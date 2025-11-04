@@ -11,6 +11,8 @@ class MainActivity : BaseActivity<ActivityMainBinding>(){
     override fun viewInit(savedInstanceState: Bundle?) {
         super.viewInit(savedInstanceState)
         Log.d("MainActivity onCreate.")
+
+
     }
 
 }
