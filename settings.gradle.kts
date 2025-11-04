@@ -22,3 +22,5 @@ dependencyResolutionManagement {
 rootProject.name = "P2achAndroidLibrary"
 include(":app")
 include(":commonLibrary")
+include(":libuvccamera")
+project(":libuvccamera").projectDir = file("libuvccamera")
