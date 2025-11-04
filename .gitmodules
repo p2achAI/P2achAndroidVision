@@ -5,3 +5,4 @@
 [submodule "libuvccamera"]
 	path = libuvccamera
 	url = git@github.com:p2achAI/libuvccamera-only.git
+	branch = main
