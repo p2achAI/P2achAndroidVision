@@ -2,6 +2,3 @@
 	path = commonLibrary
 	url = git@github.com:p2achAI/commonLibrary.git
 	branch = main
-[submodule "libuvccamera"]
-	path = libuvccamera
-	url = git@github.com:p2achAI/libuvccamera-only.git
