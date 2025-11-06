@@ -2,8 +2,8 @@
 set -euo pipefail
 
 # ===== 사용자 설정 =====
-ROOT_DIR="${1:-P2achAndroidLibrary}"
-REPO_URL="${REPO_URL:-git@github.com:p2achAI/P2achAndroidLibrary.git}"
+ROOT_DIR="${1:-P2achAndroidVision}"
+REPO_URL="${REPO_URL:-git@github.com:p2achAI/P2achAndroidVision.git}"
 # 히스토리 보존(기본) / 빠른 얕은 클론 선택
 SHALLOW="${SHALLOW:-false}"   # true | false
 
@@ -20,7 +20,7 @@ detect_default_branch() {
   echo "$def"
 }
 
-echo "=== P2achAndroidLibrary setup (SHALLOW=$SHALLOW) ==="
+echo "=== P2achAndroidVision setup (SHALLOW=$SHALLOW) ==="
 
 # 0) 메인 레포 클론
 if [[ ! -d "$ROOT_DIR/.git" ]]; then
