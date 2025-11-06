@@ -4,11 +4,11 @@
 ###  2. 로컬 저장소의 Root가 될 폴더에서 터미널 실행
 ###  3. 권한 설정 
 
-    chmod +x p2ach_android_library_init.sh
+    chmod +x p2ach_android_vision_init.sh
     
 ###  4. 실행 
 
-    ./p2ach_android_library_init.sh
+    ./p2ach_android_vision_init.sh
     
 
 이후 AndroidStudio로 Open -> Build 
