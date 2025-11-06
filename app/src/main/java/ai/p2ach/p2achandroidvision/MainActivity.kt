@@ -1,9 +1,12 @@
-package ai.p2ach.p2achandroidlibrary
+package ai.p2ach.p2achandroidvision
+
+
 
 import ai.p2ach.p2achandroidlibrary.base.activites.BaseActivity
-import ai.p2ach.p2achandroidlibrary.databinding.ActivityMainBinding
-import android.os.Bundle
 import ai.p2ach.p2achandroidlibrary.utils.Log
+import ai.p2ach.p2achandroidvision.databinding.ActivityMainBinding
+
+import android.os.Bundle
 import com.serenegiant.usb.UVCCamera
 
 

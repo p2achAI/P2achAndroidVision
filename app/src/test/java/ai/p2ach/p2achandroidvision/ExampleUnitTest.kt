@@ -1,4 +1,4 @@
-package ai.p2ach.p2achandroidlibrary
+package ai.p2ach.p2achandroidvision
 
 import org.junit.Test
 

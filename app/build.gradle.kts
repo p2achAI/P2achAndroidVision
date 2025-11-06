@@ -7,7 +7,7 @@ plugins {
 }
 
 android {
-    namespace = "ai.p2ach.p2achandroidlibrary"
+    namespace = "ai.p2ach.p2achandroidvision"
     compileSdk {
         version = release(36)
     }
@@ -20,7 +20,7 @@ android {
 
 
     defaultConfig {
-        applicationId = "ai.p2ach.p2achandroidlibrary"
+        applicationId = "ai.p2ach.p2achandroidvision"
         minSdk = 24
         targetSdk = 36
         versionCode = 1
