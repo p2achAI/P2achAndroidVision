@@ -1,7 +1,8 @@
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
-    id("kotlin-kapt")
+    alias(libs.plugins.ksp)
+    alias(libs.plugins.androidx.room)
 
 
 }
@@ -84,6 +85,10 @@ android {
 
 }
 
+room {
+    schemaDirectory("$projectDir/schemas")
+}
+
 dependencies {
 
 
@@ -108,7 +113,7 @@ dependencies {
     //room
     implementation(libs.room.runtime)
     implementation(libs.room.ktx)
-    kapt(libs.room.compiler)
+//    kapt(libs.room.compiler)
     // koin
     implementation(libs.koin.core)
     implementation(libs.koin.android)
@@ -125,5 +130,5 @@ dependencies {
     implementation(project(":commonLibrary"))
     implementation(project(":libuvccamera"))
 
-
 }
+
