@@ -9,6 +9,10 @@ lifecycleRuntimeKtx = "2.9.4"
 appcompat = "1.7.0"
 logger = "2.2.0"
 
+rtsp ="v5.1.6-swdecoder"
+constraintlayout = "2.2.0"
+
+
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
@@ -20,6 +24,16 @@ androidx-appcompat = { module = "androidx.appcompat:appcompat", version.ref = "a
 
 orhanobut-logger = { module = "com.orhanobut:logger", version.ref = "logger"}
 
+
+#rtsp
+rtsp-client-android = { module = "com.github.p2achAI:rtsp-client-android", version.ref = "rtsp" }
+
+#mdm
+lib-hmdm = { module = "local:lib-hmdm", version = "unspecified" }
+libuvccamera = { module = "local:libuvccamera", version = "unspecified" }
+
+#ConstraintLayout
+androidx-constraintlayout = { module = "androidx.constraintlayout:constraintlayout", version.ref = "constraintlayout" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

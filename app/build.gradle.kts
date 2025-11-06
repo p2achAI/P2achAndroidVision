@@ -63,10 +63,22 @@ dependencies {
 
     implementation(libs.orhanobut.logger)
 
-    implementation("androidx.constraintlayout:constraintlayout:2.2.0")
+
+
 
     implementation(project(":commonLibrary"))
     implementation(project(":libuvccamera"))
 
+
+//    rtsp
+    implementation(libs.rtsp.client.android)
+//    mdm
+    dependencies {
+        implementation(files("libs/lib-hmdm.aar"))
+        implementation(files("libs/libuvccamera-release.aar"))
+    }
+
+//    ConstraintLayout
+    implementation(libs.androidx.constraintlayout)
 
 }

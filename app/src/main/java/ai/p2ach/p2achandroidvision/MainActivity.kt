@@ -17,6 +17,7 @@ class MainActivity : BaseActivity<ActivityMainBinding>(){
         Log.d("MainActivity onCreate. ${UVCCamera.CTRL_AE_ABS}")
 
 
+
     }
 
 }
