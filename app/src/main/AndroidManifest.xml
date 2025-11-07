@@ -42,6 +42,13 @@
         android:supportsRtl="true"
         android:largeHeap="true"
         android:theme="@style/AppTheme">
+
+
+        <profileable
+            android:shell="true"
+            tools:targetApi="29" />
+
+
         <activity
             android:name=".views.activities.ActivityMain"
             android:exported="true"

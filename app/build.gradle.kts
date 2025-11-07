@@ -51,6 +51,11 @@ android {
     }
 
     buildTypes {
+
+        debug {
+            isDebuggable = true
+        }
+
         release {
             isMinifyEnabled = false
             proguardFiles(
@@ -113,6 +118,8 @@ dependencies {
     implementation(libs.retrofit.gson)
     implementation(libs.okhttp)
     implementation(libs.okhttp.logging)
+
+    
 
     // local modules
     implementation(project(":commonLibrary"))

@@ -1,17 +1,17 @@
 package ai.p2ach.p2achandroidvision.database
 
-import ai.p2ach.p2achandroidvision.repos.MDMSettingDAO
-import ai.p2ach.p2achandroidvision.repos.MDMSettingEntity
+import ai.p2ach.p2achandroidvision.repos.MDMDao
+import ai.p2ach.p2achandroidvision.repos.MDMEntity
 import androidx.room.Database
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
 
 @Database(
-    entities = [MDMSettingEntity::class],
+    entities = [MDMEntity::class],
     version = 1,
     exportSchema = false
 )
-@TypeConverters(RoomConverters::class)
+@TypeConverters(MDMConverters::class)
 abstract class AppDataBase : RoomDatabase() {
-    abstract fun mdmSettingDao(): MDMSettingDAO
+    abstract fun MDMDao(): MDMDao
 }

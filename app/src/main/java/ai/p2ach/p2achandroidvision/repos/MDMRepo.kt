@@ -6,20 +6,20 @@ import ai.p2ach.p2achandroidlibrary.base.repos.BaseRepo
 import ai.p2ach.p2achandroidlibrary.utils.Log
 import ai.p2ach.p2achandroidvision.Const
 import ai.p2ach.p2achandroidvision.database.AppDataBase
+import android.content.Context
 import androidx.room.Dao
 import androidx.room.Entity
-import androidx.room.Insert
-import androidx.room.OnConflictStrategy
 import androidx.room.PrimaryKey
 import androidx.room.Query
 import androidx.room.withTransaction
+import com.hmdm.MDMService
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.serialization.Serializable
+import kotlinx.coroutines.flow.filterNotNull
 
 
-@Entity(tableName = "table_mdm_setting")
-data class MDMSettingEntity(
+@Entity(tableName = "table_mdm")
+data class MDMEntity(
     @PrimaryKey val deviceName: String = Const.MDM.SETTING.DEFAULT_DEVICE_NAME,
     val hwType: String = Const.MDM.SETTING.DEFAULT_HW_TYPE,
     val deviceUuid: String? = null,
@@ -72,16 +72,6 @@ data class MDMSettingEntity(
     val gaMeasurementId: String = ""
 )
 
-@Dao
-interface MDMSettingDAO : BaseDao<MDMSettingEntity> {
-    @Query("SELECT * FROM table_mdm_setting WHERE deviceName = 0 LIMIT 1")
-    fun observe(): Flow<MDMSettingEntity?>
-
-}
-
-
-
-
 @Serializable
 data class ROI (
     var top : Int = 0,
@@ -120,8 +110,6 @@ data class QuadrangleRegion(
     }
 }
 
-
-
 @Serializable
 data class QuadrangleLine(
     var startX: Float = -1F,
@@ -130,32 +118,55 @@ data class QuadrangleLine(
     var endY: Float = -1F
 )
 
-class MDMRepo(private val db: AppDataBase): BaseRepo<MDMSettingEntity>(){
 
-    override fun localFlow(): Flow<MDMSettingEntity> {
+@Dao
+interface MDMDao : BaseDao<MDMEntity> {
+    @Query("SELECT * FROM table_mdm WHERE deviceName = 0 LIMIT 1")
+    fun observe(): Flow<MDMEntity?>
 
-        return emptyFlow()
+    @Query("DELETE FROM table_mdm")
+    suspend fun clearAll()
+
+}
+
+class MDMRepo(private val context: Context, private val db: AppDataBase, private val MDMDao: MDMDao): BaseRepo<MDMEntity>(){
+
+    init {
+
+
+        Log.d("MDMRepo init")
+
+
+            MDMService.getInstance().connect(context, object : MDMService.ResultHandler {
+
+                override fun onMDMConnected() {
+                    Log.d("onMDMConnected")
+                }
+
+                override fun onMDMDisconnected() {
+                    Log.d("onMDMDisconnected")
+                }
+            })
+
     }
 
-    override suspend fun saveLocal(data: MDMSettingEntity) {
 
+    override fun localFlow(): Flow<MDMEntity> =
+        MDMDao.observe().filterNotNull()
 
+    override suspend fun saveLocal(data: MDMEntity) {
+        db.withTransaction { MDMDao.upsert(data) }
     }
 
     override suspend fun clearLocal() {
-
+        db.withTransaction { MDMDao.clearAll() }
     }
 
-
-    suspend fun test(){
-
-        with(db){
-            withTransaction {
-                Log.d("repo test")
-                mdmSettingDao().upsert(MDMSettingEntity())
-            }
+    suspend fun replaceAll(value: MDMEntity) {
+        db.withTransaction {
+            MDMDao.clearAll()
+            MDMDao.upsert(value)
         }
-
     }
-
 }
+

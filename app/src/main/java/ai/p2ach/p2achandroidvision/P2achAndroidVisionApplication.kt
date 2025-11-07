@@ -1,14 +1,13 @@
 package ai.p2ach.p2achandroidvision
 
-import ai.p2ach.p2achandroidlibrary.utils.Log
+
 import ai.p2ach.p2achandroidvision.database.AppDataBase
 import ai.p2ach.p2achandroidvision.repos.MDMRepo
-import ai.p2ach.p2achandroidvision.viewmodels.TestViewModel
+import ai.p2ach.p2achandroidvision.viewmodels.MdmViewModel
 import android.app.Application
 import androidx.room.Room
 import com.orhanobut.logger.AndroidLogAdapter
 import com.orhanobut.logger.Logger
-import org.koin.android.ext.android.get
 import org.koin.android.ext.koin.androidContext
 import org.koin.android.ext.koin.androidLogger
 import org.koin.androidx.viewmodel.dsl.viewModel
@@ -25,16 +24,17 @@ class P2achAndroidVisionApplication : Application() {
                 .fallbackToDestructiveMigration(true)
                 .build()
         }
-        single { get<AppDataBase>().mdmSettingDao() }
+        single { get<AppDataBase>().MDMDao() }
 
     }
 
     val repoModule = module {
-        single { MDMRepo(get()) }
+
+        single { MDMRepo(androidContext(),get(), get()) }
     }
 
     val vmModule = module {
-        viewModel { TestViewModel(get ()) }
+       viewModel { MdmViewModel(get ()) }
     }
 
 
