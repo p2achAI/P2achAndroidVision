@@ -1,5 +1,6 @@
 pluginManagement {
     repositories {
+        gradlePluginPortal()
         google {
             content {
                 includeGroupByRegex("com\\.android.*")
@@ -8,7 +9,6 @@ pluginManagement {
             }
         }
         mavenCentral()
-        gradlePluginPortal()
         maven { url =uri("https://raw.githubusercontent.com/saki4510t/libcommon/master/repository/" )}
     }
 }

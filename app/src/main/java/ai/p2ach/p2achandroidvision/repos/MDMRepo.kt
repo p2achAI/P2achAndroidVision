@@ -3,76 +3,80 @@ package ai.p2ach.p2achandroidvision.repos
 
 import ai.p2ach.p2achandroidlibrary.base.repos.BaseDao
 import ai.p2ach.p2achandroidlibrary.base.repos.BaseRepo
+import ai.p2ach.p2achandroidlibrary.utils.Log
 import ai.p2ach.p2achandroidvision.Const
 import ai.p2ach.p2achandroidvision.database.AppDataBase
 import androidx.room.Dao
 import androidx.room.Entity
+import androidx.room.Insert
+import androidx.room.OnConflictStrategy
+import androidx.room.PrimaryKey
 import androidx.room.Query
+import androidx.room.withTransaction
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.serialization.Serializable
 
 
-@Entity(
-    tableName = "table_mdm_setting"
-)
-data class MDMSettingEntity (
-    var deviceName : String = Const.MDM.SETTING.DEFAULT_DEVICE_NAME,
-    var hwType : String = Const.MDM.SETTING.DEFAULT_HW_TYPE,
-    var deviceUuid : String? = null,
-    var rtspTimeoutMs: Long = Const.MDM.SETTING.DEFAULT_RTSP_TIMEOUT_MS,
-    var rtspUrl: String = Const.MDM.SETTING.DEFAULT_RTSP_URL,
-    var apiUrl: String = Const.MDM.SETTING.DEFAULT_API_URL,
-    var webviewUrl: String = Const.MDM.SETTING.DEFAULT_WEBVIEW_URL,
-    var middlewareUrl: String = Const.MDM.SETTING.DEFAULT_MIDDLEWARE_URL,
-    var appMode: String = Const.MDM.SETTING.DEFAULT_APP_MODE,
-    var demo_version: String = Const.MDM.SETTING.DEFAULT_DEMO_VERSION,
-    var broadcast_version : String = Const.MDM.SETTING.DEFAULT_BROADCAST_VERSION,
-    var useSmartSignService: Boolean = Const.MDM.SETTING.DEFAULT_USE_SMART_SIGN_SERVICE,
-    var hide_buttons: Boolean = Const.MDM.SETTING.DEFAULT_HIDE_BUTTONS,
-    var drawGrid: Boolean = Const.MDM.SETTING.DEFAULT_DRAW_GRID,
-    var rotation: Int = Const.MDM.SETTING.DEFAULT_ROTATION,      // rotation 1 => 90 CLOCKWISE , rotation 2 => 180 , rotation 3 => 270 CLOCKWISE (= 90 COUNTERCLOCKWISE)
-    var autoRotation: Boolean = true,                       // 기기 방향에 따라서 자동으로 화면 회전 보정을 적용할 것인지
-    var dataSendingInterval: Long = Const.MDM.SETTING.DEFAULT_DATA_SENDING_INTERVAL,
-    var dataCollectionInterval: Int = Const.MDM.SETTING.DEFAULT_DATA_COLLECTION_INTERVAL,
-    var useGzip: Boolean = Const.MDM.SETTING.DEFAULT_USE_GZIP,
-    var use_ota: Boolean = Const.MDM.SETTING.DEFAULT_USE_OTA,
-    var use_reid: Boolean = Const.MDM.SETTING.DEFAULT_USE_REID,
-    var use_ageGender_NpuModel: Boolean = true,
-    var useVideofile: Boolean = Const.MDM.SETTING.DEFAULT_USE_VIDEOFILE,
-    var videofilepaths: List<String> = emptyList(),
-    var videofileUris: List<String> = emptyList(),
-    var use_pose: Boolean = Const.MDM.SETTING.DEFAULT_USE_POSE,
-    var use_headpose: Boolean = Const.MDM.SETTING.DEFAULT_USE_HEADPOSE,
-    var use_yolo: Boolean = Const.MDM.SETTING.DEFAULT_USE_YOLO,
-    var use_par: Boolean = Const.MDM.SETTING.DEFAULT_USE_PAR,
-    var use_deepsort: Boolean = Const.MDM.SETTING.DEFAULT_USE_DEEPSORT,
-    var use_face: Boolean = Const.MDM.SETTING.DEFAULT_USE_FACE,
-    var use_4split: Boolean = Const.MDM.SETTING.DEFAULT_USE_4SPLIT,
-    var contents_mode: Boolean = Const.MDM.SETTING.DEFAULT_CONTENTS_MODE,
-    var flip: Boolean = Const.MDM.SETTING.DEFAULT_FLIP,
-    var track_frms: Int = Const.MDM.SETTING.DEFAULT_TRACK_FRMS,
-    var ageMode: Int = Const.MDM.SETTING.DEFAULT_AGE_MODE,
-    var devMode: Boolean = Const.MDM.SETTING.DEFAULT_DEV_MODE,
-    var genderThr: Float = Const.MDM.SETTING.DEFAULT_GENDER_THR,
-    var use_age_comp: Boolean = Const.MDM.SETTING.DEFAULT_USE_AGE_COMP,
-    var use_draw_limit: Boolean = Const.MDM.SETTING.DEFAULT_USE_DRAW_LIMIT,
-    var roi : ROI = ROI(),
-    var camParam: CamParam = CamParam(),
-    var corridorRegion: QuadrangleRegion = QuadrangleRegion(),
-    var junctionRegion: QuadrangleRegion = QuadrangleRegion(),
-    var tvWidth : Int = Const.MDM.SETTING.DEFAULT_TV_WIDTH,
-    var tvHeight : Int = Const.MDM.SETTING.DEFAULT_TV_HEIGHT,
-    var autoStartCameraActivity: Boolean = Const.MDM.SETTING.DEFAULT_AUTO_START_CAMERA_ACTIVITY,  // LoadingActivity에서 CameraActivity 자동 실행 여부
-    var gaApiUrl: String = Const.MDM.SETTING.DEFAULT_GA_API_URL,
-    var gaApiSecret: String = "",
-    var gaMeasurementId: String = ""
+@Entity(tableName = "table_mdm_setting")
+data class MDMSettingEntity(
+    @PrimaryKey val deviceName: String = Const.MDM.SETTING.DEFAULT_DEVICE_NAME,
+    val hwType: String = Const.MDM.SETTING.DEFAULT_HW_TYPE,
+    val deviceUuid: String? = null,
+    val rtspTimeoutMs: Long = Const.MDM.SETTING.DEFAULT_RTSP_TIMEOUT_MS,
+    val rtspUrl: String = Const.MDM.SETTING.DEFAULT_RTSP_URL,
+    val apiUrl: String = Const.MDM.SETTING.DEFAULT_API_URL,
+    val webviewUrl: String = Const.MDM.SETTING.DEFAULT_WEBVIEW_URL,
+    val middlewareUrl: String = Const.MDM.SETTING.DEFAULT_MIDDLEWARE_URL,
+    val appMode: String = Const.MDM.SETTING.DEFAULT_APP_MODE,
+    val demo_version: String = Const.MDM.SETTING.DEFAULT_DEMO_VERSION,
+    val broadcast_version: String = Const.MDM.SETTING.DEFAULT_BROADCAST_VERSION,
+    val useSmartSignService: Boolean = Const.MDM.SETTING.DEFAULT_USE_SMART_SIGN_SERVICE,
+    val hide_buttons: Boolean = Const.MDM.SETTING.DEFAULT_HIDE_BUTTONS,
+    val drawGrid: Boolean = Const.MDM.SETTING.DEFAULT_DRAW_GRID,
+    val rotation: Int = Const.MDM.SETTING.DEFAULT_ROTATION,
+    val autoRotation: Boolean = true,
+    val dataSendingInterval: Long = Const.MDM.SETTING.DEFAULT_DATA_SENDING_INTERVAL,
+    val dataCollectionInterval: Int = Const.MDM.SETTING.DEFAULT_DATA_COLLECTION_INTERVAL,
+    val useGzip: Boolean = Const.MDM.SETTING.DEFAULT_USE_GZIP,
+    val use_ota: Boolean = Const.MDM.SETTING.DEFAULT_USE_OTA,
+    val use_reid: Boolean = Const.MDM.SETTING.DEFAULT_USE_REID,
+    val use_ageGender_NpuModel: Boolean = true,
+    val useVideofile: Boolean = Const.MDM.SETTING.DEFAULT_USE_VIDEOFILE,
+    val videofilepaths: List<String> = emptyList(),
+    val videofileUris: List<String> = emptyList(),
+    val use_pose: Boolean = Const.MDM.SETTING.DEFAULT_USE_POSE,
+    val use_headpose: Boolean = Const.MDM.SETTING.DEFAULT_USE_HEADPOSE,
+    val use_yolo: Boolean = Const.MDM.SETTING.DEFAULT_USE_YOLO,
+    val use_par: Boolean = Const.MDM.SETTING.DEFAULT_USE_PAR,
+    val use_deepsort: Boolean = Const.MDM.SETTING.DEFAULT_USE_DEEPSORT,
+    val use_face: Boolean = Const.MDM.SETTING.DEFAULT_USE_FACE,
+    val use_4split: Boolean = Const.MDM.SETTING.DEFAULT_USE_4SPLIT,
+    val contents_mode: Boolean = Const.MDM.SETTING.DEFAULT_CONTENTS_MODE,
+    val flip: Boolean = Const.MDM.SETTING.DEFAULT_FLIP,
+    val track_frms: Int = Const.MDM.SETTING.DEFAULT_TRACK_FRMS,
+    val ageMode: Int = Const.MDM.SETTING.DEFAULT_AGE_MODE,
+    val devMode: Boolean = Const.MDM.SETTING.DEFAULT_DEV_MODE,
+    val genderThr: Float = Const.MDM.SETTING.DEFAULT_GENDER_THR,
+    val use_age_comp: Boolean = Const.MDM.SETTING.DEFAULT_USE_AGE_COMP,
+    val use_draw_limit: Boolean = Const.MDM.SETTING.DEFAULT_USE_DRAW_LIMIT,
+    val roi: ROI = ROI(),
+    val camParam: CamParam = CamParam(),
+    val corridorRegion: QuadrangleRegion = QuadrangleRegion(),
+    val junctionRegion: QuadrangleRegion = QuadrangleRegion(),
+    val tvWidth: Int = Const.MDM.SETTING.DEFAULT_TV_WIDTH,
+    val tvHeight: Int = Const.MDM.SETTING.DEFAULT_TV_HEIGHT,
+    val autoStartCameraActivity: Boolean = Const.MDM.SETTING.DEFAULT_AUTO_START_CAMERA_ACTIVITY,
+    val gaApiUrl: String = Const.MDM.SETTING.DEFAULT_GA_API_URL,
+    val gaApiSecret: String = "",
+    val gaMeasurementId: String = ""
 )
 
 @Dao
 interface MDMSettingDAO : BaseDao<MDMSettingEntity> {
-    @Query("SELECT * FROM table_mdm_setting")
-    fun observeAll(): Flow<List<MDMSettingEntity>>
+    @Query("SELECT * FROM table_mdm_setting WHERE deviceName = 0 LIMIT 1")
+    fun observe(): Flow<MDMSettingEntity?>
+
 }
 
 
@@ -142,5 +146,16 @@ class MDMRepo(private val db: AppDataBase): BaseRepo<MDMSettingEntity>(){
 
     }
 
+
+    suspend fun test(){
+
+        with(db){
+            withTransaction {
+                Log.d("repo test")
+                mdmSettingDao().upsert(MDMSettingEntity())
+            }
+        }
+
+    }
 
 }
