@@ -1,6 +1,5 @@
-import ai.p2ach.p2achandroidvision.repos.CamParam
-import ai.p2ach.p2achandroidvision.repos.QuadrangleRegion
-import ai.p2ach.p2achandroidvision.repos.ROI
+package ai.p2ach.p2achandroidvision.repos.mdm
+
 import androidx.room.TypeConverter
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
@@ -42,4 +41,14 @@ object MDMConverters {
     @TypeConverter
     @JvmStatic
     fun jsonToQuadrangle(value: String?): QuadrangleRegion = gson.fromJson(value ?: "{}", QuadrangleRegion::class.java)
+
+
+    @TypeConverter
+    @JvmStatic
+    fun jsonToMdmEntity(value: String?): MDMEntity {
+
+        return  gson.fromJson(value ?: "{}", MDMEntity::class.java)
+    }
+
+
 }

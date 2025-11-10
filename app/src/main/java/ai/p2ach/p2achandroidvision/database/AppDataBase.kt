@@ -1,7 +1,8 @@
 package ai.p2ach.p2achandroidvision.database
 
-import ai.p2ach.p2achandroidvision.repos.MDMDao
-import ai.p2ach.p2achandroidvision.repos.MDMEntity
+import ai.p2ach.p2achandroidvision.repos.mdm.MDMDao
+import ai.p2ach.p2achandroidvision.repos.mdm.MDMEntity
+import ai.p2ach.p2achandroidvision.repos.mdm.MDMConverters
 import androidx.room.Database
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverters

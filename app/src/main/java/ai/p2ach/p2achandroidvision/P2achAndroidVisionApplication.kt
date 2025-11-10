@@ -2,7 +2,7 @@ package ai.p2ach.p2achandroidvision
 
 
 import ai.p2ach.p2achandroidvision.database.AppDataBase
-import ai.p2ach.p2achandroidvision.repos.MDMRepo
+import ai.p2ach.p2achandroidvision.repos.mdm.MDMRepo
 import ai.p2ach.p2achandroidvision.viewmodels.MdmViewModel
 import android.app.Application
 import androidx.room.Room
@@ -42,7 +42,8 @@ class P2achAndroidVisionApplication : Application() {
     override fun onCreate() {
         super.onCreate()
         startKoin {
-            androidLogger(org.koin.core.logger.Level.DEBUG)
+//            /*Android System Logger*/
+//            androidLogger(org.koin.core.logger.Level.DEBUG)
             androidContext(this@P2achAndroidVisionApplication)
             modules(dbModule,repoModule,vmModule)
         }

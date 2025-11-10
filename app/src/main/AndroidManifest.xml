@@ -60,6 +60,11 @@
             </intent-filter>
 
 
+            <intent-filter>
+                <action android:name="com.hmdm.action.Connect" />
+            </intent-filter>
+
+
         </activity>
 
 
