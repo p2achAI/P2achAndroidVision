@@ -1,5 +1,6 @@
 package ai.p2ach.p2achandroidvision.repos.mdm
 
+import ai.p2ach.p2achandroidlibrary.utils.Log
 import androidx.room.TypeConverter
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
@@ -47,7 +48,14 @@ object MDMConverters {
     @JvmStatic
     fun jsonToMdmEntity(value: String?): MDMEntity {
 
-        return  gson.fromJson(value ?: "{}", MDMEntity::class.java)
+        return try {
+            gson.fromJson(value ?: "{}", MDMEntity::class.java)
+        }catch (e : Exception){
+            Log.e("MDMEntity is not correct. ${e.message}")
+            MDMEntity()
+        }
+
+
     }
 
 

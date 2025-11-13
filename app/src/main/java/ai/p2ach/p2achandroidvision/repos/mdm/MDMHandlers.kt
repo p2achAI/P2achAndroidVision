@@ -18,10 +18,12 @@ class MDMHandlers(private val context: Context) {
     private val mdmPushHandler = object : MDMPushHandler() {
         override fun onMessageReceived(mdmPushMessage: MDMPushMessage?) {
 
+            Log.d("onMessageReceived ${mdmPushMessage?.data}")
+
             when (mdmPushMessage?.type) {
                 mdmMessageConfigUpdated, mdmMessageAppConfigUpdated -> {
-//                        ConfigSync.refreshFromMdm()
-                    Log.d("MDM Handler mdmMessageConfigUpdated or mdmMessageAppConfigUpdated message.")
+
+
                 }
                 mdmMessageAppReboot -> {
                     // TODO: restart

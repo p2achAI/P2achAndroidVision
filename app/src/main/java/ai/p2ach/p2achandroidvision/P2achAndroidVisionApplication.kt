@@ -2,6 +2,7 @@ package ai.p2ach.p2achandroidvision
 
 
 import ai.p2ach.p2achandroidvision.database.AppDataBase
+import ai.p2ach.p2achandroidvision.repos.mdm.MDMHandlers
 import ai.p2ach.p2achandroidvision.repos.mdm.MDMRepo
 import ai.p2ach.p2achandroidvision.viewmodels.MdmViewModel
 import android.app.Application
@@ -37,6 +38,10 @@ class P2achAndroidVisionApplication : Application() {
        viewModel { MdmViewModel(get ()) }
     }
 
+    val mdmModule = module {
+        single { MDMHandlers(get()) }
+    }
+
 
 
     override fun onCreate() {
@@ -45,7 +50,7 @@ class P2achAndroidVisionApplication : Application() {
 //            /*Android System Logger*/
 //            androidLogger(org.koin.core.logger.Level.DEBUG)
             androidContext(this@P2achAndroidVisionApplication)
-            modules(dbModule,repoModule,vmModule)
+            modules(dbModule,repoModule,vmModule, mdmModule)
         }
         Logger.addLogAdapter(AndroidLogAdapter())
     }
