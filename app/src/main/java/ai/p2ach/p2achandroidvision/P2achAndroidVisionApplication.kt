@@ -39,7 +39,7 @@ class P2achAndroidVisionApplication : Application() {
     }
 
     val mdmModule = module {
-        single { MDMHandlers(get()) }
+        single { MDMHandlers(get(),get()) }
     }
 
 

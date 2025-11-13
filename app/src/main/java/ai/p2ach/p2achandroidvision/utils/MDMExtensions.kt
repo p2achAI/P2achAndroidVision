@@ -1,5 +1,6 @@
 package ai.p2ach.p2achandroidvision.utils
 
+import ai.p2ach.p2achandroidlibrary.utils.Log
 import ai.p2ach.p2achandroidvision.Const
 import ai.p2ach.p2achandroidvision.repos.mdm.MDMEntity
 import com.hmdm.MDMService
@@ -31,17 +32,20 @@ fun getNeedUpdateMDMEntity(base: MDMEntity): MDMEntity {
 
     return base.apply {
 
-        deviceName = MDMService.Preferences.get(Const.MDM.SETTING.REMOTE.KEY.DEVICE_NAME, "")
-            .getOrDefaultMDM(deviceName)
-
-        hwType = MDMService.Preferences.get(Const.MDM.SETTING.REMOTE.KEY.HW_TYPE, "")
-            .getOrDefaultMDM(hwType)
-
-        deviceUuid = MDMService.Preferences.get(Const.MDM.SETTING.REMOTE.KEY.DEVICE_UUID, "")
-            .getOrDefaultMDM(deviceUuid ?: "")
+//        deviceName = MDMService.Preferences.get(Const.MDM.SETTING.REMOTE.KEY.DEVICE_NAME, "")
+//            .getOrDefaultMDM(deviceName)
+//
+//        hwType = MDMService.Preferences.get(Const.MDM.SETTING.REMOTE.KEY.HW_TYPE, "")
+//            .getOrDefaultMDM(hwType)
+//
+//        deviceUuid = MDMService.Preferences.get(Const.MDM.SETTING.REMOTE.KEY.DEVICE_UUID, "")
+//            .getOrDefaultMDM(deviceUuid ?: "")
 
         rtspTimeoutMs = MDMService.Preferences.get(Const.MDM.SETTING.REMOTE.KEY.RTSP_TIMEOUT_MS, "")
             .getOrDefaultMDM(rtspTimeoutMs)
+
+        Log.d("rtspTimeoutMs $rtspTimeoutMs")
+
 
         rtspUrl = MDMService.Preferences.get(Const.MDM.SETTING.REMOTE.KEY.RTSP_URL, "")
             .getOrDefaultMDM(rtspUrl)

@@ -21,6 +21,7 @@ interface Const {
 
                     interface KEY{
                         companion object{
+
                             const val MDM_ENTITY = "MDMEntity"
                             const val DEVICE_NAME = "deviceName"
                             const val HW_TYPE = "hwType"

@@ -20,17 +20,23 @@ class FragmentCamera : BaseFragment<FragmentCameraBinding>(){
     override fun viewInit(savedInstanceState: Bundle?) {
         super.viewInit(savedInstanceState)
 
+        autoBinding {
+            viewLifecycleOwner.lifecycleScope.launch {
+                mdmViewModel.data.collect {
+                        mdmEntity ->
+                    Log.d(mdmEntity)
+                    tvMdm.text = mdmEntity.toString()
 
-        viewLifecycleOwner.lifecycleScope.launch {
-            mdmViewModel.data.collect {
-                mdmEntity ->
-                Log.d(mdmEntity)
+                }
             }
+
         }
 
 
 
     }
+
+
 
 
 }

@@ -9,6 +9,7 @@ import ai.p2ach.p2achandroidvision.BuildConfig
 import ai.p2ach.p2achandroidvision.Const
 import ai.p2ach.p2achandroidvision.database.AppDataBase
 import ai.p2ach.p2achandroidvision.utils.DeviceUtils
+import ai.p2ach.p2achandroidvision.utils.getNeedUpdateMDMEntity
 
 
 import android.content.Context
@@ -75,8 +76,6 @@ data class MDMEntity(
     var use_draw_limit: Boolean = Const.MDM.SETTING.DEFAULT.DEFAULT_USE_DRAW_LIMIT,
     var roi: ROI = ROI(),
     var camParam: CamParam = CamParam(),
-    var corridorRegion: QuadrangleRegion = QuadrangleRegion(),
-    var junctionRegion: QuadrangleRegion = QuadrangleRegion(),
     var tvWidth: Int = Const.MDM.SETTING.DEFAULT.DEFAULT_TV_WIDTH,
     var tvHeight: Int = Const.MDM.SETTING.DEFAULT.DEFAULT_TV_HEIGHT,
     var autoStartCameraActivity: Boolean = Const.MDM.SETTING.DEFAULT.DEFAULT_AUTO_START_CAMERA_ACTIVITY,
@@ -84,7 +83,63 @@ data class MDMEntity(
     var gaApiUrl: String = Const.MDM.SETTING.DEFAULT.DEFAULT_GA_API_URL,
     var gaApiSecret: String = "",
     var gaMeasurementId: String = ""
-)
+){
+
+    override fun toString(): String {
+
+        return buildString {
+            appendLine("deviceName=$deviceName")
+            appendLine("hwType=$hwType")
+            appendLine("deviceUuid=$deviceUuid")
+            appendLine("rtspTimeoutMs=$rtspTimeoutMs")
+            appendLine("rtspUrl=$rtspUrl")
+            appendLine("apiUrl=$apiUrl")
+            appendLine("webviewUrl=$webviewUrl")
+            appendLine("middlewareUrl=$middlewareUrl")
+            appendLine("appMode=$appMode")
+            appendLine("demo_version=$demo_version")
+            appendLine("broadcast_version=$broadcast_version")
+            appendLine("useSmartSignService=$useSmartSignService")
+            appendLine("hide_buttons=$hide_buttons")
+            appendLine("drawGrid=$drawGrid")
+            appendLine("rotation=$rotation")
+            appendLine("autoRotation=$autoRotation")
+            appendLine("dataSendingInterval=$dataSendingInterval")
+            appendLine("dataCollectionInterval=$dataCollectionInterval")
+            appendLine("useGzip=$useGzip")
+            appendLine("use_ota=$use_ota")
+            appendLine("use_reid=$use_reid")
+            appendLine("use_ageGender_NpuModel=$use_ageGender_NpuModel")
+            appendLine("useVideofile=$useVideofile")
+            appendLine("videofilepaths=$videofilepaths")
+            appendLine("videofileUris=$videofileUris")
+            appendLine("use_pose=$use_pose")
+            appendLine("use_headpose=$use_headpose")
+            appendLine("use_yolo=$use_yolo")
+            appendLine("use_par=$use_par")
+            appendLine("use_deepsort=$use_deepsort")
+            appendLine("use_face=$use_face")
+            appendLine("use_4split=$use_4split")
+            appendLine("contents_mode=$contents_mode")
+            appendLine("flip=$flip")
+            appendLine("track_frms=$track_frms")
+            appendLine("ageMode=$ageMode")
+            appendLine("devMode=$devMode")
+            appendLine("genderThr=$genderThr")
+            appendLine("use_age_comp=$use_age_comp")
+            appendLine("use_draw_limit=$use_draw_limit")
+            appendLine("roi=$roi")
+            appendLine("camParam=$camParam")
+            appendLine("tvWidth=$tvWidth")
+            appendLine("tvHeight=$tvHeight")
+            appendLine("autoStartCameraActivity=$autoStartCameraActivity")
+            appendLine("gaApiUrl=$gaApiUrl")
+            appendLine("gaApiSecret=$gaApiSecret")
+            appendLine("gaMeasurementId=$gaMeasurementId")
+        }
+    }
+
+}
 
 @Serializable
 data class ROI (
@@ -140,10 +195,10 @@ interface MDMDao : BaseDao<MDMEntity> {
     @Query("SELECT EXISTS(SELECT 1 FROM table_mdm)")
     suspend fun existsAny(): Boolean
 
-    @Query("SELECT * FROM table_mdm WHERE deviceName = :deviceName LIMIT 1")
-    suspend fun get(deviceName: String): MDMEntity?
+    @Query("SELECT * FROM table_mdm  LIMIT 1")
+    suspend fun get(): MDMEntity?
 
-    @Query("SELECT * FROM table_mdm WHERE deviceName = 0 LIMIT 1")
+    @Query("SELECT * FROM table_mdm LIMIT 1")
     fun observe(): Flow<MDMEntity?>
 
     @Query("DELETE FROM table_mdm")
@@ -157,15 +212,16 @@ class MDMRepo(private val context: Context, private val db: AppDataBase, private
     private var mdmService = MDMService.getInstance()
 
 
+
     init {
 
         mdmService.connect(context, object : MDMService.ResultHandler {
 
             override fun onMDMConnected() {
                 Log.d("onMDMConnected")
-//                     MDMHandlers(context).init()
 
                 CoroutineScope(Dispatchers.IO).launch {
+                    mdmHandler.init()
                     syncMDMInfo()
                 }
 
@@ -182,8 +238,6 @@ class MDMRepo(private val context: Context, private val db: AppDataBase, private
      suspend fun syncMDMInfo(){
 
 
-           mdmHandler.init()
-
 
             with(db){
 
@@ -193,13 +247,8 @@ class MDMRepo(private val context: Context, private val db: AppDataBase, private
 
                     val mdmDeviceId = query.getString("DEVICE_ID")?:""
                     val deviceName = DeviceUtils.getDeviceName(context,mdmDeviceId)
-                    val baseMDMEntity = mdmDao.get(deviceName)?: MDMEntity(deviceName=deviceName)
-                    Log.d("baseMDMEntity $baseMDMEntity")
-                    val needUpdateMDMEntity = createNeedUpdateMDMEntity(baseMDMEntity)
-
-                    Log.d("syncMDMInfo $query  ${MDMService.Preferences.get("test", "11")}")
-//                    Log.d("syncMDMInfo config $configJson ")
-//                    mdmDao.upsert(mdmEntity)
+                    val baseMDMEntity = mdmDao.get()?: MDMEntity(deviceName=deviceName)
+                    saveLocal(getNeedUpdateMDMEntity(baseMDMEntity))
 
 
                 }
@@ -207,34 +256,6 @@ class MDMRepo(private val context: Context, private val db: AppDataBase, private
             }
 
     }
-
-    fun createNeedUpdateMDMEntity(baseMDMEntity: MDMEntity) : MDMEntity{
-
-//        val ageGenderModelType = MDMService.Preferences.get("ageGenderModelType", "new")
-//          val remoteMdmConfig = MDMService.Preferences.get(Const.MDM.SETTING.REMOTE.KEY.MDM_ENTITY,"")
-//         Log.d("remoteMdmConfig : $remoteMdmConfig ${ MDMConverters.jsonToMdmEntity(remoteMdmConfig)}")
-
-
-//
-//        MDMService.Preferences.get(Const.MDM.SETTING.REMOTE.KEY.DEVICE_NAME,"").getOrDefaultMDM(
-//            Const.MDM.SETTING.DEFAULT.DEFAULT_DEVICE_NAME)
-
-
-
-
-
-
-        return baseMDMEntity
-
-
-
-    }
-
-
-
-
-
-
 
 
 
