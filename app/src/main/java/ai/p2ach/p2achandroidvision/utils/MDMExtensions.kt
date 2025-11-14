@@ -247,5 +247,12 @@ fun getNeedUpdateMDMEntity(base: MDMEntity): MDMEntity {
         gaMeasurementId =
             MDMService.Preferences.get(Const.MDM.SETTING.REMOTE.KEY.GA_MEASUREMENT_ID, "")
                 .getOrDefaultMDM(gaMeasurementId)
+
+
+        exposure.apply {
+            p5 = MDMService.Preferences.get(Const.MDM.SETTING.REMOTE.KEY.P5,"").getOrDefaultMDM(p5)
+            p95 = MDMService.Preferences.get(Const.MDM.SETTING.REMOTE.KEY.P95,"").getOrDefaultMDM(p95)
+        }
+
     }
 }

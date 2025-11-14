@@ -37,6 +37,16 @@ object MDMConverters {
 
     @TypeConverter
     @JvmStatic
+    fun exposureToJson(value: Exposure?): String = gson.toJson(value ?: Exposure())
+
+    @TypeConverter
+    @JvmStatic
+    fun jsonToExposure(value: String?): Exposure = gson.fromJson(value ?: "{}", Exposure::class.java)
+
+
+
+    @TypeConverter
+    @JvmStatic
     fun quadrangleToJson(value: QuadrangleRegion?): String = gson.toJson(value ?: QuadrangleRegion())
 
     @TypeConverter

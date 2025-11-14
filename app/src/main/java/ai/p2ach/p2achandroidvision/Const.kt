@@ -109,6 +109,9 @@ interface Const {
                             const val GA_API_URL = "gaApiUrl"
                             const val GA_API_SECRET = "gaApiSecret"
                             const val GA_MEASUREMENT_ID = "gaMeasurementId"
+
+                            const val P5 = "p5"
+                            const val P95 = "p95"
                         }
                     }
                 }

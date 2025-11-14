@@ -84,7 +84,8 @@ data class MDMEntity(
     var gaApiSecret: String = "",
     var gaMeasurementId: String = "",
 
-    var localWebviewUrl : String = Const.MDM.SETTING.DEFAULT.DEFAULT_LOCAL_WEBVIEW_URL
+    var localWebviewUrl : String = Const.MDM.SETTING.DEFAULT.DEFAULT_LOCAL_WEBVIEW_URL,
+    var exposure: Exposure = Exposure()
 
 ){
 
@@ -140,6 +141,7 @@ data class MDMEntity(
             appendLine("gaApiUrl=$gaApiUrl")
             appendLine("gaApiSecret=$gaApiSecret")
             appendLine("gaMeasurementId=$gaMeasurementId")
+            appendLine("exposure=$exposure")
         }
     }
 
@@ -190,6 +192,14 @@ data class QuadrangleLine(
     var endX: Float = -1F,
     var endY: Float = -1F
 )
+
+@Serializable
+data class Exposure(
+    var p5: Float = 10.0f,
+    var p95: Float = 235.0f,
+)
+
+
 
 
 @Dao
