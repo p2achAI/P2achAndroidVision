@@ -49,21 +49,21 @@ data class MDMEntity(
     var hide_buttons: Boolean = Const.MDM.SETTING.DEFAULT.DEFAULT_HIDE_BUTTONS,
     var drawGrid: Boolean = Const.MDM.SETTING.DEFAULT.DEFAULT_DRAW_GRID,
     var rotation: Int = Const.MDM.SETTING.DEFAULT.DEFAULT_ROTATION,
-    var autoRotation: Boolean = true,
-    var dataSendingInterval: Long = Const.MDM.SETTING.DEFAULT.DEFAULT_DATA_SENDING_INTERVAL,
+    var autoRotation: Boolean = Const.MDM.SETTING.DEFAULT.DEFAULT_AUTO_ROTATION,
+    var dataSendingInterval: Int = Const.MDM.SETTING.DEFAULT.DEFAULT_DATA_SENDING_INTERVAL,
     var dataCollectionInterval: Int = Const.MDM.SETTING.DEFAULT.DEFAULT_DATA_COLLECTION_INTERVAL,
     var useGzip: Boolean = Const.MDM.SETTING.DEFAULT.DEFAULT_USE_GZIP,
     var use_ota: Boolean = Const.MDM.SETTING.DEFAULT.DEFAULT_USE_OTA,
     var use_reid: Boolean = Const.MDM.SETTING.DEFAULT.DEFAULT_USE_REID,
-    var use_ageGender_NpuModel: Boolean = true,
-    var useVideofile: Boolean = Const.MDM.SETTING.DEFAULT.DEFAULT_USE_VIDEOFILE,
+    var use_ageGender_NpuModel: Boolean = Const.MDM.SETTING.DEFAULT.DEFAULT_USE_AGE_GENDER_NPU_MODEL,
+    var useVideofile: Boolean = Const.MDM.SETTING.DEFAULT.DEFAULT_USE_VIDEO_FILE,
     var videofilepaths: List<String> = emptyList(),
     var videofileUris: List<String> = emptyList(),
     var use_pose: Boolean = Const.MDM.SETTING.DEFAULT.DEFAULT_USE_POSE,
     var use_headpose: Boolean = Const.MDM.SETTING.DEFAULT.DEFAULT_USE_HEADPOSE,
     var use_yolo: Boolean = Const.MDM.SETTING.DEFAULT.DEFAULT_USE_YOLO,
     var use_par: Boolean = Const.MDM.SETTING.DEFAULT.DEFAULT_USE_PAR,
-    var use_deepsort: Boolean = Const.MDM.SETTING.DEFAULT.DEFAULT_USE_DEEPSORT,
+    var use_deepsort: Boolean = Const.MDM.SETTING.DEFAULT.DEFAULT_USE_DEEP_SORT,
     var use_face: Boolean = Const.MDM.SETTING.DEFAULT.DEFAULT_USE_FACE,
     var use_4split: Boolean = Const.MDM.SETTING.DEFAULT.DEFAULT_USE_4SPLIT,
     var contents_mode: Boolean = Const.MDM.SETTING.DEFAULT.DEFAULT_CONTENTS_MODE,
@@ -82,7 +82,10 @@ data class MDMEntity(
 
     var gaApiUrl: String = Const.MDM.SETTING.DEFAULT.DEFAULT_GA_API_URL,
     var gaApiSecret: String = "",
-    var gaMeasurementId: String = ""
+    var gaMeasurementId: String = "",
+
+    var localWebviewUrl : String = Const.MDM.SETTING.DEFAULT.DEFAULT_LOCAL_WEBVIEW_URL
+
 ){
 
     override fun toString(): String {
@@ -95,6 +98,7 @@ data class MDMEntity(
             appendLine("rtspUrl=$rtspUrl")
             appendLine("apiUrl=$apiUrl")
             appendLine("webviewUrl=$webviewUrl")
+            appendLine("localWebviewUrl=$localWebviewUrl")
             appendLine("middlewareUrl=$middlewareUrl")
             appendLine("appMode=$appMode")
             appendLine("demo_version=$demo_version")

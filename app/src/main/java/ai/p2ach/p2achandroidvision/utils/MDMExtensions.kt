@@ -2,7 +2,9 @@ package ai.p2ach.p2achandroidvision.utils
 
 import ai.p2ach.p2achandroidlibrary.utils.Log
 import ai.p2ach.p2achandroidvision.Const
+import ai.p2ach.p2achandroidvision.repos.mdm.MDMConverters
 import ai.p2ach.p2achandroidvision.repos.mdm.MDMEntity
+import ai.p2ach.p2achandroidvision.repos.mdm.ROI
 import com.hmdm.MDMService
 
 
@@ -18,6 +20,15 @@ fun String.getOrDefaultMDM(default: Long): Long = this.toLongOrNull() ?: default
 
 fun String.getOrDefaultMDM(default: Float): Float =this.toFloatOrNull() ?: default
 
+fun String.getOrDefaultMDM(default: ROI): ROI {
+    return try {
+        if (this.isBlank()) default
+        else MDMConverters.jsonToRoi(this)
+    } catch (e: Exception) {
+        Log.e("ROI parse failed: ${e.message}")
+        default
+    }
+}
 
 fun String.getOrDefaultMDM(default: List<String>): List<String> {
     return this.takeIf { it.isNotBlank() }
@@ -157,24 +168,27 @@ fun getNeedUpdateMDMEntity(base: MDMEntity): MDMEntity {
         use_draw_limit = MDMService.Preferences.get(Const.MDM.SETTING.REMOTE.KEY.USE_DRAW_LIMIT, "")
             .getOrDefaultMDM(use_draw_limit)
 
-        // =========================
-        // ROI (apply)
-        // =========================
-        roi.apply {
 
-            // TODO: Roi-> json
-//            top = MDMService.Preferences.get(Const.MDM.SETTING.REMOTE.KEY.ROI_TOP, "")
-//                .getOrDefaultMDM(top)
+        roi = MDMService.Preferences.get(Const.MDM.SETTING.REMOTE.KEY.ROI,"").getOrDefaultMDM(ROI())
+
+//        // =========================
+//        // ROI (apply)
+//        // =========================
+//        roi.apply {
 //
-//            left = MDMService.Preferences.get(Const.MDM.SETTING.REMOTE.KEY.ROI_LEFT, "")
-//                .getOrDefaultMDM(left)
-//
-//            width = MDMService.Preferences.get(Const.MDM.SETTING.REMOTE.KEY.ROI_WIDTH, "")
-//                .getOrDefaultMDM(width)
-//
-//            height = MDMService.Preferences.get(Const.MDM.SETTING.REMOTE.KEY.ROI_HEIGHT, "")
-//                .getOrDefaultMDM(height)
-        }
+//            // TODO: Roi-> json
+////            top = MDMService.Preferences.get(Const.MDM.SETTING.REMOTE.KEY.ROI_TOP, "")
+////                .getOrDefaultMDM(top)
+////
+////            left = MDMService.Preferences.get(Const.MDM.SETTING.REMOTE.KEY.ROI_LEFT, "")
+////                .getOrDefaultMDM(left)
+////
+////            width = MDMService.Preferences.get(Const.MDM.SETTING.REMOTE.KEY.ROI_WIDTH, "")
+////                .getOrDefaultMDM(width)
+////
+////            height = MDMService.Preferences.get(Const.MDM.SETTING.REMOTE.KEY.ROI_HEIGHT, "")
+////                .getOrDefaultMDM(height)
+//        }
 
         // =========================
         // CamParam (apply)
