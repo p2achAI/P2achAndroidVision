@@ -119,9 +119,15 @@ dependencies {
     implementation(libs.okhttp)
     implementation(libs.okhttp.logging)
 
+
+
     
 
     // local modules
     implementation(project(":commonLibrary"))
     implementation(project(":libuvccamera"))
+
+    //reflect
+
+    implementation(libs.kotlin.reflect)
 }

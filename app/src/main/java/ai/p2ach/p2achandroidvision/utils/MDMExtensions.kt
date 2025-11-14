@@ -52,32 +52,29 @@ fun getNeedUpdateMDMEntity(base: MDMEntity): MDMEntity {
 //        deviceUuid = MDMService.Preferences.get(Const.MDM.SETTING.REMOTE.KEY.DEVICE_UUID, "")
 //            .getOrDefaultMDM(deviceUuid ?: "")
 
-        rtspTimeoutMs = MDMService.Preferences.get(Const.MDM.SETTING.REMOTE.KEY.RTSP_TIMEOUT_MS, "")
-            .getOrDefaultMDM(rtspTimeoutMs)
+        netWorkAndApi.rtspTimeoutMs = MDMService.Preferences.get(Const.MDM.SETTING.REMOTE.KEY.RTSP_TIMEOUT_MS, "")
+            .getOrDefaultMDM(netWorkAndApi.rtspTimeoutMs)
 
-        Log.d("rtspTimeoutMs $rtspTimeoutMs")
+        netWorkAndApi.rtspUrl = MDMService.Preferences.get(Const.MDM.SETTING.REMOTE.KEY.RTSP_URL, "")
+            .getOrDefaultMDM(netWorkAndApi.rtspUrl)
 
+        netWorkAndApi.apiUrl = MDMService.Preferences.get(Const.MDM.SETTING.REMOTE.KEY.API_URL, "")
+            .getOrDefaultMDM(netWorkAndApi.apiUrl)
 
-        rtspUrl = MDMService.Preferences.get(Const.MDM.SETTING.REMOTE.KEY.RTSP_URL, "")
-            .getOrDefaultMDM(rtspUrl)
+        netWorkAndApi.webviewUrl = MDMService.Preferences.get(Const.MDM.SETTING.REMOTE.KEY.WEBVIEW_URL, "")
+            .getOrDefaultMDM(netWorkAndApi.webviewUrl)
 
-        apiUrl = MDMService.Preferences.get(Const.MDM.SETTING.REMOTE.KEY.API_URL, "")
-            .getOrDefaultMDM(apiUrl)
-
-        webviewUrl = MDMService.Preferences.get(Const.MDM.SETTING.REMOTE.KEY.WEBVIEW_URL, "")
-            .getOrDefaultMDM(webviewUrl)
-
-        middlewareUrl = MDMService.Preferences.get(Const.MDM.SETTING.REMOTE.KEY.MIDDLEWARE_URL, "")
-            .getOrDefaultMDM(middlewareUrl)
+        netWorkAndApi.middlewareUrl = MDMService.Preferences.get(Const.MDM.SETTING.REMOTE.KEY.MIDDLEWARE_URL, "")
+            .getOrDefaultMDM(netWorkAndApi.middlewareUrl)
 
         appMode = MDMService.Preferences.get(Const.MDM.SETTING.REMOTE.KEY.APP_MODE, "")
             .getOrDefaultMDM(appMode)
 
-        demo_version = MDMService.Preferences.get(Const.MDM.SETTING.REMOTE.KEY.DEMO_VERSION, "")
-            .getOrDefaultMDM(demo_version)
+        versions.demo_version = MDMService.Preferences.get(Const.MDM.SETTING.REMOTE.KEY.DEMO_VERSION, "")
+            .getOrDefaultMDM(versions.demo_version)
 
-        broadcast_version = MDMService.Preferences.get(Const.MDM.SETTING.REMOTE.KEY.BROADCAST_VERSION, "")
-            .getOrDefaultMDM(broadcast_version)
+        versions.broadcast_version = MDMService.Preferences.get(Const.MDM.SETTING.REMOTE.KEY.BROADCAST_VERSION, "")
+            .getOrDefaultMDM(versions.broadcast_version)
 
         useSmartSignService = MDMService.Preferences.get(Const.MDM.SETTING.REMOTE.KEY.USE_SMART_SIGN_SERVICE, "")
             .getOrDefaultMDM(useSmartSignService)

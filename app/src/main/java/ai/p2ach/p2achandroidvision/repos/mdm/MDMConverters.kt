@@ -47,6 +47,26 @@ object MDMConverters {
 
     @TypeConverter
     @JvmStatic
+    fun networkAndAPIToJson(value: NetWorkAndApi?): String = gson.toJson(value ?: NetWorkAndApi())
+
+    @TypeConverter
+    @JvmStatic
+    fun jsonToNetworkAndAPI(value: String?): NetWorkAndApi = gson.fromJson(value ?: "{}", NetWorkAndApi::class.java)
+
+
+    @TypeConverter
+    @JvmStatic
+    fun versionsToJson(value: Versions?): String = gson.toJson(value ?: Versions())
+
+    @TypeConverter
+    @JvmStatic
+    fun jsonToVersions(value: String?): Versions = gson.fromJson(value ?: "{}", Versions::class.java)
+
+
+
+
+    @TypeConverter
+    @JvmStatic
     fun quadrangleToJson(value: QuadrangleRegion?): String = gson.toJson(value ?: QuadrangleRegion())
 
     @TypeConverter

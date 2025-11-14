@@ -32,19 +32,36 @@ import org.koin.core.component.inject
 import java.util.UUID
 
 
+
+
+@Serializable
+data class NetWorkAndApi(
+    var rtspUrl: String = Const.MDM.SETTING.DEFAULT.DEFAULT_RTSP_URL,
+    var rtspTimeoutMs: Long = Const.MDM.SETTING.DEFAULT.DEFAULT_RTSP_TIMEOUT_MS,
+    var apiUrl: String = Const.MDM.SETTING.DEFAULT.DEFAULT_API_URL,
+    var webviewUrl: String = Const.MDM.SETTING.DEFAULT.DEFAULT_WEBVIEW_URL,
+    var middlewareUrl: String = Const.MDM.SETTING.DEFAULT.DEFAULT_MIDDLEWARE_URL,
+    var localWebviewUrl : String = Const.MDM.SETTING.DEFAULT.DEFAULT_LOCAL_WEBVIEW_URL,
+)
+
+
+@Serializable
+data class Versions(
+    var demo_version: String = Const.MDM.SETTING.DEFAULT.DEFAULT_DEMO_VERSION,
+    var broadcast_version: String = Const.MDM.SETTING.DEFAULT.DEFAULT_BROADCAST_VERSION,
+)
+
+
 @Entity(tableName = "table_mdm")
 data class MDMEntity(
     @PrimaryKey var deviceName: String = Const.MDM.SETTING.DEFAULT.DEFAULT_DEVICE_NAME,
     var hwType: String = DeviceUtils.getHwType().name,
     var deviceUuid: String? = null,
-    var rtspTimeoutMs: Long = Const.MDM.SETTING.DEFAULT.DEFAULT_RTSP_TIMEOUT_MS,
-    var rtspUrl: String = Const.MDM.SETTING.DEFAULT.DEFAULT_RTSP_URL,
-    var apiUrl: String = Const.MDM.SETTING.DEFAULT.DEFAULT_API_URL,
-    var webviewUrl: String = Const.MDM.SETTING.DEFAULT.DEFAULT_WEBVIEW_URL,
-    var middlewareUrl: String = Const.MDM.SETTING.DEFAULT.DEFAULT_MIDDLEWARE_URL,
+    var netWorkAndApi: NetWorkAndApi = NetWorkAndApi(),
+    var versions : Versions = Versions(),
     var appMode: String = Const.MDM.SETTING.DEFAULT.DEFAULT_APP_MODE,
-    var demo_version: String = Const.MDM.SETTING.DEFAULT.DEFAULT_DEMO_VERSION,
-    var broadcast_version: String = Const.MDM.SETTING.DEFAULT.DEFAULT_BROADCAST_VERSION,
+
+
     var useSmartSignService: Boolean = Const.MDM.SETTING.DEFAULT.DEFAULT_USE_SMART_SIGN_SERVICE,
     var hide_buttons: Boolean = Const.MDM.SETTING.DEFAULT.DEFAULT_HIDE_BUTTONS,
     var drawGrid: Boolean = Const.MDM.SETTING.DEFAULT.DEFAULT_DRAW_GRID,
@@ -84,7 +101,7 @@ data class MDMEntity(
     var gaApiSecret: String = "",
     var gaMeasurementId: String = "",
 
-    var localWebviewUrl : String = Const.MDM.SETTING.DEFAULT.DEFAULT_LOCAL_WEBVIEW_URL,
+
     var exposure: Exposure = Exposure()
 
 ){
@@ -95,15 +112,15 @@ data class MDMEntity(
             appendLine("deviceName=$deviceName")
             appendLine("hwType=$hwType")
             appendLine("deviceUuid=$deviceUuid")
-            appendLine("rtspTimeoutMs=$rtspTimeoutMs")
-            appendLine("rtspUrl=$rtspUrl")
-            appendLine("apiUrl=$apiUrl")
-            appendLine("webviewUrl=$webviewUrl")
-            appendLine("localWebviewUrl=$localWebviewUrl")
-            appendLine("middlewareUrl=$middlewareUrl")
+            appendLine("rtspTimeoutMs=${netWorkAndApi.rtspTimeoutMs}")
+            appendLine("rtspUrl=${netWorkAndApi.rtspUrl}l")
+            appendLine("apiUrl=$${netWorkAndApi.apiUrl}")
+            appendLine("webviewUrl=$${netWorkAndApi.webviewUrl}")
+            appendLine("localWebviewUrl=$${netWorkAndApi.localWebviewUrl}")
+            appendLine("middlewareUrl=$${netWorkAndApi.middlewareUrl}")
             appendLine("appMode=$appMode")
-            appendLine("demo_version=$demo_version")
-            appendLine("broadcast_version=$broadcast_version")
+            appendLine("demo_version=${versions.demo_version}")
+            appendLine("broadcast_version=${versions.broadcast_version}")
             appendLine("useSmartSignService=$useSmartSignService")
             appendLine("hide_buttons=$hide_buttons")
             appendLine("drawGrid=$drawGrid")
