@@ -92,8 +92,6 @@ object MDMConverters {
     @JvmStatic
     fun jsonToTopView(value: String?): TopView = gson.fromJson(value ?: "{}", TopView::class.java)
 
-
-
     @TypeConverter
     @JvmStatic
     fun gaToJson(value: Ga?): String = gson.toJson(value ?: Ga())
@@ -101,6 +99,17 @@ object MDMConverters {
     @TypeConverter
     @JvmStatic
     fun jsonToGa(value: String?): Ga = gson.fromJson(value ?: "{}", Ga::class.java)
+
+
+    @TypeConverter
+    @JvmStatic
+    fun testingToJson(value: Testing?): String = gson.toJson(value ?: Testing())
+
+    @TypeConverter
+    @JvmStatic
+    fun jsonToTesting(value: String?): Testing = gson.fromJson(value ?: "{}", Testing::class.java)
+
+
 
 
 

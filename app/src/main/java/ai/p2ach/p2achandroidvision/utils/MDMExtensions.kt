@@ -52,38 +52,32 @@ fun getNeedUpdateMDMEntity(base: MDMEntity): MDMEntity {
 //        deviceUuid = MDMService.Preferences.get(Const.MDM.SETTING.REMOTE.KEY.DEVICE_UUID, "")
 //            .getOrDefaultMDM(deviceUuid ?: "")
 
-        netWorkAndApi.rtspTimeoutMs = MDMService.Preferences.get(Const.MDM.SETTING.REMOTE.KEY.RTSP_TIMEOUT_MS, "")
-            .getOrDefaultMDM(netWorkAndApi.rtspTimeoutMs)
+        netWorkAndApi.apply {
+            rtspTimeoutMs = MDMService.Preferences.get(Const.MDM.SETTING.REMOTE.KEY.RTSP_TIMEOUT_MS, "")
+                .getOrDefaultMDM(rtspTimeoutMs)
 
-        netWorkAndApi.rtspUrl = MDMService.Preferences.get(Const.MDM.SETTING.REMOTE.KEY.RTSP_URL, "")
-            .getOrDefaultMDM(netWorkAndApi.rtspUrl)
+            rtspUrl = MDMService.Preferences.get(Const.MDM.SETTING.REMOTE.KEY.RTSP_URL, "")
+                .getOrDefaultMDM(rtspUrl)
 
-        netWorkAndApi.apiUrl = MDMService.Preferences.get(Const.MDM.SETTING.REMOTE.KEY.API_URL, "")
-            .getOrDefaultMDM(netWorkAndApi.apiUrl)
+            apiUrl = MDMService.Preferences.get(Const.MDM.SETTING.REMOTE.KEY.API_URL, "")
+                .getOrDefaultMDM(apiUrl)
 
-        netWorkAndApi.webviewUrl = MDMService.Preferences.get(Const.MDM.SETTING.REMOTE.KEY.WEBVIEW_URL, "")
-            .getOrDefaultMDM(netWorkAndApi.webviewUrl)
+            webviewUrl = MDMService.Preferences.get(Const.MDM.SETTING.REMOTE.KEY.WEBVIEW_URL, "")
+                .getOrDefaultMDM(webviewUrl)
 
-        netWorkAndApi.middlewareUrl = MDMService.Preferences.get(Const.MDM.SETTING.REMOTE.KEY.MIDDLEWARE_URL, "")
-            .getOrDefaultMDM(netWorkAndApi.middlewareUrl)
+            middlewareUrl = MDMService.Preferences.get(Const.MDM.SETTING.REMOTE.KEY.MIDDLEWARE_URL, "")
+                .getOrDefaultMDM(middlewareUrl)
+        }
 
+        versions.apply {
 
+            demo_version = MDMService.Preferences.get(Const.MDM.SETTING.REMOTE.KEY.DEMO_VERSION, "")
+                .getOrDefaultMDM(demo_version)
 
-        versions.demo_version = MDMService.Preferences.get(Const.MDM.SETTING.REMOTE.KEY.DEMO_VERSION, "")
-            .getOrDefaultMDM(versions.demo_version)
+            broadcast_version = MDMService.Preferences.get(Const.MDM.SETTING.REMOTE.KEY.BROADCAST_VERSION, "")
+                .getOrDefaultMDM(broadcast_version)
 
-        versions.broadcast_version = MDMService.Preferences.get(Const.MDM.SETTING.REMOTE.KEY.BROADCAST_VERSION, "")
-            .getOrDefaultMDM(versions.broadcast_version)
-
-
-
-        rotation = MDMService.Preferences.get(Const.MDM.SETTING.REMOTE.KEY.ROTATION, "")
-            .getOrDefaultMDM(rotation)
-
-
-
-
-
+        }
 
 
         featureFlags.apply {
@@ -163,17 +157,6 @@ fun getNeedUpdateMDMEntity(base: MDMEntity): MDMEntity {
         }
 
 
-
-
-        videofilepaths = MDMService.Preferences
-            .get(Const.MDM.SETTING.REMOTE.KEY.VIDEO_FILE_PATHS, "")
-            .getOrDefaultMDM(videofilepaths)
-
-        videofileUris = MDMService.Preferences
-            .get(Const.MDM.SETTING.REMOTE.KEY.VIDEO_FILE_URIS, "")
-            .getOrDefaultMDM(videofileUris)
-
-
         timingsAndParameters.apply {
 
             dataSendingInterval = MDMService.Preferences.get(Const.MDM.SETTING.REMOTE.KEY.DATA_SENDING_INTERVAL, "")
@@ -193,34 +176,9 @@ fun getNeedUpdateMDMEntity(base: MDMEntity): MDMEntity {
         }
 
 
-
-
-
-
         roi = MDMService.Preferences.get(Const.MDM.SETTING.REMOTE.KEY.ROI,"").getOrDefaultMDM(ROI())
 
-//        // =========================
-//        // ROI (apply)
-//        // =========================
-//        roi.apply {
-//
-//            // TODO: Roi-> json
-////            top = MDMService.Preferences.get(Const.MDM.SETTING.REMOTE.KEY.ROI_TOP, "")
-////                .getOrDefaultMDM(top)
-////
-////            left = MDMService.Preferences.get(Const.MDM.SETTING.REMOTE.KEY.ROI_LEFT, "")
-////                .getOrDefaultMDM(left)
-////
-////            width = MDMService.Preferences.get(Const.MDM.SETTING.REMOTE.KEY.ROI_WIDTH, "")
-////                .getOrDefaultMDM(width)
-////
-////            height = MDMService.Preferences.get(Const.MDM.SETTING.REMOTE.KEY.ROI_HEIGHT, "")
-////                .getOrDefaultMDM(height)
-//        }
 
-        // =========================
-        // CamParam (apply)
-        // =========================
         camParam.apply {
             focal_x = MDMService.Preferences.get(Const.MDM.SETTING.REMOTE.KEY.FOCAL_X, "")
                 .getOrDefaultMDM(focal_x)
@@ -256,6 +214,7 @@ fun getNeedUpdateMDMEntity(base: MDMEntity): MDMEntity {
                 .getOrDefaultMDM(scale2)
         }
 
+
         topView.apply {
 
             tvWidth = MDMService.Preferences.get(Const.MDM.SETTING.REMOTE.KEY.TV_WIDTH, "")
@@ -264,7 +223,6 @@ fun getNeedUpdateMDMEntity(base: MDMEntity): MDMEntity {
             tvHeight = MDMService.Preferences.get(Const.MDM.SETTING.REMOTE.KEY.TV_HEIGHT, "")
                 .getOrDefaultMDM(tvHeight)
         }
-
 
 
         ga.apply {
@@ -279,14 +237,27 @@ fun getNeedUpdateMDMEntity(base: MDMEntity): MDMEntity {
                     .getOrDefaultMDM(gaMeasurementId)
         }
 
-
-
-
-
         exposure.apply {
             p5 = MDMService.Preferences.get(Const.MDM.SETTING.REMOTE.KEY.P5,"").getOrDefaultMDM(p5)
             p95 = MDMService.Preferences.get(Const.MDM.SETTING.REMOTE.KEY.P95,"").getOrDefaultMDM(p95)
         }
+
+        testing.apply {
+
+            videofilepaths = MDMService.Preferences
+                .get(Const.MDM.SETTING.REMOTE.KEY.VIDEO_FILE_PATHS, "")
+                .getOrDefaultMDM(videofilepaths)
+
+            videofileUris = MDMService.Preferences
+                .get(Const.MDM.SETTING.REMOTE.KEY.VIDEO_FILE_URIS, "")
+                .getOrDefaultMDM(videofileUris)
+        }
+
+
+
+
+        rotation = MDMService.Preferences.get(Const.MDM.SETTING.REMOTE.KEY.ROTATION, "")
+            .getOrDefaultMDM(rotation)
 
     }
 }

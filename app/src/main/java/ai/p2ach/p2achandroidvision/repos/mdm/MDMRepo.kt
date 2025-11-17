@@ -103,6 +103,13 @@ data class Ga(
 )
 
 
+@Serializable
+data class Testing(
+    var videofilepaths: List<String> = emptyList(),
+    var videofileUris: List<String> = emptyList(),
+)
+
+
 
 @Entity(tableName = "table_mdm")
 data class MDMEntity(
@@ -111,18 +118,15 @@ data class MDMEntity(
     var deviceUuid: String? = null,
     var netWorkAndApi: NetWorkAndApi = NetWorkAndApi(),
     var versions : Versions = Versions(),
-    var rotation: Int = Const.MDM.SETTING.DEFAULT.DEFAULT_ROTATION,
-
-    var videofilepaths: List<String> = emptyList(),
-    var videofileUris: List<String> = emptyList(),
-
     var featureFlags: FeatureFlags = FeatureFlags(),
     var timingsAndParameters: TimingsAndParameters = TimingsAndParameters(),
-    var topView: TopView = TopView(),
-    var ga : Ga = Ga(),
     var roi: ROI = ROI(),
     var camParam: CamParam = CamParam(),
-    var exposure: Exposure = Exposure()
+    var topView: TopView = TopView(),
+    var ga : Ga = Ga(),
+    var exposure: Exposure = Exposure(),
+    var testing: Testing = Testing(),
+    var rotation: Int = Const.MDM.SETTING.DEFAULT.DEFAULT_ROTATION,
 
 ){
 
