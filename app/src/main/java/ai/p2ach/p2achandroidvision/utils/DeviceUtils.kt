@@ -117,7 +117,7 @@ object DeviceUtils {
     }
 
 
-    private fun getOrCreateDeviceUuid(): String = UUID.randomUUID().toString()
+    fun getOrCreateDeviceUuid(): String = UUID.randomUUID().toString()
 
 
 

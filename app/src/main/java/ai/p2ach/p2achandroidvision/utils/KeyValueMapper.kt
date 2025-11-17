@@ -10,10 +10,6 @@ data class KeyValueItem(
     val value: String
 )
 
-//sealed class MdmUiItem {
-//    data class SectionHeader(val title: String) : MdmUiItem()
-//    data class Row(val key: String, val value: String) : MdmUiItem()
-//}
 
 inline fun <reified T : Any> T.toKeyValueList(
     labelMap: Map<String, String> = emptyMap()

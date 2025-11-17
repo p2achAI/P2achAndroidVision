@@ -52,6 +52,9 @@ fun getNeedUpdateMDMEntity(base: MDMEntity): MDMEntity {
 //        deviceUuid = MDMService.Preferences.get(Const.MDM.SETTING.REMOTE.KEY.DEVICE_UUID, "")
 //            .getOrDefaultMDM(deviceUuid ?: "")
 
+        deviceUuid = base.deviceUuid?: DeviceUtils.getOrCreateDeviceUuid()
+
+
         netWorkAndApi.apply {
             rtspTimeoutMs = MDMService.Preferences.get(Const.MDM.SETTING.REMOTE.KEY.RTSP_TIMEOUT_MS, "")
                 .getOrDefaultMDM(rtspTimeoutMs)
