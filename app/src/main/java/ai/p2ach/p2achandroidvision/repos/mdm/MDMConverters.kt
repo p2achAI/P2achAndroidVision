@@ -84,6 +84,16 @@ object MDMConverters {
 
 
 
+    @TypeConverter
+    @JvmStatic
+    fun topViewToJson(value: TopView?): String = gson.toJson(value ?: TopView())
+
+    @TypeConverter
+    @JvmStatic
+    fun jsonToTopView(value: String?): TopView = gson.fromJson(value ?: "{}", TopView::class.java)
+
+
+
 
 
 

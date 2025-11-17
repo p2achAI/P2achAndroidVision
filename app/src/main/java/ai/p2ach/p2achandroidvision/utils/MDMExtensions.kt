@@ -256,11 +256,16 @@ fun getNeedUpdateMDMEntity(base: MDMEntity): MDMEntity {
                 .getOrDefaultMDM(scale2)
         }
 
-        tvWidth = MDMService.Preferences.get(Const.MDM.SETTING.REMOTE.KEY.TV_WIDTH, "")
-            .getOrDefaultMDM(tvWidth)
+        topView.apply {
 
-        tvHeight = MDMService.Preferences.get(Const.MDM.SETTING.REMOTE.KEY.TV_HEIGHT, "")
-            .getOrDefaultMDM(tvHeight)
+            tvWidth = MDMService.Preferences.get(Const.MDM.SETTING.REMOTE.KEY.TV_WIDTH, "")
+                .getOrDefaultMDM(tvWidth)
+
+            tvHeight = MDMService.Preferences.get(Const.MDM.SETTING.REMOTE.KEY.TV_HEIGHT, "")
+                .getOrDefaultMDM(tvHeight)
+        }
+
+
 
 
 

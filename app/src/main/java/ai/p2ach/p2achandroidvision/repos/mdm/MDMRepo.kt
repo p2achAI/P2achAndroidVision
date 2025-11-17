@@ -90,6 +90,14 @@ data class TimingsAndParameters(
 )
 
 
+@Serializable
+data class TopView(
+    var tvWidth: Int = Const.MDM.SETTING.DEFAULT.DEFAULT_TV_WIDTH,
+    var tvHeight: Int = Const.MDM.SETTING.DEFAULT.DEFAULT_TV_HEIGHT,
+)
+
+
+
 @Entity(tableName = "table_mdm")
 data class MDMEntity(
     @PrimaryKey var deviceName: String = Const.MDM.SETTING.DEFAULT.DEFAULT_DEVICE_NAME,
@@ -104,10 +112,10 @@ data class MDMEntity(
 
     var featureFlags: FeatureFlags = FeatureFlags(),
     var timingsAndParameters: TimingsAndParameters = TimingsAndParameters(),
+    var topView: TopView = TopView(),
     var roi: ROI = ROI(),
     var camParam: CamParam = CamParam(),
-    var tvWidth: Int = Const.MDM.SETTING.DEFAULT.DEFAULT_TV_WIDTH,
-    var tvHeight: Int = Const.MDM.SETTING.DEFAULT.DEFAULT_TV_HEIGHT,
+
 
 
     var gaApiUrl: String = Const.MDM.SETTING.DEFAULT.DEFAULT_GA_API_URL,
