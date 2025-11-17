@@ -22,14 +22,12 @@ import androidx.room.withTransaction
 import com.hmdm.MDMService
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.Flow
 import kotlinx.serialization.Serializable
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.launch
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
-import java.util.UUID
 
 
 
@@ -249,6 +247,11 @@ class MDMRepo(private val context: Context, private val db: AppDataBase, private
                     val deviceName = DeviceUtils.getDeviceName(context,mdmDeviceId)
                     val baseMDMEntity = mdmDao.get()?: MDMEntity(deviceName=deviceName)
                     saveLocal(getNeedUpdateMDMEntity(baseMDMEntity))
+
+                    /*appMode 에 따라 화면 구성을 다르게 하거나, 기능적으로 조합을 해야하는 기능이 있다 */
+                    /*카메라 모드를 명시적으로 예) uvc, rtsp가 모두 붙어있을때 선택 화면이라던지 pref 구성*/
+                    /*로그 dataDog / firebase 확인.*/
+
 
 
                 }

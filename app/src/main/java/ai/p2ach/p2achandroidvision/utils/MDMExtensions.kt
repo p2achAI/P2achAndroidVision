@@ -273,6 +273,7 @@ sealed class MdmUiItem {
 fun MDMEntity.toUiItems(): List<MdmUiItem> {
     val items = mutableListOf<MdmUiItem>()
 
+
     items += MdmUiItem.Header("Device")
     items += listOf(
         KeyValueItem("Device Name", deviceName),

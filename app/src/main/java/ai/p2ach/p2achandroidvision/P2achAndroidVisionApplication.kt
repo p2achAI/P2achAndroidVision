@@ -5,12 +5,15 @@ import ai.p2ach.p2achandroidvision.database.AppDataBase
 import ai.p2ach.p2achandroidvision.repos.mdm.MDMHandlers
 import ai.p2ach.p2achandroidvision.repos.mdm.MDMRepo
 import ai.p2ach.p2achandroidvision.viewmodels.MdmViewModel
+import ai.p2ach.p2achandroidvision.views.fragments.P2achCameraManager
 import android.app.Application
+import android.content.Context
+import android.hardware.camera2.CameraManager
+import android.hardware.usb.UsbManager
 import androidx.room.Room
 import com.orhanobut.logger.AndroidLogAdapter
 import com.orhanobut.logger.Logger
 import org.koin.android.ext.koin.androidContext
-import org.koin.android.ext.koin.androidLogger
 import org.koin.androidx.viewmodel.dsl.viewModel
 import org.koin.core.context.startKoin
 import org.koin.dsl.module
@@ -29,6 +32,9 @@ class P2achAndroidVisionApplication : Application() {
 
     }
 
+
+
+
     val repoModule = module {
 
         single { MDMRepo(androidContext(),get(), get()) }
@@ -43,6 +49,29 @@ class P2achAndroidVisionApplication : Application() {
     }
 
 
+    val systemModule = module {
+
+        single<CameraManager> {
+            androidContext().getSystemService(Context.CAMERA_SERVICE) as CameraManager
+        }
+        single<UsbManager>{
+            androidContext().getSystemService(Context.USB_SERVICE) as UsbManager
+        }
+    }
+
+    val managerModule = module{
+
+        factory { P2achCameraManager(get(),get()) }
+    }
+
+
+
+
+
+
+
+
+
 
     override fun onCreate() {
         super.onCreate()
@@ -50,7 +79,7 @@ class P2achAndroidVisionApplication : Application() {
 //            /*Android System Logger*/
 //            androidLogger(org.koin.core.logger.Level.DEBUG)
             androidContext(this@P2achAndroidVisionApplication)
-            modules(dbModule,repoModule,vmModule, mdmModule)
+            modules(dbModule,repoModule,vmModule, mdmModule, systemModule, managerModule)
         }
         Logger.addLogAdapter(AndroidLogAdapter())
     }
