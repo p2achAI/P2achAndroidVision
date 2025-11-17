@@ -52,30 +52,18 @@ data class Versions(
 )
 
 
-@Entity(tableName = "table_mdm")
-data class MDMEntity(
-    @PrimaryKey var deviceName: String = Const.MDM.SETTING.DEFAULT.DEFAULT_DEVICE_NAME,
-    var hwType: String = DeviceUtils.getHwType().name,
-    var deviceUuid: String? = null,
-    var netWorkAndApi: NetWorkAndApi = NetWorkAndApi(),
-    var versions : Versions = Versions(),
+@Serializable
+data class FeatureFlags(
     var appMode: String = Const.MDM.SETTING.DEFAULT.DEFAULT_APP_MODE,
-
-
     var useSmartSignService: Boolean = Const.MDM.SETTING.DEFAULT.DEFAULT_USE_SMART_SIGN_SERVICE,
     var hide_buttons: Boolean = Const.MDM.SETTING.DEFAULT.DEFAULT_HIDE_BUTTONS,
     var drawGrid: Boolean = Const.MDM.SETTING.DEFAULT.DEFAULT_DRAW_GRID,
-    var rotation: Int = Const.MDM.SETTING.DEFAULT.DEFAULT_ROTATION,
     var autoRotation: Boolean = Const.MDM.SETTING.DEFAULT.DEFAULT_AUTO_ROTATION,
-    var dataSendingInterval: Int = Const.MDM.SETTING.DEFAULT.DEFAULT_DATA_SENDING_INTERVAL,
-    var dataCollectionInterval: Int = Const.MDM.SETTING.DEFAULT.DEFAULT_DATA_COLLECTION_INTERVAL,
     var useGzip: Boolean = Const.MDM.SETTING.DEFAULT.DEFAULT_USE_GZIP,
     var use_ota: Boolean = Const.MDM.SETTING.DEFAULT.DEFAULT_USE_OTA,
     var use_reid: Boolean = Const.MDM.SETTING.DEFAULT.DEFAULT_USE_REID,
     var use_ageGender_NpuModel: Boolean = Const.MDM.SETTING.DEFAULT.DEFAULT_USE_AGE_GENDER_NPU_MODEL,
     var useVideofile: Boolean = Const.MDM.SETTING.DEFAULT.DEFAULT_USE_VIDEO_FILE,
-    var videofilepaths: List<String> = emptyList(),
-    var videofileUris: List<String> = emptyList(),
     var use_pose: Boolean = Const.MDM.SETTING.DEFAULT.DEFAULT_USE_POSE,
     var use_headpose: Boolean = Const.MDM.SETTING.DEFAULT.DEFAULT_USE_HEADPOSE,
     var use_yolo: Boolean = Const.MDM.SETTING.DEFAULT.DEFAULT_USE_YOLO,
@@ -85,17 +73,42 @@ data class MDMEntity(
     var use_4split: Boolean = Const.MDM.SETTING.DEFAULT.DEFAULT_USE_4SPLIT,
     var contents_mode: Boolean = Const.MDM.SETTING.DEFAULT.DEFAULT_CONTENTS_MODE,
     var flip: Boolean = Const.MDM.SETTING.DEFAULT.DEFAULT_FLIP,
-    var track_frms: Int = Const.MDM.SETTING.DEFAULT.DEFAULT_TRACK_FRMS,
-    var ageMode: Int = Const.MDM.SETTING.DEFAULT.DEFAULT_AGE_MODE,
     var devMode: Boolean = Const.MDM.SETTING.DEFAULT.DEFAULT_DEV_MODE,
-    var genderThr: Float = Const.MDM.SETTING.DEFAULT.DEFAULT_GENDER_THR,
     var use_age_comp: Boolean = Const.MDM.SETTING.DEFAULT.DEFAULT_USE_AGE_COMP,
     var use_draw_limit: Boolean = Const.MDM.SETTING.DEFAULT.DEFAULT_USE_DRAW_LIMIT,
+    var autoStartCameraActivity: Boolean = Const.MDM.SETTING.DEFAULT.DEFAULT_AUTO_START_CAMERA_ACTIVITY,
+)
+
+
+@Serializable
+data class TimingsAndParameters(
+    var dataSendingInterval: Int = Const.MDM.SETTING.DEFAULT.DEFAULT_DATA_SENDING_INTERVAL,
+    var dataCollectionInterval: Int = Const.MDM.SETTING.DEFAULT.DEFAULT_DATA_COLLECTION_INTERVAL,
+    var track_frms: Int = Const.MDM.SETTING.DEFAULT.DEFAULT_TRACK_FRMS,
+    var ageMode: Int = Const.MDM.SETTING.DEFAULT.DEFAULT_AGE_MODE,
+    var genderThr: Float = Const.MDM.SETTING.DEFAULT.DEFAULT_GENDER_THR,
+)
+
+
+@Entity(tableName = "table_mdm")
+data class MDMEntity(
+    @PrimaryKey var deviceName: String = Const.MDM.SETTING.DEFAULT.DEFAULT_DEVICE_NAME,
+    var hwType: String = DeviceUtils.getHwType().name,
+    var deviceUuid: String? = null,
+    var netWorkAndApi: NetWorkAndApi = NetWorkAndApi(),
+    var versions : Versions = Versions(),
+    var rotation: Int = Const.MDM.SETTING.DEFAULT.DEFAULT_ROTATION,
+
+    var videofilepaths: List<String> = emptyList(),
+    var videofileUris: List<String> = emptyList(),
+
+    var featureFlags: FeatureFlags = FeatureFlags(),
+    var timingsAndParameters: TimingsAndParameters = TimingsAndParameters(),
     var roi: ROI = ROI(),
     var camParam: CamParam = CamParam(),
     var tvWidth: Int = Const.MDM.SETTING.DEFAULT.DEFAULT_TV_WIDTH,
     var tvHeight: Int = Const.MDM.SETTING.DEFAULT.DEFAULT_TV_HEIGHT,
-    var autoStartCameraActivity: Boolean = Const.MDM.SETTING.DEFAULT.DEFAULT_AUTO_START_CAMERA_ACTIVITY,
+
 
     var gaApiUrl: String = Const.MDM.SETTING.DEFAULT.DEFAULT_GA_API_URL,
     var gaApiSecret: String = "",
@@ -106,61 +119,6 @@ data class MDMEntity(
 
 ){
 
-    override fun toString(): String {
-
-        return buildString {
-            appendLine("deviceName=$deviceName")
-            appendLine("hwType=$hwType")
-            appendLine("deviceUuid=$deviceUuid")
-            appendLine("rtspTimeoutMs=${netWorkAndApi.rtspTimeoutMs}")
-            appendLine("rtspUrl=${netWorkAndApi.rtspUrl}l")
-            appendLine("apiUrl=$${netWorkAndApi.apiUrl}")
-            appendLine("webviewUrl=$${netWorkAndApi.webviewUrl}")
-            appendLine("localWebviewUrl=$${netWorkAndApi.localWebviewUrl}")
-            appendLine("middlewareUrl=$${netWorkAndApi.middlewareUrl}")
-            appendLine("appMode=$appMode")
-            appendLine("demo_version=${versions.demo_version}")
-            appendLine("broadcast_version=${versions.broadcast_version}")
-            appendLine("useSmartSignService=$useSmartSignService")
-            appendLine("hide_buttons=$hide_buttons")
-            appendLine("drawGrid=$drawGrid")
-            appendLine("rotation=$rotation")
-            appendLine("autoRotation=$autoRotation")
-            appendLine("dataSendingInterval=$dataSendingInterval")
-            appendLine("dataCollectionInterval=$dataCollectionInterval")
-            appendLine("useGzip=$useGzip")
-            appendLine("use_ota=$use_ota")
-            appendLine("use_reid=$use_reid")
-            appendLine("use_ageGender_NpuModel=$use_ageGender_NpuModel")
-            appendLine("useVideofile=$useVideofile")
-            appendLine("videofilepaths=$videofilepaths")
-            appendLine("videofileUris=$videofileUris")
-            appendLine("use_pose=$use_pose")
-            appendLine("use_headpose=$use_headpose")
-            appendLine("use_yolo=$use_yolo")
-            appendLine("use_par=$use_par")
-            appendLine("use_deepsort=$use_deepsort")
-            appendLine("use_face=$use_face")
-            appendLine("use_4split=$use_4split")
-            appendLine("contents_mode=$contents_mode")
-            appendLine("flip=$flip")
-            appendLine("track_frms=$track_frms")
-            appendLine("ageMode=$ageMode")
-            appendLine("devMode=$devMode")
-            appendLine("genderThr=$genderThr")
-            appendLine("use_age_comp=$use_age_comp")
-            appendLine("use_draw_limit=$use_draw_limit")
-            appendLine("roi=$roi")
-            appendLine("camParam=$camParam")
-            appendLine("tvWidth=$tvWidth")
-            appendLine("tvHeight=$tvHeight")
-            appendLine("autoStartCameraActivity=$autoStartCameraActivity")
-            appendLine("gaApiUrl=$gaApiUrl")
-            appendLine("gaApiSecret=$gaApiSecret")
-            appendLine("gaMeasurementId=$gaMeasurementId")
-            appendLine("exposure=$exposure")
-        }
-    }
 
 }
 

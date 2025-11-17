@@ -64,6 +64,28 @@ object MDMConverters {
 
 
 
+    @TypeConverter
+    @JvmStatic
+    fun featureFlagsToJson(value: FeatureFlags?): String = gson.toJson(value ?: FeatureFlags())
+
+    @TypeConverter
+    @JvmStatic
+    fun jsonToFeatureFlags(value: String?): FeatureFlags = gson.fromJson(value ?: "{}", FeatureFlags::class.java)
+
+
+
+    @TypeConverter
+    @JvmStatic
+    fun timingsAndParametersToJson(value: TimingsAndParameters?): String = gson.toJson(value ?: TimingsAndParameters())
+
+    @TypeConverter
+    @JvmStatic
+    fun jsonToTimingsAndParameters(value: String?): TimingsAndParameters = gson.fromJson(value ?: "{}", TimingsAndParameters::class.java)
+
+
+
+
+
 
     @TypeConverter
     @JvmStatic
