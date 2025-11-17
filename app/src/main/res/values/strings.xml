@@ -1,3 +1,7 @@
 <resources>
     <string name="app_name">P2achAndroidVision</string>
+    <string name="txt_device">Device</string>
+    <string name="txt_device_name">Device Name</string>
+    <string name="txt_mock">E76128C0C25020055</string>
+
 </resources>
