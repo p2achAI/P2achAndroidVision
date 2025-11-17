@@ -261,3 +261,72 @@ fun getNeedUpdateMDMEntity(base: MDMEntity): MDMEntity {
 
     }
 }
+
+sealed class MdmUiItem {
+    data class Header(val title: String) : MdmUiItem()
+    data class Row(val key: String, val value: String) : MdmUiItem()
+}
+
+fun MDMEntity.toUiItems(): List<MdmUiItem> {
+    val items = mutableListOf<MdmUiItem>()
+
+    items += MdmUiItem.Header("Device")
+    items += listOf(
+        KeyValueItem("Device Name", deviceName),
+        KeyValueItem("HW Type", hwType),
+        KeyValueItem("Device UUID", deviceUuid ?: ""),
+        KeyValueItem("Rotation", rotation.toString())
+    ).map { MdmUiItem.Row(it.key, it.value) }
+
+    items += MdmUiItem.Header("Network / API")
+    items += netWorkAndApi
+        .toKeyValueList(MdmLabelMaps.networkAndApi)
+        .map { MdmUiItem.Row(it.key, it.value) }
+
+    items += MdmUiItem.Header("Versions")
+    items += versions
+        .toKeyValueList(MdmLabelMaps.versions)
+        .map { MdmUiItem.Row(it.key, it.value) }
+
+    items += MdmUiItem.Header("Feature Flags")
+    items += featureFlags
+        .toKeyValueList(MdmLabelMaps.featureFlags)
+        .map { MdmUiItem.Row(it.key, it.value) }
+
+    items += MdmUiItem.Header("Timings / Parameters")
+    items += timingsAndParameters
+        .toKeyValueList(MdmLabelMaps.timingsAndParameters)
+        .map { MdmUiItem.Row(it.key, it.value) }
+
+    items += MdmUiItem.Header("ROI")
+    items += roi
+        .toKeyValueList(MdmLabelMaps.roi)
+        .map { MdmUiItem.Row(it.key, it.value) }
+
+    items += MdmUiItem.Header("Camera Param")
+    items += camParam
+        .toKeyValueList(MdmLabelMaps.camParam)
+        .map { MdmUiItem.Row(it.key, it.value) }
+
+    items += MdmUiItem.Header("Top View")
+    items += topView
+        .toKeyValueList(MdmLabelMaps.topView)
+        .map { MdmUiItem.Row(it.key, it.value) }
+
+    items += MdmUiItem.Header("Google Analytics")
+    items += ga
+        .toKeyValueList(MdmLabelMaps.ga)
+        .map { MdmUiItem.Row(it.key, it.value) }
+
+    items += MdmUiItem.Header("Exposure")
+    items += exposure
+        .toKeyValueList(MdmLabelMaps.exposure)
+        .map { MdmUiItem.Row(it.key, it.value) }
+
+    items += MdmUiItem.Header("Testing")
+    items += testing
+        .toKeyValueList(MdmLabelMaps.testing)
+        .map { MdmUiItem.Row(it.key, it.value) }
+
+    return items
+}
