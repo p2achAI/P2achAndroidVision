@@ -94,6 +94,13 @@ object MDMConverters {
 
 
 
+    @TypeConverter
+    @JvmStatic
+    fun gaToJson(value: Ga?): String = gson.toJson(value ?: Ga())
+
+    @TypeConverter
+    @JvmStatic
+    fun jsonToGa(value: String?): Ga = gson.fromJson(value ?: "{}", Ga::class.java)
 
 
 

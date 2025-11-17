@@ -95,6 +95,12 @@ data class TopView(
     var tvWidth: Int = Const.MDM.SETTING.DEFAULT.DEFAULT_TV_WIDTH,
     var tvHeight: Int = Const.MDM.SETTING.DEFAULT.DEFAULT_TV_HEIGHT,
 )
+@Serializable
+data class Ga(
+    var gaApiUrl: String = Const.MDM.SETTING.DEFAULT.DEFAULT_GA_API_URL,
+    var gaApiSecret: String = "",
+    var gaMeasurementId: String = "",
+)
 
 
 
@@ -113,16 +119,9 @@ data class MDMEntity(
     var featureFlags: FeatureFlags = FeatureFlags(),
     var timingsAndParameters: TimingsAndParameters = TimingsAndParameters(),
     var topView: TopView = TopView(),
+    var ga : Ga = Ga(),
     var roi: ROI = ROI(),
     var camParam: CamParam = CamParam(),
-
-
-
-    var gaApiUrl: String = Const.MDM.SETTING.DEFAULT.DEFAULT_GA_API_URL,
-    var gaApiSecret: String = "",
-    var gaMeasurementId: String = "",
-
-
     var exposure: Exposure = Exposure()
 
 ){

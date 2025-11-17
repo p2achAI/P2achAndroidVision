@@ -267,17 +267,20 @@ fun getNeedUpdateMDMEntity(base: MDMEntity): MDMEntity {
 
 
 
+        ga.apply {
+            gaApiUrl = MDMService.Preferences.get(Const.MDM.SETTING.REMOTE.KEY.GA_API_URL, "")
+                .getOrDefaultMDM(gaApiUrl)
+
+            gaApiSecret = MDMService.Preferences.get(Const.MDM.SETTING.REMOTE.KEY.GA_API_SECRET, "")
+                .getOrDefaultMDM(gaApiSecret)
+
+            gaMeasurementId =
+                MDMService.Preferences.get(Const.MDM.SETTING.REMOTE.KEY.GA_MEASUREMENT_ID, "")
+                    .getOrDefaultMDM(gaMeasurementId)
+        }
 
 
-        gaApiUrl = MDMService.Preferences.get(Const.MDM.SETTING.REMOTE.KEY.GA_API_URL, "")
-            .getOrDefaultMDM(gaApiUrl)
 
-        gaApiSecret = MDMService.Preferences.get(Const.MDM.SETTING.REMOTE.KEY.GA_API_SECRET, "")
-            .getOrDefaultMDM(gaApiSecret)
-
-        gaMeasurementId =
-            MDMService.Preferences.get(Const.MDM.SETTING.REMOTE.KEY.GA_MEASUREMENT_ID, "")
-                .getOrDefaultMDM(gaMeasurementId)
 
 
         exposure.apply {
