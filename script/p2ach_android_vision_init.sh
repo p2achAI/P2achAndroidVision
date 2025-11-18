@@ -4,40 +4,46 @@ set -euo pipefail
 # ===== 사용자 설정 =====
 ROOT_DIR="${1:-P2achAndroidVision}"
 REPO_URL="${REPO_URL:-git@github.com:p2achAI/P2achAndroidVision.git}"
-# 히스토리 보존(기본) / 빠른 얕은 클론 선택
 SHALLOW="${SHALLOW:-false}"   # true | false
 
 # 서브모듈 목록(동일 인덱스 매칭)
-SUB_PATHS=( "commonLibrary" "libuvccamera" )
-SUB_URLS=(  "git@github.com:p2achAI/commonLibrary.git"
-            "git@github.com:p2achAI/libuvccamera-only.git" )
+SUB_PATHS=(
+  "commonLibrary"
+  "libuvccamera"
+  "app/src/main/cpp"
+)
+SUB_URLS=(
+  "git@github.com:p2achAI/commonLibrary.git"
+  "git@github.com:p2achAI/libuvccamera-only.git"
+  "git@github.com:p2achAI/p2ach_vision_cpp.git"
+)
 
 detect_default_branch() {
   local url="$1"
   local def
-  def="$(git ls-remote --symref "$url" HEAD 2>/dev/null | awk '/^ref:/ { sub("refs/heads/","",$2); print $2; exit }' || true)"
+  def="$(git ls-remote --symref "$url" HEAD 2>/dev/null \
+        | awk '/^ref:/ { sub("refs/heads/","",$2); print $2; exit }' \
+        || true)"
   [[ -z "${def:-}" ]] && def="main"
   echo "$def"
 }
 
 echo "=== P2achAndroidVision setup (SHALLOW=$SHALLOW) ==="
 
-# 0) 메인 레포 클론
+echo "[step] clone main repo (without submodules) -> $ROOT_DIR"
 if [[ ! -d "$ROOT_DIR/.git" ]]; then
-  echo "[step] clone main repo -> $ROOT_DIR"
   if [[ "$SHALLOW" == "true" ]]; then
     git clone --progress --depth 1 "$REPO_URL" "$ROOT_DIR"
   else
     git clone --progress "$REPO_URL" "$ROOT_DIR"
   fi
 else
-  echo "[skip] already exists: $ROOT_DIR"
+  echo "  - skip: repo already exists"
 fi
 
 cd "$ROOT_DIR"
 
-# 1) 서브모듈 등록/정합성 (절대 삭제 안 함)
-echo "[step] submodule ensure/add"
+echo "[step] ensure .gitmodules entries"
 for i in "${!SUB_PATHS[@]}"; do
   path="${SUB_PATHS[$i]}"
   url="${SUB_URLS[$i]}"
@@ -46,39 +52,54 @@ for i in "${!SUB_PATHS[@]}"; do
 
   if git config -f .gitmodules --get "submodule.${path}.url" >/dev/null 2>&1; then
     cur_url="$(git config -f .gitmodules --get "submodule.${path}.url" || true)"
-    [[ "$cur_url" != "$url" ]] && git submodule set-url "$path" "$url"
-    git submodule set-branch --branch "$br" "$path" >/dev/null 2>&1 || true
-  else
-    # 잔존 디렉터리가 깃관리 아니면 제거
-    if [[ -d "$path" && ! -d "$path/.git" ]]; then
-      echo "    > cleanup leftover dir: $path"
-      rm -rf "$path"
+    if [[ "$cur_url" != "$url" ]]; then
+      echo "    > update url: $cur_url -> $url"
+      git config -f .gitmodules "submodule.${path}.url" "$url"
     fi
-    git submodule add -b "$br" "$url" "$path"
+    git config -f .gitmodules "submodule.${path}.branch" "$br" >/dev/null 2>&1 || true
+  else
+    echo "    > add submodule entry to .gitmodules"
+    git submodule add -f -b "$br" "$url" "$path" || true
   fi
 done
 
-# 2) 서브모듈 sync & checkout (blob:none 금지: 빈 폴더 오해 방지)
-echo "[step] submodule sync/update"
-git submodule sync --recursive
-if [[ "$SHALLOW" == "true" ]]; then
-  git submodule update --init --recursive --depth 1 --recommend-shallow --progress
-else
-  git submodule update --init --recursive --progress
-fi
+echo "[step] sync .gitmodules to local config"
+git submodule sync --recursive || true
 
-# 3) 최신 반영(기본 브랜치로 fast-forward)
-echo "[step] submodule fast-forward to default branch"
+echo "[step] materialize submodules (ignore stored SHA, always use latest branch)"
 for i in "${!SUB_PATHS[@]}"; do
   path="${SUB_PATHS[$i]}"
   url="${SUB_URLS[$i]}"
   br="$(git config -f .gitmodules --get "submodule.${path}.branch" || detect_default_branch "$url")"
-  echo "  - $path -> $br"
-  if [[ "$SHALLOW" == "true" ]]; then
-    (cd "$path" && git fetch --depth 1 origin "$br" && git checkout -q "$br" && git pull --ff-only)
-  else
-    (cd "$path" && git fetch origin "$br" && git checkout -q "$br" && git pull --ff-only)
+
+  echo "  - prepare $path (branch=$br)"
+
+  if [[ -d "$path" && ! -d "$path/.git" ]]; then
+    echo "    > leftover non-git dir found, removing: $path"
+    rm -rf "$path"
   fi
+
+  if [[ ! -d "$path/.git" ]]; then
+    echo "    > fresh clone into $path"
+    if [[ "$SHALLOW" == "true" ]]; then
+      git clone --progress --depth 1 --branch "$br" "$url" "$path"
+    else
+      git clone --progress --branch "$br" "$url" "$path"
+    fi
+  else
+    echo "    > existing git repo, fetch & reset"
+    if [[ "$SHALLOW" == "true" ]]; then
+      ( cd "$path" && git fetch --depth 1 origin "$br" || true )
+    else
+      ( cd "$path" && git fetch origin "$br" || true )
+    fi
+  fi
+
+  echo "    > checkout origin/$br (ignore superproject SHA)"
+  ( cd "$path" && git checkout -B "$br" "origin/$br" || true )
+
+  # superproject 입장에서는 이 서브모듈이 "새 커밋" 상태일 수 있지만,
+  # 빌드는 정상 동작. 필요하면 나중에 git add/commit 로 고정.
 done
 
 echo "[done] submodule status:"
