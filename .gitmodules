@@ -6,3 +6,7 @@
 	path = libuvccamera
 	url = git@github.com:p2achAI/libuvccamera-only.git
 	branch = main
+[submodule "p2ach_vision_cpp"]
+	path = p2ach_vision_cpp
+	url = git@github.com:p2achAI/p2ach_vision_cpp.git
+	branch = main
