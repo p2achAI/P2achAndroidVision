@@ -1,4 +1,4 @@
-package ai.p2ach.p2achandroidvision.repos.service
+package ai.p2ach.p2achandroidvision.repos.camera
 
 import ai.p2ach.p2achandroidlibrary.base.repos.BaseServiceRepo
 import android.os.IBinder

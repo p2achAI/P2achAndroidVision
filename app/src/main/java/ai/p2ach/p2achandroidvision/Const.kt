@@ -5,6 +5,15 @@ import ai.p2ach.p2achandroidvision.repos.mdm.ROI
 interface Const {
 
 
+    interface Service{
+
+        companion object{
+            const val CHANNEL_ID = "pe2ch_camera_service_channel"
+            const val CHNNEL_NAME="P2ach Camera Service Channel"
+        }
+    }
+
+
     interface DB{
         companion object{
             const val NAME = "p2achvision.db"
