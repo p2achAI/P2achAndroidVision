@@ -128,6 +128,8 @@ dependencies {
     implementation(project(":libuvccamera"))
 
     //reflect
-
     implementation(libs.kotlin.reflect)
+
+
+
 }

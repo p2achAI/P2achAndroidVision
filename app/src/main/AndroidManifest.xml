@@ -68,6 +68,12 @@
         </activity>
 
 
+        <service android:name=".service.CameraService"
+            android:enabled="true"
+            android:exported="false"
+            android:foregroundServiceType="camera"/>
+
+
 <!--        <receiver-->
 <!--            android:name=".receiver.ExternalControlReceiver"-->
 <!--            android:enabled="true"-->

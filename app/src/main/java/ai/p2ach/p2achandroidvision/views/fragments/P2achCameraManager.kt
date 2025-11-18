@@ -42,11 +42,7 @@ class P2achCameraManager(private val cameraManager: CameraManager , private val 
             internalCamCnt > 0 -> CameraType.INTERNAL
             else -> CameraType.RTSP
         }
-//        return (if (cameraIds.isNotEmpty()) {
-//            CameraType.INTERNAL
-//        } else {
-//            CameraType.RTSP
-//        })
+
     }
 
 
