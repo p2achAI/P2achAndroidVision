@@ -126,6 +126,8 @@ dependencies {
     // local modules
     implementation(project(":commonLibrary"))
     implementation(project(":libuvccamera"))
+    implementation(project(":sdk"))
+
 
     //reflect
     implementation(libs.kotlin.reflect)

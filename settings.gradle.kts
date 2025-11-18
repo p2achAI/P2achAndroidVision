@@ -27,3 +27,6 @@ include(":app")
 include(":commonLibrary")
 include(":libuvccamera")
 project(":libuvccamera").projectDir = file("libuvccamera")
+
+include(":sdk")
+project(":sdk").projectDir = file("sdk")
