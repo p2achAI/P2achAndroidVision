@@ -68,7 +68,7 @@
         </activity>
 
 
-        <service android:name=".service.CameraService"
+        <service android:name=".repos.service.CameraService"
             android:enabled="true"
             android:exported="false"
             android:foregroundServiceType="camera"/>

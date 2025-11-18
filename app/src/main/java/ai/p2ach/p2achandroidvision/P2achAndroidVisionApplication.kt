@@ -4,6 +4,8 @@ package ai.p2ach.p2achandroidvision
 import ai.p2ach.p2achandroidvision.database.AppDataBase
 import ai.p2ach.p2achandroidvision.repos.mdm.MDMHandlers
 import ai.p2ach.p2achandroidvision.repos.mdm.MDMRepo
+import ai.p2ach.p2achandroidvision.repos.service.CameraServiceRepo
+import ai.p2ach.p2achandroidvision.viewmodels.CameraViewModel
 import ai.p2ach.p2achandroidvision.viewmodels.MdmViewModel
 import ai.p2ach.p2achandroidvision.views.fragments.P2achCameraManager
 import android.app.Application
@@ -38,10 +40,15 @@ class P2achAndroidVisionApplication : Application() {
     val repoModule = module {
 
         single { MDMRepo(androidContext(),get(), get()) }
+        single { CameraServiceRepo(get()) }
     }
 
     val vmModule = module {
-       viewModel { MdmViewModel(get ()) }
+       viewModel {
+           MdmViewModel(get ())
+           CameraViewModel(get())
+
+       }
     }
 
     val mdmModule = module {
