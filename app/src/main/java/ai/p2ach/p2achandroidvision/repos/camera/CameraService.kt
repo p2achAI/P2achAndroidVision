@@ -3,7 +3,7 @@ package ai.p2ach.p2achandroidvision.repos.camera
 import ai.p2ach.p2achandroidlibrary.utils.Log
 import ai.p2ach.p2achandroidvision.Const
 import ai.p2ach.p2achandroidvision.R
-import ai.p2ach.p2achandroidvision.views.activities.ActivityCamera
+import ai.p2ach.p2achandroidvision.views.activities.ActivityMain
 import ai.p2ach.p2achandroidvision.views.fragments.P2achCameraManager
 import android.app.Notification
 import android.app.NotificationChannel
@@ -45,7 +45,7 @@ class CameraService() : Service() {
 
         createNotificationChannel()
 
-        val notificationIntent = Intent(applicationContext, ActivityCamera::class.java)
+        val notificationIntent = Intent(applicationContext, ActivityMain::class.java)
         notificationIntent.putExtra("from_notification", true)
         val pendingIntent: PendingIntent = PendingIntent.getActivity(applicationContext, 0, notificationIntent,
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)

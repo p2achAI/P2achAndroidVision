@@ -31,6 +31,9 @@ navigationFragmentKtxVersion = "2.9.6"
 navigationUiKtxVersion = "2.9.6"
 
 
+tedPermission = "3.4.2"
+
+
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
@@ -68,6 +71,7 @@ navigation-ui-ktx = { group = "androidx.navigation", name = "navigation-ui-ktx",
 
 kotlin-reflect = { module = "org.jetbrains.kotlin:kotlin-reflect", version.ref = "kotlin" }
 
+ted-permission ={module = "io.github.ParkSangGwon:tedpermission-normal", version.ref = "tedPermission"}
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

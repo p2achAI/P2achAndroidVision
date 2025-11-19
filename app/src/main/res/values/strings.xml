@@ -7,4 +7,10 @@
 
     <string name="txt_notification_message">P2ACH Vision 2 is running in the background</string>
 
+
+    <string name="txt_dialog_permission_title">권한 필요</string>
+    <string name="txt_dialog_permission_message">필수 권한이 허용되지 않아 기능을 사용할 수 없습니다.\n설정에서 권한을 허용해 주세요.</string>
+    <string name="txt_dialog_permission_positive">설정으로 이동</string>
+    <string name="txt_dialog_permission_negative">닫기</string>
+
 </resources>

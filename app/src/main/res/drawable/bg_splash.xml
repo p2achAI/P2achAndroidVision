@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!-- 배경 색 -->
+    <item>
+        <shape android:shape="rectangle">
+            <solid android:color="@color/black" />
+        </shape>
+    </item>
+
+    <!-- 가운데 앱 아이콘 (벡터/포그라운드도 가능) -->
+    <item
+        android:gravity="center"
+        android:width="200dp"
+        android:height="200dp"
+        android:drawable="@drawable/ic_app_icon_foreground" />
+    <!-- 필요하면 @mipmap/ic_launcher_foreground 로 바꿔도 됨 -->
+
+</layer-list>

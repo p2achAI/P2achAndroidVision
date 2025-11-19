@@ -8,7 +8,7 @@ import ai.p2ach.p2achandroidvision.databinding.ActivityMainBinding
 
 import android.os.Bundle
 
-class ActivityCamera : BaseActivity<ActivityMainBinding>(){
+class ActivityMain : BaseActivity<ActivityMainBinding>(){
 
 
     override fun viewInit(savedInstanceState: Bundle?) {
