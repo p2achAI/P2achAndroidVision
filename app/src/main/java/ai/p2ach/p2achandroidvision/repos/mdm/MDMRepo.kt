@@ -216,7 +216,7 @@ class MDMRepo(private val context: Context, private val db: AppDataBase, private
         mdmService.connect(context, object : MDMService.ResultHandler {
 
             override fun onMDMConnected() {
-                Log.d("onMDMConnected")
+//                Log.d("onMDMConnected")
 
                 CoroutineScope(Dispatchers.IO).launch {
                     mdmHandler.init()
@@ -227,7 +227,7 @@ class MDMRepo(private val context: Context, private val db: AppDataBase, private
             }
 
             override fun onMDMDisconnected() {
-                Log.d("onMDMDisconnected")
+//                Log.d("onMDMDisconnected")
             }
         })
     }

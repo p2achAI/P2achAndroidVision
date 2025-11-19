@@ -58,7 +58,7 @@ class MDMHandlers(private val context: Context, private val mdmRepo: MDMRepo) {
 
             messageTypes?.forEach {
                 m->
-                Log.d("Handler register success $m")
+//                Log.d("Handler register success $m")
             }
 
 
@@ -66,7 +66,7 @@ class MDMHandlers(private val context: Context, private val mdmRepo: MDMRepo) {
     }
 
     fun init(){
-        Log.d("mdmPushHandler init()")
+//        Log.d("mdmPushHandler init()")
         mdmPushHandler.register(eventChannels,context)
     }
 

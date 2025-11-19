@@ -2,6 +2,8 @@ package ai.p2ach.p2achandroidvision.utils
 
 import ai.p2ach.p2achandroidvision.Const
 import android.content.Context
+import android.hardware.usb.UsbConstants
+import android.hardware.usb.UsbDevice
 import android.os.Build
 import android.provider.Settings
 import java.io.File
@@ -122,3 +124,7 @@ object DeviceUtils {
 
 
 }
+
+
+
+
