@@ -68,7 +68,7 @@ class P2achAndroidVisionApplication : Application() {
 
     val managerModule = module{
 
-        factory { P2achCameraManager(get(),get()) }
+        factory { P2achCameraManager(get(),get(), get()) }
     }
 
 

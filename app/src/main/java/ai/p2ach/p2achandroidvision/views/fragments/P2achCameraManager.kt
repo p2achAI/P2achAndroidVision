@@ -1,13 +1,18 @@
 package ai.p2ach.p2achandroidvision.views.fragments
 
 
+import ai.p2ach.p2achandroidlibrary.base.fragments.isCameraDevice
+import ai.p2ach.p2achandroidvision.repos.mdm.MDMRepo
 import android.hardware.camera2.CameraCharacteristics.LENS_FACING
 import android.hardware.camera2.CameraManager
 import android.hardware.camera2.CameraMetadata.LENS_FACING_EXTERNAL
 import android.hardware.usb.UsbDevice
 import android.hardware.usb.UsbManager
 
-class P2achCameraManager(private val cameraManager: CameraManager , private val usbManager: UsbManager) {
+class P2achCameraManager(private val cameraManager: CameraManager ,
+                         private val usbManager: UsbManager,
+                         private val mdmRepo: MDMRepo
+    ) {
 
     enum class CameraType {
         INTERNAL, USB_UVC, RTSP, VIDEO_FILE
@@ -27,10 +32,10 @@ class P2achCameraManager(private val cameraManager: CameraManager , private val 
         }
 
         val hasUvcCamera = usbManager.deviceList.values.any { device ->
-            isUsbCamera(device)
+            device.isCameraDevice()
         }.also { found ->
             if (found) {
-                usbManager.deviceList.values.firstOrNull { isUsbCamera(it) }?.let { d ->
+                usbManager.deviceList.values.firstOrNull { it.isCameraDevice() }?.let { d ->
                     MonitoringData.CAM_VID = d.vendorId
                     MonitoringData.CAM_PID = d.productId
                 }
@@ -46,17 +51,7 @@ class P2achCameraManager(private val cameraManager: CameraManager , private val 
     }
 
 
-    private fun isUsbCamera(device: UsbDevice): Boolean {
-        for (i in 0 until device.interfaceCount) {
-            val usbInterface = device.getInterface(i)
-            if (usbInterface.interfaceClass == 14 &&
-                usbInterface.interfaceSubclass == 2)
-            { // Subclass 2는 비디오 스트리밍
-                return true
-            }
-        }
-        return false
-    }
+
 
 
     object MonitoringData {
