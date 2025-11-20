@@ -3,6 +3,9 @@ package ai.p2ach.p2achandroidvision.repos.camera
 import ai.p2ach.p2achandroidlibrary.utils.Log
 import ai.p2ach.p2achandroidvision.Const
 import ai.p2ach.p2achandroidvision.R
+
+import ai.p2ach.p2achandroidvision.repos.camera.handlers.CameraHandler
+import ai.p2ach.p2achandroidvision.repos.camera.handlers.UVCCameraHandler
 import ai.p2ach.p2achandroidvision.repos.mdm.MDMRepo
 import ai.p2ach.p2achandroidvision.views.activities.ActivityMain
 import ai.p2ach.p2achandroidvision.views.fragments.P2achCameraManager
@@ -13,6 +16,7 @@ import android.app.PendingIntent
 import android.content.Intent
 import android.os.Binder
 import android.os.IBinder
+import android.view.SurfaceHolder
 import androidx.core.app.NotificationCompat
 import androidx.lifecycle.LifecycleService
 import androidx.lifecycle.lifecycleScope
@@ -25,40 +29,34 @@ class CameraService : LifecycleService() {
     val cameraManager: P2achCameraManager by inject()
     val mdmRepo: MDMRepo by inject()
 
+    private var handler: CameraHandler? = null
+    private var currentSurface: SurfaceHolder? = null
+
     inner class LocalBinder : Binder() {
         fun getService(): CameraService = this@CameraService
     }
 
     private val binder = LocalBinder()
 
-
-
     override fun onBind(intent: Intent): IBinder? {
         super.onBind(intent)
-        return  binder
+        return binder
     }
-
-
-
-
-    //    override fun onBind(intent: Intent): IBinder? = binder
 
     override fun onCreate() {
         super.onCreate()
-        Log.d("onCreate()")
+        Log.d("CameraService onCreate()")
         startForegroundWithNotification()
         collectMDM()
-
     }
 
-    fun collectMDM(){
+    private fun collectMDM() {
         lifecycleScope.launch {
             mdmRepo.stream().distinctUntilChanged().collect { mdmEntity ->
                 Log.d("CameraService mdmEntity=$mdmEntity")
             }
         }
     }
-
 
     private fun startForegroundWithNotification() {
         createNotificationChannel()
@@ -95,5 +93,55 @@ class CameraService : LifecycleService() {
         )
         val manager = getSystemService(NotificationManager::class.java)
         manager.createNotificationChannel(channel)
+    }
+
+    fun attachSurface(holder: SurfaceHolder) {
+        Log.d("CameraService attachSurface")
+        currentSurface = holder
+        handler?.setSurface(holder)
+    }
+
+    fun detachSurface(holder: SurfaceHolder) {
+        Log.d("CameraService detachSurface")
+        if (currentSurface == holder) {
+            currentSurface = null
+        }
+        handler?.clearSurface(holder)
+    }
+
+    fun startUsbCamera() {
+        Log.d("CameraService startUsbCamera")
+        if (handler is UVCCameraHandler) {
+            handler?.start()
+            return
+        }
+        stopCameraInternal()
+        val uvc = UVCCameraHandler(applicationContext)
+        handler = uvc
+        currentSurface?.let { uvc.setSurface(it) }
+        uvc.start()
+    }
+
+    fun startRtspCamera(url: String) {
+        Log.d("CameraService startRtspCamera url=$url")
+    }
+
+    fun stopCamera() {
+        Log.d("CameraService stopCamera")
+        stopCameraInternal()
+    }
+
+    private fun stopCameraInternal() {
+        handler?.stop()
+        if (handler is UVCCameraHandler) {
+            (handler as UVCCameraHandler).release()
+        }
+        handler = null
+    }
+
+    override fun onDestroy() {
+        Log.d("CameraService onDestroy()")
+        stopCameraInternal()
+        super.onDestroy()
     }
 }
