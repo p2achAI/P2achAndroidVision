@@ -1,6 +1,7 @@
 package ai.p2ach.p2achandroidvision.repos.camera.handlers
 
 import ai.p2ach.p2achandroidlibrary.utils.Log
+import ai.p2ach.p2achandroidvision.utils.DeviceUtils.isCameraDevice
 import android.app.PendingIntent
 import android.content.BroadcastReceiver
 import android.content.Context
@@ -97,7 +98,11 @@ class UVCCameraHandler(
         if (cam != null) {
             try {
                 Log.d("UVC clearSurface detach surface & stopPreview")
-                cam.stopPreview()
+//                cam.stopPreview()
+//                cam.
+
+                cam.setPreviewDisplay(null as Surface?)
+                cam.setPreviewDisplay(null as SurfaceHolder?)
             } catch (t: Throwable) {
                 Log.e("UVC clearSurface", "error while stopping preview: $t")
             }
@@ -202,6 +207,8 @@ class UVCCameraHandler(
 
         camera.setFrameCallback(object : IFrameCallback {
             override fun onFrame(frame: ByteBuffer?) {
+
+//                Log.d("onFrame")
             }
         }, UVCCamera.PIXEL_FORMAT_YUV420SP)
 
@@ -231,8 +238,3 @@ class UVCCameraHandler(
     }
 }
 
-private fun UsbDevice.isCameraDevice(): Boolean {
-    return this.deviceClass == UsbConstants.USB_CLASS_VIDEO ||
-            (this.interfaceCount > 0 &&
-                    this.getInterface(0).interfaceClass == UsbConstants.USB_CLASS_VIDEO)
-}
