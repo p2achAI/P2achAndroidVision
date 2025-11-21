@@ -153,12 +153,12 @@ class CameraService : LifecycleService() {
     }
 
     private fun onUsbCameraAttached(device: UsbDevice) {
-        Log.d("CameraService onUsbCameraAttached $device")
+        Log.d("CameraService onUsbCameraAttached ${device.deviceName}")
         startUsbCamera()
     }
 
     private fun onUsbCameraDetached(device: UsbDevice) {
-        Log.d("CameraService onUsbCameraDetached $device")
+        Log.d("CameraService onUsbCameraDetached ${device.deviceName}")
         stopCamera()
     }
 
@@ -199,10 +199,6 @@ class CameraService : LifecycleService() {
     }
 
     private fun stopCameraInternal() {
-        handler?.stop()
-        if (handler is UVCCameraHandler) {
-            (handler as UVCCameraHandler).release()
-        }
-        handler = null
+
     }
 }

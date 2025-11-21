@@ -26,16 +26,13 @@ class UVCCameraHandler(
     private var uvcCamera: UVCCamera? = null
     private var previewHolder: SurfaceHolder? = null
 
-    private var isCameraOpened = false
-    private var isUsbRegistered = false
-
     private val mainHandler = Handler(Looper.getMainLooper())
     private val permissionAction = "ai.p2ach.USB_PERMISSION"
 
     private val usbListener = object : USBMonitor.OnDeviceConnectListener {
 
         override fun onAttach(device: UsbDevice?) {
-            Log.d("UVC onAttach device=$device")
+            Log.d("UVC onAttach device=${device?.deviceName}")
             val d = device ?: return
             if (!d.isCameraDevice()) {
                 Log.d("UVC onAttach non-camera device, ignore")
@@ -45,8 +42,8 @@ class UVCCameraHandler(
         }
 
         override fun onDetach(device: UsbDevice?) {
-            Log.d("UVC onDetach device=$device")
-            closeCamera()
+            Log.d("UVC onDetach device=${device?.deviceName}")
+
         }
 
         override fun onConnect(
@@ -54,7 +51,7 @@ class UVCCameraHandler(
             ctrlBlock: USBMonitor.UsbControlBlock?,
             createNew: Boolean
         ) {
-            Log.d("UVC onConnect device=$device ctrlBlock=$ctrlBlock createNew=$createNew")
+            Log.d("UVC onConnect device=${device?.deviceName} ctrlBlock=$ctrlBlock createNew=$createNew")
             if (device == null || ctrlBlock == null) return
             if (!device.isCameraDevice()) {
                 Log.d("UVC onConnect non-camera device, ignore")
@@ -64,17 +61,18 @@ class UVCCameraHandler(
         }
 
         override fun onDisconnect(device: UsbDevice?, ctrlBlock: USBMonitor.UsbControlBlock?) {
-            Log.d("UVC onDisconnect device=$device")
-            closeCamera()
+            Log.d("UVC onDisconnect device=${device?.deviceName}")
+
         }
 
         override fun onCancel(device: UsbDevice?) {
-            Log.d("UVC onCancel device=$device")
+            Log.d("UVC onCancel device=${device?.deviceName}")
         }
     }
 
     init {
         usbMonitor = USBMonitor(context, usbListener)
+        usbMonitor?.register()
     }
 
     override fun setSurface(holder: SurfaceHolder?) {
@@ -98,13 +96,7 @@ class UVCCameraHandler(
     }
 
     override fun start() {
-        Log.d("UVC start() isCameraOpened=$isCameraOpened isUsbRegistered=$isUsbRegistered")
-        if (isCameraOpened) return
 
-        if (!isUsbRegistered) {
-            usbMonitor?.register()
-            isUsbRegistered = true
-        }
 
         val devices = usbMonitor?.deviceList.orEmpty()
         Log.d("UVC deviceList size=${devices.size} list=$devices")
@@ -121,7 +113,7 @@ class UVCCameraHandler(
 
     override fun stop() {
         Log.d("UVC stop()")
-        closeCamera()
+
     }
 
     private fun requestUsbPermissionForDevice(
@@ -136,7 +128,7 @@ class UVCCameraHandler(
             return
         }
 
-        Log.d("UVC requestUsbPermissionForDevice where=$where device=$device")
+        Log.d("UVC requestUsbPermissionForDevice where=$where device=${device.deviceName}")
 
         val intent = Intent(permissionAction)
         val permissionIntent = PendingIntent.getBroadcast(
@@ -161,7 +153,7 @@ class UVCCameraHandler(
                 if (granted) {
                     usbMonitor?.requestPermission(device)
                 } else {
-                    Log.e("UVC", "USB permission denied for device=$device")
+                    Log.e("UVC", "USB permission denied for device=${device.deviceName}")
                 }
             }
         }
@@ -177,10 +169,7 @@ class UVCCameraHandler(
     }
 
     private fun openCamera(ctrlBlock: USBMonitor.UsbControlBlock) {
-        if (isCameraOpened) {
-            Log.d("UVC openCamera already opened")
-            return
-        }
+
 
         Log.d("UVC openCamera")
 
@@ -225,42 +214,7 @@ class UVCCameraHandler(
         }
 
         uvcCamera = camera
-        isCameraOpened = true
-    }
 
-    private fun closeCamera() {
-        if (!isCameraOpened) {
-            Log.d("UVC closeCamera: not opened")
-            return
-        }
-
-        Log.d("UVC closeCamera")
-
-        try {
-            uvcCamera?.stopPreview()
-        } catch (t: Throwable) {
-            Log.e("UVC closeCamera stopPreview error=$t")
-        }
-
-        try {
-            uvcCamera?.destroy()
-        } catch (t: Throwable) {
-            Log.e("UVC closeCamera destroy error=$t")
-        }
-
-        uvcCamera = null
-        isCameraOpened = false
-    }
-
-    fun release() {
-        Log.d("UVC release()")
-        stop()
-        if (isUsbRegistered) {
-            usbMonitor?.unregister()
-            isUsbRegistered = false
-        }
-        usbMonitor?.destroy()
-        usbMonitor = null
     }
 }
 
