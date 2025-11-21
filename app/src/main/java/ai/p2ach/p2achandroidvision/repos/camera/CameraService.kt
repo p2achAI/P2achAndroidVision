@@ -3,21 +3,28 @@ package ai.p2ach.p2achandroidvision.repos.camera
 import ai.p2ach.p2achandroidlibrary.utils.Log
 import ai.p2ach.p2achandroidvision.Const
 import ai.p2ach.p2achandroidvision.R
-
 import ai.p2ach.p2achandroidvision.repos.camera.handlers.CameraHandler
 import ai.p2ach.p2achandroidvision.repos.camera.handlers.UVCCameraHandler
 import ai.p2ach.p2achandroidvision.repos.mdm.MDMRepo
+import ai.p2ach.p2achandroidvision.utils.DeviceUtils.isCameraDevice
 import ai.p2ach.p2achandroidvision.views.activities.ActivityMain
 import ai.p2ach.p2achandroidvision.views.fragments.P2achCameraManager
 import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
+import android.content.BroadcastReceiver
+import android.content.Context
 import android.content.Intent
+import android.content.IntentFilter
+import android.hardware.usb.UsbDevice
+import android.hardware.usb.UsbManager
 import android.os.Binder
 import android.os.IBinder
 import android.view.SurfaceHolder
 import androidx.core.app.NotificationCompat
+import androidx.core.content.ContextCompat
+import androidx.core.content.getSystemService
 import androidx.lifecycle.LifecycleService
 import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -31,6 +38,8 @@ class CameraService : LifecycleService() {
 
     private var handler: CameraHandler? = null
     private var currentSurface: SurfaceHolder? = null
+
+    private var usbReceiver: BroadcastReceiver? = null
 
     inner class LocalBinder : Binder() {
         fun getService(): CameraService = this@CameraService
@@ -48,6 +57,14 @@ class CameraService : LifecycleService() {
         Log.d("CameraService onCreate()")
         startForegroundWithNotification()
         collectMDM()
+        registerUsbReceiver()
+    }
+
+    override fun onDestroy() {
+        Log.d("CameraService onDestroy()")
+        unregisterUsbReceiver()
+        stopCameraInternal()
+        super.onDestroy()
     }
 
     private fun collectMDM() {
@@ -95,6 +112,56 @@ class CameraService : LifecycleService() {
         manager.createNotificationChannel(channel)
     }
 
+    private fun registerUsbReceiver() {
+        if (usbReceiver != null) return
+
+        val filter = IntentFilter().apply {
+            addAction(UsbManager.ACTION_USB_DEVICE_ATTACHED)
+            addAction(UsbManager.ACTION_USB_DEVICE_DETACHED)
+        }
+
+        usbReceiver = object : BroadcastReceiver() {
+            override fun onReceive(context: Context?, intent: Intent?) {
+                val device =
+                    intent?.getParcelableExtra<UsbDevice>(UsbManager.EXTRA_DEVICE) ?: return
+
+                if (!device.isCameraDevice()) return
+
+                when (intent.action) {
+                    UsbManager.ACTION_USB_DEVICE_ATTACHED -> onUsbCameraAttached(device)
+                    UsbManager.ACTION_USB_DEVICE_DETACHED -> onUsbCameraDetached(device)
+                }
+            }
+        }
+
+        ContextCompat.registerReceiver(
+            this,
+            usbReceiver,
+            filter,
+            ContextCompat.RECEIVER_NOT_EXPORTED
+        )
+    }
+
+    private fun unregisterUsbReceiver() {
+        usbReceiver?.let {
+            try {
+                unregisterReceiver(it)
+            } catch (_: Exception) {
+            }
+        }
+        usbReceiver = null
+    }
+
+    private fun onUsbCameraAttached(device: UsbDevice) {
+        Log.d("CameraService onUsbCameraAttached $device")
+        startUsbCamera()
+    }
+
+    private fun onUsbCameraDetached(device: UsbDevice) {
+        Log.d("CameraService onUsbCameraDetached $device")
+        stopCamera()
+    }
+
     fun attachSurface(holder: SurfaceHolder) {
         Log.d("CameraService attachSurface")
         currentSurface = holder
@@ -137,11 +204,5 @@ class CameraService : LifecycleService() {
             (handler as UVCCameraHandler).release()
         }
         handler = null
-    }
-
-    override fun onDestroy() {
-        Log.d("CameraService onDestroy()")
-        stopCameraInternal()
-        super.onDestroy()
     }
 }

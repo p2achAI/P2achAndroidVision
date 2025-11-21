@@ -36,10 +36,10 @@ class FragmentSplash : BaseFragment<FragmentSplashBinding>() {
             .setPermissions(
                 Manifest.permission.CAMERA,
                 Manifest.permission.POST_NOTIFICATIONS,
-                Manifest.permission.READ_MEDIA_IMAGES,
-                Manifest.permission.READ_MEDIA_VIDEO,
+//                Manifest.permission.READ_MEDIA_IMAGES,
+//                Manifest.permission.READ_MEDIA_VIDEO,
                 Manifest.permission.FOREGROUND_SERVICE,
-                Manifest.permission.FOREGROUND_SERVICE_CAMERA,
+//                Manifest.permission.FOREGROUND_SERVICE_CAMERA,
                 )
             .check();
 

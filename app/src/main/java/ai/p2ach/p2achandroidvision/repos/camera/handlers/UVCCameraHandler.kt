@@ -1,15 +1,21 @@
 package ai.p2ach.p2achandroidvision.repos.camera.handlers
 
 import ai.p2ach.p2achandroidlibrary.utils.Log
+import android.app.PendingIntent
+import android.content.BroadcastReceiver
 import android.content.Context
+import android.content.Intent
+import android.content.IntentFilter
+import android.hardware.usb.UsbConstants
 import android.hardware.usb.UsbDevice
-import android.view.SurfaceHolder
-
-import com.serenegiant.usb.UVCCamera
-import com.serenegiant.usb.USBMonitor
-import com.serenegiant.usb.IFrameCallback
+import android.hardware.usb.UsbManager
 import android.os.Handler
 import android.os.Looper
+import android.view.SurfaceHolder
+import androidx.core.content.ContextCompat
+import com.serenegiant.usb.IFrameCallback
+import com.serenegiant.usb.UVCCamera
+import com.serenegiant.usb.USBMonitor
 import java.nio.ByteBuffer
 
 class UVCCameraHandler(
@@ -19,16 +25,23 @@ class UVCCameraHandler(
     private var usbMonitor: USBMonitor? = null
     private var uvcCamera: UVCCamera? = null
     private var previewHolder: SurfaceHolder? = null
+
     private var isCameraOpened = false
+    private var isUsbRegistered = false
+
     private val mainHandler = Handler(Looper.getMainLooper())
+    private val permissionAction = "ai.p2ach.USB_PERMISSION"
 
     private val usbListener = object : USBMonitor.OnDeviceConnectListener {
 
         override fun onAttach(device: UsbDevice?) {
             Log.d("UVC onAttach device=$device")
-            device?.let {
-                usbMonitor?.requestPermission(it)
+            val d = device ?: return
+            if (!d.isCameraDevice()) {
+                Log.d("UVC onAttach non-camera device, ignore")
+                return
             }
+            requestUsbPermissionForDevice(d, "onAttach")
         }
 
         override fun onDetach(device: UsbDevice?) {
@@ -43,6 +56,10 @@ class UVCCameraHandler(
         ) {
             Log.d("UVC onConnect device=$device ctrlBlock=$ctrlBlock createNew=$createNew")
             if (device == null || ctrlBlock == null) return
+            if (!device.isCameraDevice()) {
+                Log.d("UVC onConnect non-camera device, ignore")
+                return
+            }
             openCamera(ctrlBlock)
         }
 
@@ -58,7 +75,6 @@ class UVCCameraHandler(
 
     init {
         usbMonitor = USBMonitor(context, usbListener)
-        usbMonitor?.register()
     }
 
     override fun setSurface(holder: SurfaceHolder?) {
@@ -70,7 +86,6 @@ class UVCCameraHandler(
 
         Log.d("UVC setSurface surface.isValid=${surface.isValid}")
         cam.setPreviewDisplay(surface)
-
         cam.startPreview()
         Log.d("UVC startPreview from setSurface")
     }
@@ -83,24 +98,82 @@ class UVCCameraHandler(
     }
 
     override fun start() {
-        Log.d("UVC start() isCameraOpened=$isCameraOpened")
+        Log.d("UVC start() isCameraOpened=$isCameraOpened isUsbRegistered=$isUsbRegistered")
         if (isCameraOpened) return
 
-        val deviceList = usbMonitor?.deviceList.orEmpty()
-        Log.d("UVC deviceList size=${deviceList.size} list=$deviceList")
-
-        val device = deviceList.firstOrNull()
-        if (device != null) {
-            Log.d("UVC requestPermission device=$device")
-            usbMonitor?.requestPermission(device)
-        } else {
-            Log.e("UVC start", "No USB device connected")
+        if (!isUsbRegistered) {
+            usbMonitor?.register()
+            isUsbRegistered = true
         }
+
+        val devices = usbMonitor?.deviceList.orEmpty()
+        Log.d("UVC deviceList size=${devices.size} list=$devices")
+
+        val cameraDevice = devices.firstOrNull { it.isCameraDevice() }
+        if (cameraDevice == null) {
+            Log.e("UVC start", "No USB camera device connected")
+            return
+        }
+
+        Log.d("UVC start request permission for camera=$cameraDevice")
+        requestUsbPermissionForDevice(cameraDevice, "start")
     }
 
     override fun stop() {
         Log.d("UVC stop()")
         closeCamera()
+    }
+
+    private fun requestUsbPermissionForDevice(
+        device: UsbDevice,
+        where: String
+    ) {
+        val usbManager = context.getSystemService(Context.USB_SERVICE) as UsbManager
+
+        if (usbManager.hasPermission(device)) {
+            Log.d("UVC already has permission where=$where, call usbMonitor.requestPermission")
+            usbMonitor?.requestPermission(device)
+            return
+        }
+
+        Log.d("UVC requestUsbPermissionForDevice where=$where device=$device")
+
+        val intent = Intent(permissionAction)
+        val permissionIntent = PendingIntent.getBroadcast(
+            context,
+            0,
+            intent,
+            PendingIntent.FLAG_IMMUTABLE
+        )
+
+        val filter = IntentFilter(permissionAction)
+        val receiver = object : BroadcastReceiver() {
+            override fun onReceive(c: Context?, received: Intent?) {
+                val mgr = context.getSystemService(Context.USB_SERVICE) as UsbManager
+                val granted = mgr.hasPermission(device)
+                Log.d("UVC permission result where=$where granted=$granted")
+
+                try {
+                    context.unregisterReceiver(this)
+                } catch (_: Exception) {
+                }
+
+                if (granted) {
+                    usbMonitor?.requestPermission(device)
+                } else {
+                    Log.e("UVC", "USB permission denied for device=$device")
+                }
+            }
+        }
+
+        ContextCompat.registerReceiver(
+            context,
+            receiver,
+            filter,
+            ContextCompat.RECEIVER_EXPORTED
+        )
+
+        usbManager.requestPermission(device, permissionIntent)
     }
 
     private fun openCamera(ctrlBlock: USBMonitor.UsbControlBlock) {
@@ -127,7 +200,6 @@ class UVCCameraHandler(
 
         camera.setFrameCallback(object : IFrameCallback {
             override fun onFrame(frame: ByteBuffer?) {
-//                Log.d("UVC onFrame size=${frame?.remaining()}")
             }
         }, UVCCamera.PIXEL_FORMAT_YUV420SP)
 
@@ -183,8 +255,17 @@ class UVCCameraHandler(
     fun release() {
         Log.d("UVC release()")
         stop()
-        usbMonitor?.unregister()
+        if (isUsbRegistered) {
+            usbMonitor?.unregister()
+            isUsbRegistered = false
+        }
         usbMonitor?.destroy()
         usbMonitor = null
     }
+}
+
+private fun UsbDevice.isCameraDevice(): Boolean {
+    return this.deviceClass == UsbConstants.USB_CLASS_VIDEO ||
+            (this.interfaceCount > 0 &&
+                    this.getInterface(0).interfaceClass == UsbConstants.USB_CLASS_VIDEO)
 }

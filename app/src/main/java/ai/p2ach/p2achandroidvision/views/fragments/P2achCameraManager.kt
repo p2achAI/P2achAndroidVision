@@ -1,8 +1,10 @@
 package ai.p2ach.p2achandroidvision.views.fragments
 
 
-import ai.p2ach.p2achandroidlibrary.base.fragments.isCameraDevice
+
 import ai.p2ach.p2achandroidvision.repos.mdm.MDMRepo
+import ai.p2ach.p2achandroidvision.utils.DeviceUtils.isCameraDevice
+
 import android.hardware.camera2.CameraCharacteristics.LENS_FACING
 import android.hardware.camera2.CameraManager
 import android.hardware.camera2.CameraMetadata.LENS_FACING_EXTERNAL

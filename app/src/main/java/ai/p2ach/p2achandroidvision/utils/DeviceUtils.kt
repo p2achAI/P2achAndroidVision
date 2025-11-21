@@ -122,7 +122,22 @@ object DeviceUtils {
     fun getOrCreateDeviceUuid(): String = UUID.randomUUID().toString()
 
 
+//     fun UsbDevice.isCameraDevice(): Boolean {
+//        // 클래스 코드 0x0e는 비디오 장치 (USB Video Class)
+//        return this.deviceClass == UsbConstants.USB_CLASS_VIDEO ||
+//                this.interfaceCount > 0 && this.getInterface(0).interfaceClass == UsbConstants.USB_CLASS_VIDEO
+//    }
 
+
+
+    fun UsbDevice.isCameraDevice(): Boolean {
+        if (deviceClass == UsbConstants.USB_CLASS_VIDEO) return true
+        for (i in 0 until interfaceCount) {
+            val intf = getInterface(i)
+            if (intf.interfaceClass == UsbConstants.USB_CLASS_VIDEO) return true
+        }
+        return false
+    }
 }
 
 
