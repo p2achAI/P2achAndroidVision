@@ -52,12 +52,14 @@ class FragmentCamera : BaseFragment<FragmentCameraBinding>() {
                     Log.d("UVC surfaceDestroyed")
                     cameraViewModel.detachPreview(holder)
                 }
+
+
             })
         }
     }
 
     override fun onPause() {
         super.onPause()
-        cameraViewModel.stopPreview()
+//        cameraViewModel.stopPreview()
     }
 }

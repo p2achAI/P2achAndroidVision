@@ -11,6 +11,7 @@ import android.hardware.usb.UsbDevice
 import android.hardware.usb.UsbManager
 import android.os.Handler
 import android.os.Looper
+import android.view.Surface
 import android.view.SurfaceHolder
 import androidx.core.content.ContextCompat
 import com.serenegiant.usb.IFrameCallback
@@ -82,6 +83,8 @@ class UVCCameraHandler(
         val cam = uvcCamera ?: return
         val surface = holder?.surface ?: return
 
+
+
         Log.d("UVC setSurface surface.isValid=${surface.isValid}")
         cam.setPreviewDisplay(surface)
         cam.startPreview()
@@ -90,6 +93,16 @@ class UVCCameraHandler(
 
     override fun clearSurface(holder: SurfaceHolder?) {
         Log.d("UVC clearSurface holder=$holder")
+        val cam = uvcCamera
+        if (cam != null) {
+            try {
+                Log.d("UVC clearSurface detach surface & stopPreview")
+                cam.stopPreview()
+            } catch (t: Throwable) {
+                Log.e("UVC clearSurface", "error while stopping preview: $t")
+            }
+        }
+
         if (previewHolder == holder) {
             previewHolder = null
         }
