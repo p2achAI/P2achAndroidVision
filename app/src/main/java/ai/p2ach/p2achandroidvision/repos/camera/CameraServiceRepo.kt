@@ -2,8 +2,12 @@ package ai.p2ach.p2achandroidvision.repos.camera
 
 import ai.p2ach.p2achandroidlibrary.base.repos.BaseServiceRepo
 import android.content.Context
+import android.graphics.Bitmap
 import android.os.IBinder
-import android.view.SurfaceHolder
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.emptyFlow
+import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.flatMapLatest
 
 class CameraServiceRepo(
     context: Context
@@ -11,8 +15,9 @@ class CameraServiceRepo(
     appContext = context.applicationContext,
     serviceClass = CameraService::class.java
 ) {
-    private val pendingSurfaces = mutableSetOf<SurfaceHolder>()
-    private val pendingActions = mutableListOf<(CameraService) -> Unit>()
+
+    val frames: Flow<Bitmap> =
+        serviceState.filterNotNull().flatMapLatest { it.frames }
 
     override fun getServiceFromBinder(binder: IBinder): CameraService {
         val b = binder as CameraService.LocalBinder
@@ -20,61 +25,8 @@ class CameraServiceRepo(
     }
 
     override fun onServiceBound(service: CameraService) {
-        pendingSurfaces.forEach { holder ->
-            service.attachSurface(holder)
-        }
-        pendingSurfaces.clear()
-
-        pendingActions.forEach { action ->
-            action(service)
-        }
-        pendingActions.clear()
     }
 
     override fun onServiceUnbound(old: CameraService?) {
-    }
-
-    fun attachPreview(holder: SurfaceHolder) {
-        val service = serviceState.value
-        if (service != null) {
-            service.attachSurface(holder)
-        } else {
-            pendingSurfaces += holder
-        }
-    }
-
-    fun detachPreview(holder: SurfaceHolder) {
-        val service = serviceState.value
-        if (service != null) {
-            service.detachSurface(holder)
-        }
-        pendingSurfaces -= holder
-    }
-
-    fun startUsbPreview() {
-        val service = serviceState.value
-        if (service != null) {
-            service.startUsbCamera()
-        } else {
-            pendingActions += { it.startUsbCamera() }
-        }
-    }
-
-    fun startRtspPreview(url: String) {
-        val service = serviceState.value
-        if (service != null) {
-            service.startRtspCamera(url)
-        } else {
-            pendingActions += { it.startRtspCamera(url) }
-        }
-    }
-
-    fun stopPreview() {
-        val service = serviceState.value
-        if (service != null) {
-            service.stopCamera()
-        } else {
-            pendingActions += { it.stopCamera() }
-        }
     }
 }

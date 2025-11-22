@@ -7,7 +7,6 @@ import ai.p2ach.p2achandroidvision.repos.mdm.MDMRepo
 import ai.p2ach.p2achandroidvision.repos.camera.CameraServiceRepo
 import ai.p2ach.p2achandroidvision.viewmodels.CameraViewModel
 import ai.p2ach.p2achandroidvision.viewmodels.MdmViewModel
-import ai.p2ach.p2achandroidvision.views.fragments.P2achCameraManager
 import android.app.Application
 import android.content.Context
 import android.hardware.camera2.CameraManager
@@ -68,7 +67,7 @@ class P2achAndroidVisionApplication : Application() {
 
     val managerModule = module{
 
-        factory { P2achCameraManager(get(),get(), get()) }
+
     }
 
 

@@ -195,6 +195,16 @@ interface Const {
         }
 
 
+    interface CAMERA_TYPE{
+        companion object{
+            const val UVC="UVC"
+            const val INTERNAL="INTERNAL"
+            const val RTSP="RTSP"
+
+        }
+    }
+
+
 
     interface BUNDLE{
         interface KEY{

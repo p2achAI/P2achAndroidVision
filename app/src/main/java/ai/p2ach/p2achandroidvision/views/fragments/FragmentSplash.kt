@@ -15,7 +15,7 @@ import org.koin.android.ext.android.inject
 
 class FragmentSplash : BaseFragment<FragmentSplashBinding>() {
 
-    private val p2achCameraManager  : P2achCameraManager by inject()
+
 
 
     override fun viewInit(savedInstanceState: Bundle?) {
@@ -50,9 +50,7 @@ class FragmentSplash : BaseFragment<FragmentSplashBinding>() {
 
     private fun next(){
 
-        navigate(R.id.nav_fragment_camera,Bundle().apply {
-            putSerializable(Const.BUNDLE.KEY.CAMERA_TYPE, p2achCameraManager.detectCameraType())
-        })
+        navigate(R.id.nav_fragment_camera)
 
     }
 

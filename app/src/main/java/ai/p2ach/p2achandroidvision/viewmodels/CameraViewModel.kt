@@ -7,25 +7,5 @@ import android.view.SurfaceHolder
 
 
 class CameraViewModel(private val cameraServiceRepo: CameraServiceRepo): BaseViewModel<CameraService, CameraServiceRepo>(cameraServiceRepo) {
-
-
-    fun attachPreview(holder: SurfaceHolder) {
-        repo.attachPreview(holder)
-    }
-
-    fun detachPreview(holder: SurfaceHolder) {
-        repo.detachPreview(holder)
-    }
-
-    fun startUsbPreview() {
-        repo.startUsbPreview()
-    }
-
-    fun startRtspPreview(url: String) {
-        repo.startRtspPreview(url)
-    }
-
-    fun stopPreview() {
-        repo.stopPreview()
-    }
+    val frames = cameraServiceRepo.frames
 }

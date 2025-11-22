@@ -7,25 +7,28 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
+import android.graphics.Bitmap
+import android.graphics.ImageFormat
+import android.graphics.Rect
+import android.graphics.YuvImage
+import android.hardware.usb.UsbConstants
 import android.hardware.usb.UsbDevice
 import android.hardware.usb.UsbManager
 import android.os.Handler
 import android.os.Looper
-import android.view.Surface
-import android.view.SurfaceHolder
 import androidx.core.content.ContextCompat
 import com.serenegiant.usb.IFrameCallback
 import com.serenegiant.usb.UVCCamera
 import com.serenegiant.usb.USBMonitor
+import java.io.ByteArrayOutputStream
 import java.nio.ByteBuffer
 
 class UVCCameraHandler(
     private val context: Context
-) : CameraHandler {
+) : BaseCameraHandler(CameraType.UVC) {
 
     private var usbMonitor: USBMonitor? = null
     private var uvcCamera: UVCCamera? = null
-    private var previewHolder: SurfaceHolder? = null
 
     private val mainHandler = Handler(Looper.getMainLooper())
     private val permissionAction = "ai.p2ach.USB_PERMISSION"
@@ -33,18 +36,15 @@ class UVCCameraHandler(
     private val usbListener = object : USBMonitor.OnDeviceConnectListener {
 
         override fun onAttach(device: UsbDevice?) {
-            Log.d("UVC onAttach device=${device?.deviceName}")
             val d = device ?: return
-            if (!d.isCameraDevice()) {
-                Log.d("UVC onAttach non-camera device, ignore")
-                return
-            }
+            if (!d.isCameraDevice()) return
             requestUsbPermissionForDevice(d, "onAttach")
         }
 
         override fun onDetach(device: UsbDevice?) {
-            Log.d("UVC onDetach device=${device?.deviceName}")
-
+            val d = device ?: return
+            if (!d.isCameraDevice()) return
+            stopStreaming()
         }
 
         override fun onConnect(
@@ -52,22 +52,18 @@ class UVCCameraHandler(
             ctrlBlock: USBMonitor.UsbControlBlock?,
             createNew: Boolean
         ) {
-            Log.d("UVC onConnect device=${device?.deviceName} ctrlBlock=$ctrlBlock createNew=$createNew")
             if (device == null || ctrlBlock == null) return
-            if (!device.isCameraDevice()) {
-                Log.d("UVC onConnect non-camera device, ignore")
-                return
-            }
+            if (!device.isCameraDevice()) return
             openCamera(ctrlBlock)
         }
 
         override fun onDisconnect(device: UsbDevice?, ctrlBlock: USBMonitor.UsbControlBlock?) {
-            Log.d("UVC onDisconnect device=${device?.deviceName}")
-
+            val d = device ?: return
+            if (!d.isCameraDevice()) return
+            stopStreaming()
         }
 
         override fun onCancel(device: UsbDevice?) {
-            Log.d("UVC onCancel device=${device?.deviceName}")
         }
     }
 
@@ -76,76 +72,33 @@ class UVCCameraHandler(
         usbMonitor?.register()
     }
 
-    override fun setSurface(holder: SurfaceHolder?) {
-        Log.d("UVC setSurface holder=$holder")
-        previewHolder = holder
-
-        val cam = uvcCamera ?: return
-        val surface = holder?.surface ?: return
-
-
-
-        Log.d("UVC setSurface surface.isValid=${surface.isValid}")
-        cam.setPreviewDisplay(surface)
-        cam.startPreview()
-        Log.d("UVC startPreview from setSurface")
-    }
-
-    override fun clearSurface(holder: SurfaceHolder?) {
-        Log.d("UVC clearSurface holder=$holder")
-        val cam = uvcCamera
-        if (cam != null) {
-            try {
-                Log.d("UVC clearSurface detach surface & stopPreview")
-//                cam.stopPreview()
-//                cam.
-
-                cam.setPreviewDisplay(null as Surface?)
-                cam.setPreviewDisplay(null as SurfaceHolder?)
-            } catch (t: Throwable) {
-                Log.e("UVC clearSurface", "error while stopping preview: $t")
-            }
-        }
-
-        if (previewHolder == holder) {
-            previewHolder = null
-        }
-    }
-
-    override fun start() {
-
+    override fun startStreaming() {
+        if (isStarted) return
+        isStarted = true
 
         val devices = usbMonitor?.deviceList.orEmpty()
-        Log.d("UVC deviceList size=${devices.size} list=$devices")
-
         val cameraDevice = devices.firstOrNull { it.isCameraDevice() }
         if (cameraDevice == null) {
-            Log.e("UVC start", "No USB camera device connected")
+            Log.e("UVC startStreaming", "No USB camera device")
             return
         }
-
-        Log.d("UVC start request permission for camera=$cameraDevice")
-        requestUsbPermissionForDevice(cameraDevice, "start")
+        requestUsbPermissionForDevice(cameraDevice, "startStreaming")
     }
 
-    override fun stop() {
-        Log.d("UVC stop()")
-
+    override fun stopStreaming() {
+        isStarted = false
+        try { uvcCamera?.stopPreview() } catch (_: Throwable) {}
+        try { uvcCamera?.destroy() } catch (_: Throwable) {}
+        uvcCamera = null
     }
 
-    private fun requestUsbPermissionForDevice(
-        device: UsbDevice,
-        where: String
-    ) {
+    private fun requestUsbPermissionForDevice(device: UsbDevice, where: String) {
         val usbManager = context.getSystemService(Context.USB_SERVICE) as UsbManager
 
         if (usbManager.hasPermission(device)) {
-            Log.d("UVC already has permission where=$where, call usbMonitor.requestPermission")
             usbMonitor?.requestPermission(device)
             return
         }
-
-        Log.d("UVC requestUsbPermissionForDevice where=$where device=${device.deviceName}")
 
         val intent = Intent(permissionAction)
         val permissionIntent = PendingIntent.getBroadcast(
@@ -160,17 +113,13 @@ class UVCCameraHandler(
             override fun onReceive(c: Context?, received: Intent?) {
                 val mgr = context.getSystemService(Context.USB_SERVICE) as UsbManager
                 val granted = mgr.hasPermission(device)
-                Log.d("UVC permission result where=$where granted=$granted")
 
-                try {
-                    context.unregisterReceiver(this)
-                } catch (_: Exception) {
-                }
+                try { context.unregisterReceiver(this) } catch (_: Exception) {}
 
                 if (granted) {
                     usbMonitor?.requestPermission(device)
                 } else {
-                    Log.e("UVC", "USB permission denied for device=${device.deviceName}")
+                    Log.e("UVC", "permission denied where=$where device=${device.deviceName}")
                 }
             }
         }
@@ -186,54 +135,40 @@ class UVCCameraHandler(
     }
 
     private fun openCamera(ctrlBlock: USBMonitor.UsbControlBlock) {
-
-
-        Log.d("UVC openCamera")
+        stopStreaming()
 
         val camera = UVCCamera()
         camera.open(ctrlBlock)
 
-        val supported = camera.supportedSize
-        Log.d("UVC supportedSizes=$supported")
+        val width = 640
+        val height = 480
 
-        val targetWidth = 640
-        val targetHeight = 480
-        camera.setPreviewSize(
-            targetWidth,
-            targetHeight,
-            UVCCamera.FRAME_FORMAT_YUYV
-        )
+        camera.setPreviewSize(width, height, UVCCamera.FRAME_FORMAT_YUYV)
 
         camera.setFrameCallback(object : IFrameCallback {
             override fun onFrame(frame: ByteBuffer?) {
-
-//                Log.d("onFrame")
+                if (!isStarted || isPaused) return
+                val bmp = frame?.let { yuyvToBitmap(it, width, height) }
+                onFrameProcessed(bmp)
             }
         }, UVCCamera.PIXEL_FORMAT_YUV420SP)
 
-        val surface = previewHolder?.surface
-        Log.d("UVC openCamera surface=$surface isValid=${surface?.isValid}")
-
-        if (surface != null && surface.isValid) {
-            camera.setPreviewDisplay(surface)
-            camera.startPreview()
-            Log.d("UVC startPreview from openCamera")
-        } else {
-            Log.d("UVC openCamera: surface not ready, wait and retry")
-
-            mainHandler.postDelayed({
-                val s = previewHolder?.surface
-                Log.d("UVC delayed surface=$s isValid=${s?.isValid}")
-                if (s != null && s.isValid) {
-                    camera.setPreviewDisplay(s)
-                    camera.startPreview()
-                    Log.d("UVC startPreview from delayed openCamera")
-                }
-            }, 200)
-        }
+        camera.startPreview()
 
         uvcCamera = camera
+        isStarted = true
+    }
 
+    private fun yuyvToBitmap(buffer: ByteBuffer, width: Int, height: Int): Bitmap? {
+        val size = width * height * 3 / 2
+        val nv21 = ByteArray(size)
+        buffer.get(nv21, 0, minOf(buffer.remaining(), size))
+
+        val yuv = YuvImage(nv21, ImageFormat.NV21, width, height, null)
+        val out = ByteArrayOutputStream()
+        yuv.compressToJpeg(Rect(0, 0, width, height), 80, out)
+        val jpeg = out.toByteArray()
+        return android.graphics.BitmapFactory.decodeByteArray(jpeg, 0, jpeg.size)
     }
 }
 

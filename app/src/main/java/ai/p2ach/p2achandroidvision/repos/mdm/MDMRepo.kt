@@ -112,6 +112,7 @@ data class Testing(
 @Entity(tableName = "table_mdm")
 data class MDMEntity(
     @PrimaryKey var deviceName: String = Const.MDM.SETTING.DEFAULT.DEFAULT_DEVICE_NAME,
+    var cameraType:String?=null,
     var hwType: String = DeviceUtils.getHwType().name,
     var deviceUuid: String? = null,
     var netWorkAndApi: NetWorkAndApi = NetWorkAndApi(),
