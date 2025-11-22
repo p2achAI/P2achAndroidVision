@@ -1,6 +1,5 @@
 package ai.p2ach.p2achandroidvision.repos.camera
 
-import ai.p2ach.p2achandroidlibrary.utils.Log
 import ai.p2ach.p2achandroidvision.Const
 import ai.p2ach.p2achandroidvision.R
 import ai.p2ach.p2achandroidvision.repos.camera.handlers.BaseCameraHandler
@@ -9,11 +8,14 @@ import ai.p2ach.p2achandroidvision.repos.camera.handlers.UVCCameraHandler
 import ai.p2ach.p2achandroidvision.repos.mdm.MDMEntity
 import ai.p2ach.p2achandroidvision.repos.mdm.MDMRepo
 import ai.p2ach.p2achandroidvision.views.activities.ActivityMain
+import ai.p2ach.p2achandroidlibrary.utils.Log
+import ai.p2ach.p2achandroidvision.repos.receivers.UVCCameraReceiver
 import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.Intent
+import android.hardware.usb.UsbDevice
 import android.os.Binder
 import android.os.IBinder
 import androidx.core.app.NotificationCompat
@@ -28,7 +30,10 @@ import org.koin.android.ext.android.inject
 
 class CameraService : LifecycleService() {
 
+    private val uvcCameraHandler: UVCCameraHandler by inject()
     val mdmRepo: MDMRepo by inject()
+
+    private lateinit var uvcCameraReceiver: UVCCameraReceiver
 
     inner class LocalBinder : Binder() {
         fun getService(): CameraService = this@CameraService
@@ -54,26 +59,37 @@ class CameraService : LifecycleService() {
     override fun onCreate() {
         super.onCreate()
         startForegroundWithNotification()
+
+        uvcCameraReceiver = UVCCameraReceiver(
+            context = this,
+            onAttached = ::onUsbCameraAttached,
+            onDetached = ::onUsbCameraDetached
+        )
+        uvcCameraReceiver.register()
+
         collectMDM()
     }
 
     override fun onDestroy() {
+        uvcCameraReceiver.unregister()
+
         handlerCollectJob?.cancel()
         handler?.stopStreaming()
         handler = null
+
         super.onDestroy()
     }
 
     private fun collectMDM() {
         lifecycleScope.launch {
             mdmRepo.stream().distinctUntilChanged().collect { mdmEntity ->
-
                 applyCameraType(mdmEntity.toCameraType())
             }
         }
     }
 
     private fun applyCameraType(type: CameraType) {
+        Log.d("CameraService applyCameraType currType=$currentType newType=$type")
         if (currentType == type) return
         currentType = type
 
@@ -82,7 +98,7 @@ class CameraService : LifecycleService() {
         handler = null
 
         handler = when (type) {
-            CameraType.UVC -> UVCCameraHandler(applicationContext)
+            CameraType.UVC -> uvcCameraHandler
             else -> null
         }
 
@@ -95,6 +111,22 @@ class CameraService : LifecycleService() {
         }
 
         h.startStreaming()
+    }
+
+    private fun onUsbCameraAttached(device: UsbDevice) {
+        Log.d("CameraService onUsbCameraAttached ${device.deviceName} currType=$currentType")
+
+        if (currentType == CameraType.UVC) {
+            uvcCameraHandler.startStreaming()
+        }
+    }
+
+    private fun onUsbCameraDetached(device: UsbDevice) {
+        Log.d("CameraService onUsbCameraDetached ${device.deviceName} currType=$currentType")
+
+        if (currentType == CameraType.UVC) {
+            uvcCameraHandler.stopStreaming()
+        }
     }
 
     private fun startForegroundWithNotification() {
@@ -134,15 +166,12 @@ class CameraService : LifecycleService() {
         manager.createNotificationChannel(channel)
     }
 
-
-    private fun MDMEntity.toCameraType() : CameraType{
-
-        return when(cameraType){
-            Const.CAMERA_TYPE.UVC-> CameraType.UVC
-            Const.CAMERA_TYPE.RTSP-> CameraType.RTSP
-            Const.CAMERA_TYPE.INTERNAL-> CameraType.INTERNAL
-            else-> CameraType.UVC
-
+    private fun MDMEntity.toCameraType(): CameraType {
+        return when (cameraType) {
+            Const.CAMERA_TYPE.UVC -> CameraType.UVC
+            Const.CAMERA_TYPE.RTSP -> CameraType.RTSP
+            Const.CAMERA_TYPE.INTERNAL -> CameraType.INTERNAL
+            else -> CameraType.UVC
         }
     }
 }

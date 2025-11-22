@@ -85,6 +85,7 @@ class UVCCameraHandler(
         val cameraDevice = devices.firstOrNull { it.isCameraDevice() }
         if (cameraDevice == null) {
             Log.e("UVC startStreaming", "No USB camera device")
+            isStarted=false
             return
         }
         requestUsbPermissionForDevice(cameraDevice, "startStreaming")
