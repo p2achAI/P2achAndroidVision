@@ -93,9 +93,9 @@ class UVCCameraHandler(
 
     override fun stopStreaming() {
         isStarted = false
-        try { uvcCamera?.stopPreview() } catch (_: Throwable) {}
-        try { uvcCamera?.destroy() } catch (_: Throwable) {}
-        uvcCamera = null
+//        try { uvcCamera?.stopPreview() } catch (_: Throwable) {}
+//        try { uvcCamera?.destroy() } catch (_: Throwable) {}
+//        uvcCamera = null
     }
 
     private fun requestUsbPermissionForDevice(device: UsbDevice, where: String) {

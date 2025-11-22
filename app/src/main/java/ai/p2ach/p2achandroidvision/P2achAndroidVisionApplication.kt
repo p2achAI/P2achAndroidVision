@@ -6,6 +6,9 @@ import ai.p2ach.p2achandroidvision.repos.mdm.MDMHandlers
 import ai.p2ach.p2achandroidvision.repos.mdm.MDMRepo
 import ai.p2ach.p2achandroidvision.repos.camera.CameraServiceRepo
 import ai.p2ach.p2achandroidvision.repos.camera.handlers.UVCCameraHandler
+import ai.p2ach.p2achandroidvision.repos.receivers.watchdog.WatchdogScheduler
+
+
 import ai.p2ach.p2achandroidvision.viewmodels.CameraViewModel
 import ai.p2ach.p2achandroidvision.viewmodels.MdmViewModel
 import android.app.Application
@@ -93,6 +96,7 @@ class P2achAndroidVisionApplication : Application() {
             modules(dbModule,repoModule,vmModule, mdmModule, systemModule, managerModule)
         }
         Logger.addLogAdapter(AndroidLogAdapter())
+        WatchdogScheduler.start(this)
     }
 
 }

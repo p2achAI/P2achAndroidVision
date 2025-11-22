@@ -38,6 +38,9 @@
     <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
 
 
+    <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM"/>
+
+
 
     <application
         android:name=".P2achAndroidVisionApplication"
@@ -95,6 +98,10 @@
                 android:resource="@xml/accessibility_service_config" />
         </service>
 
+        <receiver
+            android:name=".repos.receivers.watchdog.WatchdogReceiver"
+            android:exported="false"
+            android:process=":watchdog" />
 
 <!--        <receiver-->
 <!--            android:name=".receiver.ExternalControlReceiver"-->
