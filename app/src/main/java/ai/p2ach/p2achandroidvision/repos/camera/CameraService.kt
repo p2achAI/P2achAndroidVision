@@ -24,7 +24,7 @@ import android.os.IBinder
 import android.view.SurfaceHolder
 import androidx.core.app.NotificationCompat
 import androidx.core.content.ContextCompat
-import androidx.core.content.getSystemService
+
 import androidx.lifecycle.LifecycleService
 import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.flow.distinctUntilChanged

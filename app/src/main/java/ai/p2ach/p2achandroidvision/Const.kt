@@ -196,5 +196,11 @@ interface Const {
 
 
 
+    interface BUNDLE{
+        interface KEY{
+            companion object{ const val CAMERA_TYPE="CAMERA_TYPE"}
+        }
+
+    }
 
 }
