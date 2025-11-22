@@ -81,6 +81,9 @@ class P2achAndroidVisionApplication : Application() {
 
     override fun onCreate() {
         super.onCreate()
+
+        System.loadLibrary("opencv_java4")
+
         startKoin {
 //            /*Android System Logger*/
 //            androidLogger(org.koin.core.logger.Level.DEBUG)

@@ -11,15 +11,18 @@ import android.graphics.Bitmap
 import android.graphics.ImageFormat
 import android.graphics.Rect
 import android.graphics.YuvImage
-import android.hardware.usb.UsbConstants
 import android.hardware.usb.UsbDevice
 import android.hardware.usb.UsbManager
 import android.os.Handler
 import android.os.Looper
 import androidx.core.content.ContextCompat
 import com.serenegiant.usb.IFrameCallback
+import com.serenegiant.usb.Size
 import com.serenegiant.usb.UVCCamera
 import com.serenegiant.usb.USBMonitor
+import org.opencv.core.CvType
+import org.opencv.core.Mat
+import org.opencv.imgproc.Imgproc
 import java.io.ByteArrayOutputStream
 import java.nio.ByteBuffer
 
@@ -27,6 +30,8 @@ class UVCCameraHandler(
     private val context: Context
 ) : BaseCameraHandler(CameraType.UVC) {
 
+
+    private val format = UVCCamera.FRAME_FORMAT_MJPEG
     private var usbMonitor: USBMonitor? = null
     private var uvcCamera: UVCCamera? = null
 
@@ -54,7 +59,7 @@ class UVCCameraHandler(
         ) {
             if (device == null || ctrlBlock == null) return
             if (!device.isCameraDevice()) return
-            openCamera(ctrlBlock)
+            openCamera(ctrlBlock, device)
         }
 
         override fun onDisconnect(device: UsbDevice?, ctrlBlock: USBMonitor.UsbControlBlock?) {
@@ -134,22 +139,45 @@ class UVCCameraHandler(
         usbManager.requestPermission(device, permissionIntent)
     }
 
-    private fun openCamera(ctrlBlock: USBMonitor.UsbControlBlock) {
+    private fun openCamera(ctrlBlock: USBMonitor.UsbControlBlock, device : UsbDevice?) {
         stopStreaming()
 
         val camera = UVCCamera()
         camera.open(ctrlBlock)
 
-        val width = 640
-        val height = 480
+        val defaultSize = Size(0, 0, 0, 1920, 1080)
+        val supportedSizes = when (format) {
+            UVCCamera.FRAME_FORMAT_YUYV -> {
+                UVCCamera.getSupportedSize(4, uvcCamera?.supportedSize)
+            }
+            UVCCamera.FRAME_FORMAT_MJPEG -> {
+                UVCCamera.getSupportedSize(6, uvcCamera?.supportedSize)
+            }
+            else -> {
+                emptyList()
+            }
+        }
 
-        camera.setPreviewSize(width, height, UVCCamera.FRAME_FORMAT_YUYV)
+        val fHdPixels = 1920 * 1080
+        val maxSupported =
+            supportedSizes.maxByOrNull { it.width * it.height } ?: defaultSize
+        val maxSize = if (maxSupported.width * maxSupported.height > fHdPixels) {
+            Size(0, 0, 0, 1920, 1080)
+        } else {
+            maxSupported
+        }
+
+
+        camera.setPreviewSize(maxSize.width, maxSize.height, format)
 
         camera.setFrameCallback(object : IFrameCallback {
             override fun onFrame(frame: ByteBuffer?) {
+                if(frame == null) return
                 if (!isStarted || isPaused) return
-                val bmp = frame?.let { yuyvToBitmap(it, width, height) }
-                onFrameProcessed(bmp)
+
+                val mat = convertToMat(frame, maxSize.width, maxSize.height)
+                processImage(mat,device?.deviceId.toString())
+                mat.release()
             }
         }, UVCCamera.PIXEL_FORMAT_YUV420SP)
 
@@ -169,6 +197,40 @@ class UVCCameraHandler(
         yuv.compressToJpeg(Rect(0, 0, width, height), 80, out)
         val jpeg = out.toByteArray()
         return android.graphics.BitmapFactory.decodeByteArray(jpeg, 0, jpeg.size)
+    }
+
+
+    private fun convertToMat(buffer: ByteBuffer, width: Int, height: Int): Mat {
+        val expected = (width * height * 3) / 2 // NV12 (YUV420SP)
+        val remaining = buffer.remaining()
+        if (remaining < expected) {
+            // Defensive: avoid reading beyond provided data
+            throw IllegalArgumentException("Frame buffer too small: remaining=$remaining, expected=$expected for ${width}x${height}")
+        }
+
+        var yBytes: ByteArray? = null
+        val yuvMat = Mat(height + height / 2, width, CvType.CV_8UC1)
+        val bgrMat = Mat() // will be returned to caller; caller is responsible to release()
+        try {
+            // Borrow from pool and fill
+            yBytes = ByteArrayPool.getByteArray(expected)
+            buffer.get(yBytes, 0, expected)
+            yuvMat.put(0, 0, yBytes)
+
+            // Convert NV12 (YUV420SP) -> BGR
+            Imgproc.cvtColor(yuvMat, bgrMat, Imgproc.COLOR_YUV2BGR_NV12)
+            return bgrMat
+        } catch (e: Throwable) {
+            // If conversion failed, ensure we don't leak the Mat allocated for output
+            bgrMat.release()
+            throw e
+        } finally {
+            // Always release temporary resources
+            yuvMat.release()
+            if (yBytes != null) {
+                ByteArrayPool.release(yBytes)
+            }
+        }
     }
 }
 
