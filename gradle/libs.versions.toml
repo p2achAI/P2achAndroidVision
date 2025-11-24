@@ -22,7 +22,8 @@ koinWork = "3.5.3"
 #room
 room = "2.8.3"
 #rtsp
-rtsp ="v5.1.6-swdecoder"
+#rtsp ="v5.1.6-swdecoder"
+rtsp ="5.1.0" #com.github.am3n:rtsp-client-android  원본
 #common android
 lifecycle = "2.8.6"
 navigationFragmentKtx = "2.9.5"
@@ -46,7 +47,8 @@ orhanobut-logger = { module = "com.orhanobut:logger", version.ref = "logger"}
 
 
 #rtsp
-rtsp-client-android = { module = "com.github.p2achAI:rtsp-client-android", version.ref = "rtsp" }
+#rtsp-client-android = { module = "com.github.p2achAI:rtsp-client-android", version.ref = "rtsp" } 원래 p2achai rtsp
+rtsp-client-android = { module = "com.github.am3n:rtsp-client-android", version.ref = "rtsp" }
 #koin
 koin-core = { module = "io.insert-koin:koin-core", version.ref = "koin" }
 koin-android = { module = "io.insert-koin:koin-android", version.ref = "koin" }
