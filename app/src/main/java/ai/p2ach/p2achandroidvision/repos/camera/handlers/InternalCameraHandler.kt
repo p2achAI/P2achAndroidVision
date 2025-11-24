@@ -82,6 +82,7 @@ class InternalCameraHandler(
 
     override fun startStreaming() {
         if (isStarted) return
+        super.startStreaming()
         isStarted = true
         startBackgroundThread()
         openCameraInternal()
@@ -214,6 +215,8 @@ class InternalCameraHandler(
                 lastFrameTimestamp = System.currentTimeMillis()
                 processImageProxy(image)
             }, backgroundHandler)
+
+            setCameraState(CameraUiState.Connected(CameraType.INTERNAL))
 
             cameraManager.openCamera(cameraId!!, stateCallback, backgroundHandler)
         } catch (_: SecurityException) {

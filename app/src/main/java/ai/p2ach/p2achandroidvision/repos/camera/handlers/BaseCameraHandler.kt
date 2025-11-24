@@ -5,9 +5,21 @@ import android.graphics.Bitmap
 import androidx.core.graphics.createBitmap
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import org.opencv.android.Utils
 import org.opencv.core.Mat
+
+sealed class CameraUiState {
+    data object Idle : CameraUiState()
+    data class Switching(val type: CameraType) : CameraUiState()
+    data class Connecting(val type: CameraType) : CameraUiState()
+    data class Connected(val type: CameraType) : CameraUiState()
+    data class Stoped(val type: CameraType) : CameraUiState()
+    data class Error(val type: CameraType, val message: String? = null) : CameraUiState()
+}
 
 
 enum class CameraType {
@@ -20,6 +32,9 @@ enum class CameraType {
 interface CameraHandler {
     fun startStreaming()
     fun stopStreaming()
+
+    fun errorStreaming(msg:String)
+
     fun pause()
     fun resume()
 }
@@ -49,9 +64,17 @@ abstract class BaseCameraHandler(
     )
     val frames: SharedFlow<Bitmap> = _frames
 
+    private val _uiState = MutableStateFlow<CameraUiState>(CameraUiState.Idle)
+    val uiState: StateFlow<CameraUiState> = _uiState.asStateFlow()
+
     protected fun emitFrame(bitmap: Bitmap?) {
         if (!isStarted || isPaused) return
         if (bitmap != null) _frames.tryEmit(bitmap)
+    }
+
+
+    protected fun setCameraState(state: CameraUiState) {
+        _uiState.value = state
     }
 
 
@@ -61,6 +84,18 @@ abstract class BaseCameraHandler(
     }
 
 
+    override fun startStreaming() {
+//        setCameraState(CameraUiState.Connecting(type))
+    }
+
+    override fun stopStreaming() {
+        setCameraState(CameraUiState.Stoped(type))
+    }
+
+
+    override fun errorStreaming(msg: String) {
+        setCameraState(CameraUiState.Error(type,msg))
+    }
 
 
 

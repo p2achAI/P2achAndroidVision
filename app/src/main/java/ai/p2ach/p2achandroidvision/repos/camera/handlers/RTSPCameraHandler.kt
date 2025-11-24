@@ -59,6 +59,7 @@ class RTSPCameraHandler(
             originWidth = sdpInfo.videoTrack?.frameWidth ?: 0
             originHeight = sdpInfo.videoTrack?.frameHeight ?: 0
             Log.d("RTSP", "onConnected ${originWidth}x${originHeight}")
+            setCameraState(CameraUiState.Connected(CameraType.RTSP))
         }
 
         override fun onDisconnected() {
@@ -171,6 +172,7 @@ class RTSPCameraHandler(
                 }
 
                 bitmap != null -> {
+
                     emitFrame(bitmap)
                 }
             }
@@ -250,6 +252,7 @@ class RTSPCameraHandler(
     }
 
     override fun startStreaming() {
+        super.startStreaming()
         CoroutineScope(Dispatchers.IO).launch {
             startStopLock.withLock {
                 if (rtsp.isStarted()) return@withLock
@@ -265,6 +268,9 @@ class RTSPCameraHandler(
                 rtsp.setStatusListener(rtspStatusListener)
                 rtsp.setFrameListener(rtspFrameListener)
                 rtsp.setRequestYuv(true)
+
+
+
                 rtsp.start(playVideo = true, playAudio = false)
             }
         }

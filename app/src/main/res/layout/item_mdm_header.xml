@@ -12,7 +12,7 @@
         android:id="@+id/tvTitle"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:textSize="@dimen/bit_large_text"
+        android:textSize="@dimen/big_large_text"
         android:textStyle="bold"
         tools:text="@string/txt_device"
         android:padding="@dimen/middle_dimen"

@@ -1,6 +1,7 @@
 package ai.p2ach.p2achandroidvision.repos.camera
 
 import ai.p2ach.p2achandroidlibrary.base.repos.BaseServiceRepo
+import ai.p2ach.p2achandroidvision.repos.camera.handlers.CameraUiState
 import android.content.Context
 import android.graphics.Bitmap
 import android.os.IBinder
@@ -18,6 +19,7 @@ class CameraServiceRepo(
 
     val frames: Flow<Bitmap> =
         serviceState.filterNotNull().flatMapLatest { it.frames }
+    val uiStateFlow : Flow<CameraUiState> = serviceState.filterNotNull().flatMapLatest { it.uiState }
 
     override fun getServiceFromBinder(binder: IBinder): CameraService {
         val b = binder as CameraService.LocalBinder

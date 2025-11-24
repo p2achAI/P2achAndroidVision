@@ -9,6 +9,7 @@ import ai.p2ach.p2achandroidvision.repos.mdm.MDMEntity
 import ai.p2ach.p2achandroidvision.repos.mdm.MDMRepo
 import ai.p2ach.p2achandroidvision.views.activities.ActivityMain
 import ai.p2ach.p2achandroidlibrary.utils.Log
+import ai.p2ach.p2achandroidvision.repos.camera.handlers.CameraUiState
 import ai.p2ach.p2achandroidvision.repos.camera.handlers.InternalCameraHandler
 import ai.p2ach.p2achandroidvision.repos.camera.handlers.RTSPCameraHandler
 import ai.p2ach.p2achandroidvision.repos.receivers.UVCCameraReceiver
@@ -25,7 +26,10 @@ import androidx.lifecycle.LifecycleService
 import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.launch
 import org.koin.android.ext.android.inject
@@ -53,6 +57,7 @@ class CameraService : LifecycleService() {
 
     private var handler: BaseCameraHandler? = null
     private var handlerCollectJob: Job? = null
+    private var handlerStateJob: Job? = null
     private var currentType: CameraType? = null
 
     private val _frames = MutableSharedFlow<android.graphics.Bitmap>(
@@ -60,6 +65,10 @@ class CameraService : LifecycleService() {
         extraBufferCapacity = 1
     )
     val frames: SharedFlow<android.graphics.Bitmap> = _frames
+
+    private val _uiState = MutableStateFlow<CameraUiState>(CameraUiState.Idle)
+    val uiState: StateFlow<CameraUiState> = _uiState.asStateFlow()
+
 
     override fun onCreate() {
         super.onCreate()
@@ -102,6 +111,8 @@ class CameraService : LifecycleService() {
         if (currentType == type) return
         currentType = type
 
+        _uiState.value = CameraUiState.Switching(type)
+
         handlerCollectJob?.cancel()
         handler?.stopStreaming()
         handler = null
@@ -120,6 +131,13 @@ class CameraService : LifecycleService() {
                 _frames.emit(bmp)
             }
         }
+
+        handlerStateJob = lifecycleScope.launch {
+            h.uiState.collect { state ->
+                _uiState.value = state
+            }
+        }
+
 
         h.startStreaming()
     }
@@ -179,11 +197,12 @@ class CameraService : LifecycleService() {
 
     private fun MDMEntity.toCameraType(): CameraType {
 
+
         Log.d("cameraType ${this.cameraType}")
-        return when (cameraType) {
-            Const.CAMERA_TYPE.UVC -> CameraType.UVC
-            Const.CAMERA_TYPE.RTSP -> CameraType.RTSP
-            Const.CAMERA_TYPE.INTERNAL -> CameraType.INTERNAL
+        return when (cameraType.lowercase()) {
+            Const.CAMERA_TYPE.UVC.lowercase() -> CameraType.UVC
+            Const.CAMERA_TYPE.RTSP.lowercase() -> CameraType.RTSP
+            Const.CAMERA_TYPE.INTERNAL.lowercase() -> CameraType.INTERNAL
             else -> CameraType.UVC
         }
     }

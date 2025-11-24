@@ -13,4 +13,13 @@
     <string name="txt_dialog_permission_positive">설정으로 이동</string>
     <string name="txt_dialog_permission_negative">닫기</string>
 
+
+    <string name="txt_progress_connecting_unknown">로딩중..</string>
+    <string name="txt_progress_connecting_uvc">UVC 카메라 연결중..</string>
+    <string name="txt_progress_connecting_internal">내장 카메라 연결중..</string>
+    <string name="txt_progress_connecting_rtsp">RTSP 카메라 연결중..</string>
+
+
+
+
 </resources>

@@ -31,6 +31,7 @@ class UVCCameraHandler(
 ) : BaseCameraHandler(CameraType.UVC) {
 
 
+
     private val format = UVCCamera.FRAME_FORMAT_MJPEG
     private var usbMonitor: USBMonitor? = null
     private var uvcCamera: UVCCamera? = null
@@ -79,6 +80,7 @@ class UVCCameraHandler(
 
     override fun startStreaming() {
         if (isStarted) return
+        super.startStreaming()
         isStarted = true
 
         val devices = usbMonitor?.deviceList.orEmpty()
@@ -140,8 +142,11 @@ class UVCCameraHandler(
         usbManager.requestPermission(device, permissionIntent)
     }
 
+
     private fun openCamera(ctrlBlock: USBMonitor.UsbControlBlock, device : UsbDevice?) {
         stopStreaming()
+
+        setCameraState(CameraUiState.Connected(CameraType.UVC))
 
         val camera = UVCCamera()
         camera.open(ctrlBlock)

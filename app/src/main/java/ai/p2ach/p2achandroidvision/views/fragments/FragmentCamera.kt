@@ -2,7 +2,10 @@ package ai.p2ach.p2achandroidvision.views.fragments
 
 import ai.p2ach.p2achandroidlibrary.base.fragments.BaseFragment
 import ai.p2ach.p2achandroidlibrary.utils.Log
+import ai.p2ach.p2achandroidvision.R
 import ai.p2ach.p2achandroidvision.databinding.FragmentCameraBinding
+import ai.p2ach.p2achandroidvision.repos.camera.handlers.CameraType
+import ai.p2ach.p2achandroidvision.repos.camera.handlers.CameraUiState
 import ai.p2ach.p2achandroidvision.viewmodels.CameraViewModel
 import android.graphics.Bitmap
 import android.graphics.Canvas
@@ -10,6 +13,8 @@ import android.graphics.Color
 import android.graphics.Matrix
 import android.graphics.PixelFormat
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.view.Surface
 import android.view.SurfaceHolder
 import android.view.View
@@ -54,6 +59,42 @@ class FragmentCamera : BaseFragment<FragmentCameraBinding>() {
                     drawUsingCanvas(bmp)
                 }
             }
+
+            viewLifecycleOwner.lifecycleScope.launch {
+                cameraViewModel.uiState.collect {
+                    cameraUiState ->
+                    Log.d("cameraUiState $cameraUiState")
+                    when(cameraUiState){
+                        is CameraUiState.Connecting -> {
+
+                        }
+                        is CameraUiState.Switching ->{
+
+                            preview.visibility = View.GONE
+                            clProgress.visibility = View.VISIBLE
+                            when(cameraUiState.type){
+                                CameraType.UVC -> tvProgress.text = getString(R.string.txt_progress_connecting_uvc)
+                                CameraType.RTSP-> tvProgress.text = getString(R.string.txt_progress_connecting_rtsp)
+                                CameraType.INTERNAL-> tvProgress.text = getString(R.string.txt_progress_connecting_internal)
+                                else -> tvProgress.text = getString(R.string.txt_progress_connecting_unknown)
+                            }
+                        }
+                        is CameraUiState.Connected -> {
+
+                            Handler(Looper.getMainLooper()).postDelayed(
+                                {
+                                    preview.visibility = View.VISIBLE
+                                    clProgress.visibility = View.GONE
+                                },500)
+
+
+                        }
+                        else -> clProgress.visibility = View.GONE
+                    }
+
+                }
+            }
+
         }
 
 
