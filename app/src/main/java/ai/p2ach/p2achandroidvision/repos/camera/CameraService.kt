@@ -9,6 +9,7 @@ import ai.p2ach.p2achandroidvision.repos.mdm.MDMEntity
 import ai.p2ach.p2achandroidvision.repos.mdm.MDMRepo
 import ai.p2ach.p2achandroidvision.views.activities.ActivityMain
 import ai.p2ach.p2achandroidlibrary.utils.Log
+import ai.p2ach.p2achandroidvision.repos.camera.handlers.RTSPCameraHandler
 import ai.p2ach.p2achandroidvision.repos.receivers.UVCCameraReceiver
 import android.app.Notification
 import android.app.NotificationChannel
@@ -31,6 +32,8 @@ import org.koin.android.ext.android.inject
 class CameraService : LifecycleService() {
 
     private val uvcCameraHandler: UVCCameraHandler by inject()
+    private val rtspCameraHandler: RTSPCameraHandler by inject()
+
     val mdmRepo: MDMRepo by inject()
 
     private lateinit var uvcCameraReceiver: UVCCameraReceiver
@@ -70,6 +73,10 @@ class CameraService : LifecycleService() {
         collectMDM()
     }
 
+
+
+
+
     override fun onDestroy() {
         uvcCameraReceiver.unregister()
 
@@ -83,12 +90,12 @@ class CameraService : LifecycleService() {
     private fun collectMDM() {
         lifecycleScope.launch {
             mdmRepo.stream().distinctUntilChanged().collect { mdmEntity ->
-                applyCameraType(mdmEntity.toCameraType())
+                applyCameraType(mdmEntity.toCameraType(),mdmEntity)
             }
         }
     }
 
-    private fun applyCameraType(type: CameraType) {
+    private fun applyCameraType(type: CameraType,mdmEntity: MDMEntity?) {
         Log.d("CameraService applyCameraType currType=$currentType newType=$type")
         if (currentType == type) return
         currentType = type
@@ -98,7 +105,8 @@ class CameraService : LifecycleService() {
         handler = null
 
         handler = when (type) {
-            CameraType.UVC -> uvcCameraHandler
+            CameraType.UVC -> uvcCameraHandler.withMDM(mdmEntity)
+            CameraType.RTSP -> rtspCameraHandler.withMDM(mdmEntity)
             else -> null
         }
 
@@ -167,6 +175,8 @@ class CameraService : LifecycleService() {
     }
 
     private fun MDMEntity.toCameraType(): CameraType {
+
+        Log.d("cameraType ${this.cameraType}")
         return when (cameraType) {
             Const.CAMERA_TYPE.UVC -> CameraType.UVC
             Const.CAMERA_TYPE.RTSP -> CameraType.RTSP

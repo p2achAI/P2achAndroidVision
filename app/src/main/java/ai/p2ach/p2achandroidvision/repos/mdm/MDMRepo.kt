@@ -112,7 +112,7 @@ data class Testing(
 @Entity(tableName = "table_mdm")
 data class MDMEntity(
     @PrimaryKey var deviceName: String = Const.MDM.SETTING.DEFAULT.DEFAULT_DEVICE_NAME,
-    var cameraType:String?=null,
+    var cameraType:String= Const.MDM.SETTING.DEFAULT.DEFAULT_CAMERA_TYPE,
     var hwType: String = DeviceUtils.getHwType().name,
     var deviceUuid: String? = null,
     var netWorkAndApi: NetWorkAndApi = NetWorkAndApi(),
@@ -127,7 +127,7 @@ data class MDMEntity(
     var testing: Testing = Testing(),
     var rotation: Int = Const.MDM.SETTING.DEFAULT.DEFAULT_ROTATION,
 
-){
+    ){
 
 
 }

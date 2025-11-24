@@ -5,6 +5,7 @@ import ai.p2ach.p2achandroidvision.database.AppDataBase
 import ai.p2ach.p2achandroidvision.repos.mdm.MDMHandlers
 import ai.p2ach.p2achandroidvision.repos.mdm.MDMRepo
 import ai.p2ach.p2achandroidvision.repos.camera.CameraServiceRepo
+import ai.p2ach.p2achandroidvision.repos.camera.handlers.RTSPCameraHandler
 import ai.p2ach.p2achandroidvision.repos.camera.handlers.UVCCameraHandler
 import ai.p2ach.p2achandroidvision.repos.receivers.watchdog.WatchdogScheduler
 
@@ -57,6 +58,7 @@ class P2achAndroidVisionApplication : Application() {
     val mdmModule = module {
         single { MDMHandlers(get(),get()) }
         single { UVCCameraHandler(get()) }
+        single { RTSPCameraHandler(get()) }
     }
 
 

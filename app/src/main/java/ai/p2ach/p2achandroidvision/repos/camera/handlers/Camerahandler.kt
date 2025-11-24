@@ -1,5 +1,6 @@
 package ai.p2ach.p2achandroidvision.repos.camera.handlers
 
+import ai.p2ach.p2achandroidvision.repos.mdm.MDMEntity
 import android.graphics.Bitmap
 import androidx.core.graphics.createBitmap
 import kotlinx.coroutines.channels.BufferOverflow
@@ -34,9 +35,11 @@ abstract class BaseCameraHandler(
     private val inputImg = Mat()
     private val resultImg = Mat()
     private val drawImg = Mat()
-    protected var isPaused = false
     protected var isStarted = false
+    protected var isPaused = false
+
     private var bckImg : Mat? = null
+    var mdmEntity : MDMEntity? = null
     private var bitmapPool: MutableList<Bitmap> = mutableListOf()
 
     private val _frames = MutableSharedFlow<Bitmap>(
@@ -50,6 +53,16 @@ abstract class BaseCameraHandler(
         if (!isStarted || isPaused) return
         if (bitmap != null) _frames.tryEmit(bitmap)
     }
+
+
+    fun withMDM(mdmEntity: MDMEntity?): BaseCameraHandler{
+        this.mdmEntity = mdmEntity
+        return this
+    }
+
+
+
+
 
     override fun pause() { isPaused = true }
     override fun resume() { isPaused = false }

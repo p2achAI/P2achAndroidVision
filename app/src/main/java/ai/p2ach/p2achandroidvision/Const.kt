@@ -121,6 +121,8 @@ interface Const {
 
                             const val P5 = "p5"
                             const val P95 = "p95"
+                            const val CAMERA_TYPE = "cameraType"
+
                         }
                     }
                 }
@@ -184,6 +186,8 @@ interface Const {
                         const val DEFAULT_AUTO_ROTATION = false
 
                         const val DEFAULT_USE_AGE_GENDER_NPU_MODEL = false
+
+                        const val DEFAULT_CAMERA_TYPE="UVC"
 
 
 

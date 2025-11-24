@@ -261,6 +261,9 @@ fun getNeedUpdateMDMEntity(base: MDMEntity): MDMEntity {
         }
 
 
+        Log.d("caemraType ${MDMService.Preferences.get(Const.MDM.SETTING.REMOTE.KEY.CAMERA_TYPE,"")} ")
+
+        cameraType = MDMService.Preferences.get(Const.MDM.SETTING.REMOTE.KEY.CAMERA_TYPE,"").getOrDefaultMDM(cameraType)
 
 
         rotation = MDMService.Preferences.get(Const.MDM.SETTING.REMOTE.KEY.ROTATION, "")
