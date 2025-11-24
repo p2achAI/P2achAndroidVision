@@ -410,6 +410,22 @@ class RTSPCameraHandler(
         return bgr
     }
 
+
+    override fun applyAutoExposure(enabled: Boolean) {
+        TODO("Not yet implemented")
+    }
+
+    override fun applyManualExposure(exposure: Int) {
+        TODO("Not yet implemented")
+    }
+
+    override fun getAutoExposureMode(): Boolean {
+        TODO("Not yet implemented")
+    }
+
+    override fun getExposure(): Int {
+        TODO("Not yet implemented")
+    }
 }
 
 sealed class FrameData {
@@ -424,4 +440,5 @@ fun FrameData.safeClose() {
         } catch (_: Throwable) {
         }
     }
+
 }

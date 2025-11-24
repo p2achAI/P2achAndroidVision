@@ -125,5 +125,10 @@ abstract class BaseCameraHandler(
         onFrameProcessed(resultBitmap)
     }
 
+    abstract fun applyAutoExposure(enabled: Boolean)
+    abstract fun applyManualExposure(exposure: Int)
+    abstract fun getAutoExposureMode() : Boolean
+    abstract fun getExposure() : Int
+
 
 }

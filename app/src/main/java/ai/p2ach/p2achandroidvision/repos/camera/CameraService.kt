@@ -9,6 +9,7 @@ import ai.p2ach.p2achandroidvision.repos.mdm.MDMEntity
 import ai.p2ach.p2achandroidvision.repos.mdm.MDMRepo
 import ai.p2ach.p2achandroidvision.views.activities.ActivityMain
 import ai.p2ach.p2achandroidlibrary.utils.Log
+import ai.p2ach.p2achandroidvision.repos.camera.handlers.InternalCameraHandler
 import ai.p2ach.p2achandroidvision.repos.camera.handlers.RTSPCameraHandler
 import ai.p2ach.p2achandroidvision.repos.receivers.UVCCameraReceiver
 import android.app.Notification
@@ -33,6 +34,7 @@ class CameraService : LifecycleService() {
 
     private val uvcCameraHandler: UVCCameraHandler by inject()
     private val rtspCameraHandler: RTSPCameraHandler by inject()
+    private val internalCameraHandler: InternalCameraHandler by inject()
 
     val mdmRepo: MDMRepo by inject()
 
@@ -107,6 +109,7 @@ class CameraService : LifecycleService() {
         handler = when (type) {
             CameraType.UVC -> uvcCameraHandler.withMDM(mdmEntity)
             CameraType.RTSP -> rtspCameraHandler.withMDM(mdmEntity)
+            CameraType.INTERNAL -> internalCameraHandler.withMDM(mdmEntity)
             else -> null
         }
 
