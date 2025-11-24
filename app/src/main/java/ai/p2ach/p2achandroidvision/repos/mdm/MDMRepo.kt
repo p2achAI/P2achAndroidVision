@@ -8,6 +8,7 @@ import ai.p2ach.p2achandroidlibrary.utils.Log
 import ai.p2ach.p2achandroidvision.BuildConfig
 import ai.p2ach.p2achandroidvision.Const
 import ai.p2ach.p2achandroidvision.database.AppDataBase
+import ai.p2ach.p2achandroidvision.repos.camera.handlers.CameraType
 import ai.p2ach.p2achandroidvision.utils.DeviceUtils
 import ai.p2ach.p2achandroidvision.utils.getNeedUpdateMDMEntity
 
@@ -22,6 +23,7 @@ import androidx.room.withTransaction
 import com.hmdm.MDMService
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.serialization.Serializable
 import kotlinx.coroutines.flow.filterNotNull
@@ -209,7 +211,7 @@ class MDMRepo(private val context: Context, private val db: AppDataBase, private
 
     private val mdmHandler : MDMHandlers by inject()
     private var mdmService = MDMService.getInstance()
-
+    private var mdmConnected = false
 
 
     init {
@@ -217,21 +219,38 @@ class MDMRepo(private val context: Context, private val db: AppDataBase, private
         mdmService.connect(context, object : MDMService.ResultHandler {
 
             override fun onMDMConnected() {
-//                Log.d("onMDMConnected")
-
                 CoroutineScope(Dispatchers.IO).launch {
+                    mdmConnected = true
                     mdmHandler.init()
                     syncMDMInfo()
                 }
-
-
             }
 
             override fun onMDMDisconnected() {
-//                Log.d("onMDMDisconnected")
+                Log.d("onMDMDisconnected")
             }
         })
+
+        CoroutineScope(Dispatchers.IO).launch {
+            delay(5000)
+            if (!mdmConnected) {
+                Log.d("MDMService not available → fallback to local default")
+
+                upsertLocalDefault()
+            }
+        }
+
     }
+
+    private suspend fun upsertLocalDefault() {
+        val exists = mdmDao.existsAny()
+        if (!exists) {
+            val deviceName = DeviceUtils.getDeviceName(context, "")
+            val defaultEntity = MDMEntity(deviceName = deviceName, cameraType = CameraType.INTERNAL.name)
+            saveLocal(defaultEntity)
+        }
+    }
+
 
 
      suspend fun syncMDMInfo(){
@@ -247,6 +266,7 @@ class MDMRepo(private val context: Context, private val db: AppDataBase, private
                     val mdmDeviceId = query.getString("DEVICE_ID")?:""
                     val deviceName = DeviceUtils.getDeviceName(context,mdmDeviceId)
                     val baseMDMEntity = mdmDao.get()?: MDMEntity(deviceName=deviceName)
+                    Log.d("baseMDMEntity $baseMDMEntity")
                     saveLocal(getNeedUpdateMDMEntity(baseMDMEntity))
 
                     /*appMode 에 따라 화면 구성을 다르게 하거나, 기능적으로 조합을 해야하는 기능이 있다 */
