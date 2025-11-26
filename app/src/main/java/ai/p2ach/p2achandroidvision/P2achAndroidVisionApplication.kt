@@ -29,6 +29,8 @@ import org.koin.dsl.module
 class P2achAndroidVisionApplication : Application() {
 
 
+
+
     val dbModule = module {
         single {
             Room.databaseBuilder(androidContext(), AppDataBase::class.java, Const.DB.NAME)
@@ -90,6 +92,8 @@ class P2achAndroidVisionApplication : Application() {
 
     override fun onCreate() {
         super.onCreate()
+
+
 
         System.loadLibrary("opencv_java4")
 

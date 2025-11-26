@@ -6,6 +6,7 @@ import ai.p2ach.p2achandroidvision.R
 import ai.p2ach.p2achandroidvision.databinding.FragmentCameraBinding
 import ai.p2ach.p2achandroidvision.repos.camera.handlers.CameraType
 import ai.p2ach.p2achandroidvision.repos.camera.handlers.CameraUiState
+import ai.p2ach.p2achandroidvision.utils.getCameraStatusMessage
 import ai.p2ach.p2achandroidvision.viewmodels.CameraViewModel
 import android.graphics.Bitmap
 import android.graphics.Canvas
@@ -64,32 +65,18 @@ class FragmentCamera : BaseFragment<FragmentCameraBinding>() {
                 cameraViewModel.uiState.collect {
                     cameraUiState ->
                     Log.d("cameraUiState $cameraUiState")
-                    when(cameraUiState){
-                        is CameraUiState.Connecting -> {
 
-                        }
-                        is CameraUiState.Switching ->{
+                    val message = getCameraStatusMessage(cameraUiState)
+                    if(message.isEmpty()){
+                        Handler(Looper.getMainLooper()).postDelayed({
+                            clProgress.visibility = View.GONE
+                            preview.visibility = View.VISIBLE
+                        },1000)
 
-                            preview.visibility = View.GONE
-                            clProgress.visibility = View.VISIBLE
-                            when(cameraUiState.type){
-                                CameraType.UVC -> tvProgress.text = getString(R.string.txt_progress_connecting_uvc)
-                                CameraType.RTSP-> tvProgress.text = getString(R.string.txt_progress_connecting_rtsp)
-                                CameraType.INTERNAL-> tvProgress.text = getString(R.string.txt_progress_connecting_internal)
-                                else -> tvProgress.text = getString(R.string.txt_progress_connecting_unknown)
-                            }
-                        }
-                        is CameraUiState.Connected -> {
-
-                            Handler(Looper.getMainLooper()).postDelayed(
-                                {
-                                    preview.visibility = View.VISIBLE
-                                    clProgress.visibility = View.GONE
-                                },500)
-
-
-                        }
-                        else -> clProgress.visibility = View.GONE
+                    }else{
+                        clProgress.visibility= View.VISIBLE
+                        preview.visibility = View.GONE
+                        tvProgress.text = message
                     }
 
                 }

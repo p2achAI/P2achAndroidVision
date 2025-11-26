@@ -1,5 +1,13 @@
 package ai.p2ach.p2achandroidvision.utils
 
+import ai.p2ach.p2achandroidvision.P2achAndroidVisionApplication
+import ai.p2ach.p2achandroidvision.R
+import ai.p2ach.p2achandroidvision.repos.camera.handlers.CameraType
+import ai.p2ach.p2achandroidvision.repos.camera.handlers.CameraUiState
+import android.content.Context
+import androidx.annotation.StringRes
+import org.koin.java.KoinJavaComponent
+
 
 object MdmLabelMaps {
     val networkAndApi = mapOf(
@@ -91,4 +99,51 @@ object MdmLabelMaps {
         "videofilepaths" to "Video Paths",
         "videofileUris" to "Video URIs"
     )
+}
+
+
+
+fun getCameraStatusMessage(cameraUiState: CameraUiState) : String{
+
+    return when(cameraUiState){
+
+        is CameraUiState.Error ->
+            when(cameraUiState.type){
+            CameraType.UVC -> R.string.txt_error_connecting_uvc.getMessage()
+            CameraType.RTSP ->R.string.txt_error_connecting_rtsp.getMessage()
+            CameraType.INTERNAL ->R.string.txt_error_connecting_internal.getMessage()
+            CameraType.NONE -> R.string.txt_error_connecting_unknown.getMessage()
+        }
+        is CameraUiState.Idle -> R.string.txt_progress_connecting_unknown.getMessage()
+        is CameraUiState.Connected -> ""
+        is CameraUiState.Stoped -> ""
+        is CameraUiState.Connecting -> {
+            when(cameraUiState.type){
+                CameraType.UVC -> R.string.txt_error_connecting_uvc.getMessage()
+                CameraType.RTSP -> R.string.txt_error_connecting_rtsp.getMessage()
+                CameraType.INTERNAL -> R.string.txt_error_connecting_internal.getMessage()
+                CameraType.NONE -> R.string.txt_error_connecting_unknown.getMessage()
+
+            }
+        }
+        is CameraUiState.Switching -> {
+            when(cameraUiState.type){
+                CameraType.UVC -> R.string.txt_progress_switch_uvc.getMessage()
+                CameraType.RTSP -> R.string.txt_progress_connecting_rtsp.getMessage()
+                CameraType.INTERNAL -> R.string.txt_progress_switch_internal.getMessage()
+                CameraType.NONE -> R.string.txt_progress_switch_unknown.getMessage()
+            }
+        }
+    }
+}
+
+
+
+
+
+
+
+fun @receiver:StringRes Int.getMessage(): String {
+    val context = KoinJavaComponent.get<Context>(Context::class.java)
+    return context.getString(this)
 }

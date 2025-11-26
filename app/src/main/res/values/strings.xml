@@ -14,10 +14,27 @@
     <string name="txt_dialog_permission_negative">닫기</string>
 
 
+
+    <string name="txt_progress_switch_unknown">카메라 전환중..</string>
+    <string name="txt_progress_switch_uvc">UVC 카메라 전환중..</string>
+    <string name="txt_progress_switch_internal">내장 카메라 전환중..</string>
+    <string name="txt_progress_switch_rtsp">RTSP 카메라 전환중..</string>
+
+
+
     <string name="txt_progress_connecting_unknown">로딩중..</string>
     <string name="txt_progress_connecting_uvc">UVC 카메라 연결중..</string>
     <string name="txt_progress_connecting_internal">내장 카메라 연결중..</string>
     <string name="txt_progress_connecting_rtsp">RTSP 카메라 연결중..</string>
+
+
+
+    <string name="txt_error_connecting_unknown">알 수 없는 이유로 로드하지 못했습니다.</string>
+    <string name="txt_error_connecting_uvc">UVC 카메라 연결 상태를 확인해 주세요.</string>
+    <string name="txt_error_connecting_rtsp">RTSP Url을 확인해 주세요.</string>
+    <string name="txt_error_connecting_internal">내장 카메라 상태를 확인해 주세요.</string>
+
+
 
 
 

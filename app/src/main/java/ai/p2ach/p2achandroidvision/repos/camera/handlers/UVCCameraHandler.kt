@@ -86,7 +86,9 @@ class UVCCameraHandler(
         val devices = usbMonitor?.deviceList.orEmpty()
         val cameraDevice = devices.firstOrNull { it.isCameraDevice() }
         if (cameraDevice == null) {
-            Log.e("UVC startStreaming", "No USB camera device")
+
+            errorStreaming("No USB camera device")
+//            Log.e("UVC startStreaming", "No USB camera device")
             isStarted=false
             return
         }

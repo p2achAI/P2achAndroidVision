@@ -55,13 +55,6 @@ class MDMHandlers(private val context: Context, private val mdmRepo: MDMRepo) {
             context: Context?
         ) {
             super.register(messageTypes, context)
-
-            messageTypes?.forEach {
-                m->
-//                Log.d("Handler register success $m")
-            }
-
-
         }
     }
 
