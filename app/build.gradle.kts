@@ -27,6 +27,21 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
         buildConfigField("String", "MDM_API_KEY", "\"c4Bz60gRwz\"")
+
+        // 레거시와 동일한 ABI 필터
+        ndk {
+            abiFilters += listOf("armeabi-v7a", "arm64-v8a")
+        }
+
+        // 레거시 defaultConfig 의 cmake 인자
+        externalNativeBuild {
+            cmake {
+                // 네온 사용
+                arguments += listOf(
+                    "-DANDROID_ARM_NEON=TRUE"
+                )
+            }
+        }
     }
 
     productFlavors {
@@ -34,19 +49,19 @@ android {
             dimension = "environment"
             applicationIdSuffix = ".dev"
             versionNameSuffix = "dev"
-            buildConfigField("String", "CONFIG_SVR_URL", "\"https://admin.dev.p2ach.io/\"")
-            buildConfigField("String", "API_URL", "\"https://4j75oomboa.execute-api.ap-northeast-2.amazonaws.com/dev/\"")
-            buildConfigField("String", "API_KEY", "\"CKQGF74aKl5Y8ArgPUpwF6Wt8fZvk3fM6ouAvGiU\"")
-            buildConfigField("String", "PROD_API_URL", "\"https://k50o0i0a90.execute-api.ap-northeast-2.amazonaws.com/prod/\"")
-            buildConfigField("String", "PROD_API_KEY", "\"shtQsXianY2bELEiqxKIB7u9ZtfekTT287EC4jxJ\"")
+//            buildConfigField("String", "CONFIG_SVR_URL", "\"https://admin.dev.p2ach.io/\"")
+//            buildConfigField("String", "API_URL", "\"https://4j75oomboa.execute-api.ap-northeast-2.amazonaws.com/dev/\"")
+//            buildConfigField("String", "API_KEY", "\"CKQGF74aKl5Y8ArgPUpwF6Wt8fZvk3fM6ouAvGiU\"")
+//            buildConfigField("String", "PROD_API_URL", "\"https://k50o0i0a90.execute-api.ap-northeast-2.amazonaws.com/prod/\"")
+//            buildConfigField("String", "PROD_API_KEY", "\"shtQsXianY2bELEiqxKIB7u9ZtfekTT287EC4jxJ\"")
         }
         create("prod") {
             dimension = "environment"
-            buildConfigField("String", "CONFIG_SVR_URL", "\"https://prod.p2ach.io/\"")
-            buildConfigField("String", "API_URL", "\"https://k50o0i0a90.execute-api.ap-northeast-2.amazonaws.com/prod/\"")
-            buildConfigField("String", "API_KEY", "\"shtQsXianY2bELEiqxKIB7u9ZtfekTT287EC4jxJ\"")
-            buildConfigField("String", "PROD_API_URL", "\"https://k50o0i0a90.execute-api.ap-northeast-2.amazonaws.com/prod/\"")
-            buildConfigField("String", "PROD_API_KEY", "\"shtQsXianY2bELEiqxKIB7u9ZtfekTT287EC4jxJ\"")
+//            buildConfigField("String", "CONFIG_SVR_URL", "\"https://prod.p2ach.io/\"")
+//            buildConfigField("String", "API_URL", "\"https://k50o0i0a90.execute-api.ap-northeast-2.amazonaws.com/prod/\"")
+//            buildConfigField("String", "API_KEY", "\"shtQsXianY2bELEiqxKIB7u9ZtfekTT287EC4jxJ\"")
+//            buildConfigField("String", "PROD_API_URL", "\"https://k50o0i0a90.execute-api.ap-northeast-2.amazonaws.com/prod/\"")
+//            buildConfigField("String", "PROD_API_KEY", "\"shtQsXianY2bELEiqxKIB7u9ZtfekTT287EC4jxJ\"")
         }
     }
 
@@ -54,6 +69,15 @@ android {
 
         debug {
             isDebuggable = true
+
+            externalNativeBuild {
+                cmake {
+                    // 레거시: -DCMAKE_BUILD_TYPE=Debug
+                    arguments += listOf(
+                        "-DCMAKE_BUILD_TYPE=Debug"
+                    )
+                }
+            }
         }
 
         release {
@@ -62,21 +86,39 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+
+            externalNativeBuild {
+                cmake {
+                    // 레거시: -DCMAKE_BUILD_TYPE=Release
+                    arguments += listOf(
+                        "-DCMAKE_BUILD_TYPE=Release"
+                    )
+                }
+            }
         }
     }
 
-    flavorDimensions("environment")
+    flavorDimensions += "environment"
+
+
+    externalNativeBuild {
+        cmake {
+            // 레거시랑 동일 경로/버전
+            path = file("src/main/cpp/CMakeLists.txt")
+            version = "3.22.1"
+        }
+    }
 
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
     }
+
     kotlinOptions {
         jvmTarget = "11"
     }
 }
 
-// Room 스키마 경로(KSP 방식)
 ksp {
     arg("room.schemaLocation", "$projectDir/schemas")
     arg("room.incremental", "true")
