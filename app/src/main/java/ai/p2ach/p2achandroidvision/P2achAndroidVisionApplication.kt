@@ -1,6 +1,7 @@
 package ai.p2ach.p2achandroidvision
 
 
+import ai.p2ach.p2achandroidlibrary.utils.Log
 import ai.p2ach.p2achandroidvision.database.AppDataBase
 import ai.p2ach.p2achandroidvision.repos.mdm.MDMHandlers
 import ai.p2ach.p2achandroidvision.repos.mdm.MDMRepo
@@ -94,8 +95,13 @@ class P2achAndroidVisionApplication : Application() {
         super.onCreate()
 
 
+        try {
+            System.loadLibrary("opencv_java4")
+            System.loadLibrary("p2ach-vision")
+        }catch (e: Exception){
+            Log.d("onCreate ${e.message}")
+        }
 
-        System.loadLibrary("opencv_java4")
 
         startKoin {
 //            /*Android System Logger*/
