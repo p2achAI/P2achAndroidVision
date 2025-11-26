@@ -22,7 +22,7 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "P2achAndroidLibrary"
+rootProject.name = "P2achAndroidVision"
 include(":app")
 include(":commonLibrary")
 include(":libuvccamera")
