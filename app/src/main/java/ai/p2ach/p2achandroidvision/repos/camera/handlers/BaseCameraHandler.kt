@@ -4,12 +4,15 @@ import ai.p2ach.p2achandroidvision.repos.camera.CaptureRepo
 import ai.p2ach.p2achandroidvision.repos.mdm.MDMEntity
 import android.graphics.Bitmap
 import androidx.core.graphics.createBitmap
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.launch
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import org.opencv.android.Utils
@@ -110,7 +113,12 @@ abstract class BaseCameraHandler(
 
     override fun onFrameProcessed(bitmap: Bitmap?) {
         emitFrame(bitmap)
-        captureRepo.writeToLocal(bitmap)
+
+        CoroutineScope(Dispatchers.IO).launch {
+            captureRepo.writeToLocal(bitmap)
+        }
+
+
     }
 
 

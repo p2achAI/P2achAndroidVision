@@ -30,8 +30,7 @@ import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.launch
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
-
-
+import java.util.Date
 
 
 @Serializable
@@ -185,6 +184,15 @@ data class Exposure(
     var p5: Float = 10.0f,
     var p95: Float = 235.0f,
 )
+
+@Serializable
+data class Capture(
+    var startTime : Date, //하루에 일정시간에 반복
+    var captureInterval : Long,
+    var captureMaxCount: Int
+    )
+
+
 
 
 

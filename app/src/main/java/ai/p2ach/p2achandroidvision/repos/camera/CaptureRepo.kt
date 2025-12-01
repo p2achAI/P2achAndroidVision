@@ -3,7 +3,8 @@ package ai.p2ach.p2achandroidvision.repos.camera
 import ai.p2ach.p2achandroidlibrary.base.repos.BaseDao
 import ai.p2ach.p2achandroidlibrary.base.repos.BaseLocalRepo
 import ai.p2ach.p2achandroidvision.database.AppDataBase
-import ai.p2ach.p2achandroidvision.repos.mdm.MDMEntity
+import ai.p2ach.p2achandroidvision.utils.saveBitmapAsJpeg
+
 import android.content.Context
 import android.graphics.Bitmap
 import androidx.room.Dao
@@ -52,8 +53,8 @@ class CaptureRepo(private val context: Context,  private val db:AppDataBase, pri
     }
 
 
-    fun writeToLocal(bitmap : Bitmap?){
-
+    suspend fun writeToLocal(bitmap : Bitmap?){
+            bitmap?.saveBitmapAsJpeg()
     }
 
 }

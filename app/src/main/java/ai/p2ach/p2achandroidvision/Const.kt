@@ -4,6 +4,23 @@ import ai.p2ach.p2achandroidvision.repos.mdm.ROI
 
 interface Const {
 
+    interface LOCAL{
+
+        interface FILE{
+
+            interface IMAGE{
+                companion object{
+                    const val CAPTURE_FILE_DIR ="captures"
+                    const val COMPRESS_QUALITY = 90
+                    const val FORMAT = ".jpg"
+                }
+            }
+
+
+        }
+
+    }
+
 
     interface Service{
 
