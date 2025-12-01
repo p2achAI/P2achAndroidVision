@@ -13,7 +13,6 @@ import ai.p2ach.p2achandroidvision.repos.camera.handlers.CameraUiState
 import ai.p2ach.p2achandroidvision.repos.camera.handlers.InternalCameraHandler
 import ai.p2ach.p2achandroidvision.repos.camera.handlers.RTSPCameraHandler
 import ai.p2ach.p2achandroidvision.repos.receivers.UVCCameraReceiver
-import ai.p2ach.p2achandroidvision.utils.AlarmManagerUtil
 import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
@@ -22,7 +21,6 @@ import android.content.Intent
 import android.hardware.usb.UsbDevice
 import android.os.Binder
 import android.os.IBinder
-import android.widget.Toast
 import androidx.core.app.NotificationCompat
 import androidx.lifecycle.LifecycleService
 import androidx.lifecycle.lifecycleScope
@@ -32,7 +30,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.launch
 import org.koin.android.ext.android.inject
@@ -42,7 +39,7 @@ class CameraService : LifecycleService() {
     private val uvcCameraHandler: UVCCameraHandler by inject()
     private val rtspCameraHandler: RTSPCameraHandler by inject()
     private val internalCameraHandler: InternalCameraHandler by inject()
-    private val captureRepo: CaptureRepo by inject()
+    private val captureRepo: CaptureReportRepo by inject()
 
     val mdmRepo: MDMRepo by inject()
 

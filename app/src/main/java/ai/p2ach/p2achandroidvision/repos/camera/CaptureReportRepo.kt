@@ -8,6 +8,7 @@ import ai.p2ach.p2achandroidvision.repos.camera.handlers.BaseCameraHandler
 import ai.p2ach.p2achandroidvision.repos.mdm.MDMEntity
 import ai.p2ach.p2achandroidvision.utils.AlarmManagerUtil
 import ai.p2ach.p2achandroidvision.utils.CoroutineExtension
+import ai.p2ach.p2achandroidvision.utils.parseTimeString
 import ai.p2ach.p2achandroidvision.utils.saveBitmapAsJpeg
 
 import android.content.Context
@@ -46,7 +47,7 @@ data class CaptureEntity(
     var isSended : Boolean = false
 )
 
-class CaptureRepo(
+class CaptureReportRepo(
     private val context: Context,
     private val db: AppDataBase,
     private val captureDao: CaptureDao
@@ -74,7 +75,11 @@ class CaptureRepo(
 
         val captureReport = mdmEntity?.captureReport
         if(captureReport?.startTime.isNullOrEmpty() ||
-            captureReport?.captureInterval == null || captureReport?.captureCount == null) return
+            captureReport.captureInterval == null
+            || captureReport.captureCount == null
+            ||captureReport.captureInterval ==-1L
+            ||captureReport.captureCount == -1
+            ) return
 
         Log.w("bindHandler ${captureReport}")
 
@@ -85,7 +90,7 @@ class CaptureRepo(
             }
         }
 
-        startCaptureAlarm(mdmEntity)
+        startCaptureReportAlarm(mdmEntity)
     }
 
     fun unbindHandler() {
@@ -95,19 +100,26 @@ class CaptureRepo(
         alarmId = null
     }
 
-    private fun startCaptureAlarm(mdmEntity: MDMEntity?) {
+    private fun startCaptureReportAlarm(mdmEntity: MDMEntity?) {
+
         alarmId?.let { AlarmManagerUtil.cancel(context, it) }
+        var (h,m,s) =mdmEntity?.captureReport?.startTime?.parseTimeString() ?: Triple(-1,-1,-1)
 
-        val startAt = System.currentTimeMillis()
-        val interval = 5_000L
-        val count = 10
 
-        alarmId = AlarmManagerUtil.scheduleSeries(
-            context = context,
-            startAtMillis = startAt,
+        Log.w("startCaptureReportAlarm $h : $m : $s start. " +
+                "captureInterval -> ${mdmEntity?.captureReport?.captureInterval} " +
+                "captureCount -> ${mdmEntity?.captureReport?.captureCount}")
 
-            count = count
-        ) {
+
+        AlarmManagerUtil.scheduleAtSpecificTime(context,
+                hourOfDay = h,
+                minute = m,
+                second = s,
+                intervalMillis = mdmEntity?.captureReport?.captureInterval?:-1L,
+                count = mdmEntity?.captureReport?.captureCount?:-1,
+                ){
+
+            Log.w("AlarmManagerUtil captureLastFrame ${System.currentTimeMillis()}")
             captureLastFrame()
         }
     }
@@ -138,4 +150,5 @@ class CaptureRepo(
             toSave.recycle()
         }
     }
+
 }

@@ -15,15 +15,15 @@ typealias AlarmAction = () -> Unit
 object AlarmManagerUtil {
 
     private const val ACTION_ALARM = "ai.p2ach.p2achandroidvision.ALARM"
-    private const val EXTRA_ID = "extra_id"
+    const val EXTRA_ID = "extra_id"
 
     private val tasks = ConcurrentHashMap<String, AlarmTaskConfig>()
 
-    fun scheduleSeries(
+    fun scheduleAfter(
         context: Context,
         startAtMillis: Long,
-        intervalMillis: Long =7000,
-        count: Int=1,
+        intervalMillis: Long = 7000,
+        count: Int = 1,
         action: AlarmAction,
     ): String {
         val id = UUID.randomUUID().toString()
@@ -65,8 +65,6 @@ object AlarmManagerUtil {
     private fun scheduleAlarm(context: Context, config: AlarmTaskConfig, triggerAt: Long) {
         val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
         val pendingIntent = buildPendingIntent(context, config.id)
-
-
         alarmManager.setExactAndAllowWhileIdle(
             AlarmManager.RTC_WAKEUP,
             triggerAt,
@@ -88,15 +86,17 @@ object AlarmManagerUtil {
         )
     }
 
-
     fun scheduleAtSpecificTime(
         context: Context,
         hourOfDay: Int,
         minute: Int,
-        intervalMillis: Long =0,
-        count: Int=1,
+        second: Int = -1,
+        intervalMillis: Long = -1,
+        count: Int = 1,
         action: AlarmAction,
     ): String {
+
+
 
         val id = UUID.randomUUID().toString()
         val config = AlarmTaskConfig(
@@ -107,29 +107,24 @@ object AlarmManagerUtil {
         )
         tasks[id] = config
 
-        val triggerAt = calculateNextTriggerTime(hourOfDay, minute)
+        val triggerAt = calculateNextTriggerTime(hourOfDay, minute, second)
         scheduleAlarm(context, config, triggerAt)
 
         return id
     }
 
-
-
-    private fun calculateNextTriggerTime(hour: Int, minute: Int): Long {
+    private fun calculateNextTriggerTime(hour: Int, minute: Int, second: Int): Long {
         val now = System.currentTimeMillis()
         val cal = Calendar.getInstance().apply {
             timeInMillis = now
             set(Calendar.HOUR_OF_DAY, hour)
             set(Calendar.MINUTE, minute)
-            set(Calendar.SECOND, 0)
+            set(Calendar.SECOND, second)
             set(Calendar.MILLISECOND, 0)
         }
-
-
         if (cal.timeInMillis <= now) {
             cal.add(Calendar.DAY_OF_YEAR, 1)
         }
-
         return cal.timeInMillis
     }
 
@@ -141,14 +136,10 @@ object AlarmManagerUtil {
     )
 }
 
-
-
-
-
 class AlarmReceiver : BroadcastReceiver() {
 
     override fun onReceive(context: Context, intent: Intent) {
-        val id = intent.getStringExtra("extra_id") ?: return
+        val id = intent.getStringExtra(AlarmManagerUtil.EXTRA_ID) ?: return
         AlarmManagerUtil.onAlarm(context, id)
     }
 }
