@@ -1,5 +1,6 @@
 package ai.p2ach.p2achandroidvision.repos.camera.handlers
 
+import ai.p2ach.p2achandroidvision.repos.camera.CaptureRepo
 import ai.p2ach.p2achandroidvision.repos.mdm.MDMEntity
 import android.graphics.Bitmap
 import androidx.core.graphics.createBitmap
@@ -9,6 +10,8 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import org.koin.core.component.KoinComponent
+import org.koin.core.component.inject
 import org.opencv.android.Utils
 import org.opencv.core.Mat
 
@@ -45,13 +48,16 @@ interface CameraCallback {
 
 abstract class BaseCameraHandler(
     private val type: CameraType
-) : CameraHandler, CameraCallback {
+) : CameraHandler, CameraCallback , KoinComponent {
 
     private val inputImg = Mat()
     private val resultImg = Mat()
     private val drawImg = Mat()
     protected var isStarted = false
     protected var isPaused = false
+
+    private val captureRepo : CaptureRepo by inject()
+
 
     private var bckImg : Mat? = null
     var mdmEntity : MDMEntity? = null
@@ -104,6 +110,7 @@ abstract class BaseCameraHandler(
 
     override fun onFrameProcessed(bitmap: Bitmap?) {
         emitFrame(bitmap)
+        captureRepo.writeToLocal(bitmap)
     }
 
 
