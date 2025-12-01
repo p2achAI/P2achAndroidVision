@@ -113,10 +113,10 @@ abstract class BaseCameraHandler(
 
     override fun onFrameProcessed(bitmap: Bitmap?) {
         emitFrame(bitmap)
-
-        CoroutineScope(Dispatchers.IO).launch {
-            captureRepo.writeToLocal(bitmap)
-        }
+//
+//        CoroutineScope(Dispatchers.IO).launch {
+//            captureRepo.writeToLocal(bitmap)
+//        }
 
 
     }

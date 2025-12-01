@@ -9,6 +9,7 @@ import ai.p2ach.p2achandroidvision.BuildConfig
 import ai.p2ach.p2achandroidvision.Const
 import ai.p2ach.p2achandroidvision.database.AppDataBase
 import ai.p2ach.p2achandroidvision.repos.camera.handlers.CameraType
+import ai.p2ach.p2achandroidvision.utils.CoroutineExtension
 import ai.p2ach.p2achandroidvision.utils.DeviceUtils
 import ai.p2ach.p2achandroidvision.utils.getNeedUpdateMDMEntity
 
@@ -227,11 +228,13 @@ class MDMRepo(private val context: Context, private val db: AppDataBase, private
         mdmService.connect(context, object : MDMService.ResultHandler {
 
             override fun onMDMConnected() {
-                CoroutineScope(Dispatchers.IO).launch {
+
+                CoroutineExtension.launch {
                     mdmConnected = true
                     mdmHandler.init()
                     syncMDMInfo()
                 }
+
             }
 
             override fun onMDMDisconnected() {
@@ -239,7 +242,7 @@ class MDMRepo(private val context: Context, private val db: AppDataBase, private
             }
         })
 
-        CoroutineScope(Dispatchers.IO).launch {
+        CoroutineExtension.launch {
             delay(5000)
             if (!mdmConnected) {
                 Log.d("MDMService not available → fallback to local default")

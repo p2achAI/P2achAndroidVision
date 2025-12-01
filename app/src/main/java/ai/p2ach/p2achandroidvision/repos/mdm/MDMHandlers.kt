@@ -1,6 +1,7 @@
 package ai.p2ach.p2achandroidvision.repos.mdm
 
 import ai.p2ach.p2achandroidlibrary.utils.Log
+import ai.p2ach.p2achandroidvision.utils.CoroutineExtension
 import android.content.Context
 import com.hmdm.MDMPushHandler
 import com.hmdm.MDMPushMessage
@@ -26,7 +27,7 @@ class MDMHandlers(private val context: Context, private val mdmRepo: MDMRepo) {
             when (mdmPushMessage?.type) {
                 mdmMessageConfigUpdated, mdmMessageAppConfigUpdated -> {
                     Log.d("onMessageReceived ${mdmPushMessage?.type}")
-                    CoroutineScope(Dispatchers.IO).launch {
+                    CoroutineExtension.launch {
                         mdmRepo.syncMDMInfo()
                     }
 

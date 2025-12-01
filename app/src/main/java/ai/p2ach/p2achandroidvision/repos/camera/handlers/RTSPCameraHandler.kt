@@ -3,6 +3,7 @@ package ai.p2ach.p2achandroidvision.repos.camera.handlers
 import ai.p2ach.p2achandroidlibrary.utils.Log
 import ai.p2ach.p2achandroidvision.repos.camera.handlers.FrameData.MediaImageFrame
 import ai.p2ach.p2achandroidvision.repos.camera.handlers.FrameData.YuvImageFrame
+import ai.p2ach.p2achandroidvision.utils.CoroutineExtension
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.ImageFormat
@@ -108,7 +109,7 @@ class RTSPCameraHandler(
                 else -> 5_000L
             }
 
-            reconnectJob = CoroutineScope(Dispatchers.IO).launch {
+            reconnectJob = CoroutineExtension.launch {
                 delay(timeoutDelay)
                 if (!rtsp.isStarted() && isStarted) {
                     Log.d("RTSP", "reconnect start")
@@ -234,7 +235,7 @@ class RTSPCameraHandler(
     }
 
     private fun initPlayer() {
-        CoroutineScope(Dispatchers.IO).launch {
+        CoroutineExtension.launch {
             val url = mdmEntity?.netWorkAndApi?.rtspUrl.orEmpty()
             if (url.isEmpty()) {
                 Log.e("RTSP", "rtspUrl empty")
@@ -253,7 +254,7 @@ class RTSPCameraHandler(
 
     override fun startStreaming() {
         super.startStreaming()
-        CoroutineScope(Dispatchers.IO).launch {
+        CoroutineExtension.launch {
             startStopLock.withLock {
                 if (rtsp.isStarted()) return@withLock
 

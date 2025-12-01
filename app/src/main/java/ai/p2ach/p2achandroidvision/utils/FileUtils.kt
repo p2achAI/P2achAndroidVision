@@ -13,7 +13,6 @@ suspend fun Bitmap.saveBitmapAsJpeg(
 
 ): File = withContext(Dispatchers.IO) {
 
-    delay(10000)
 
     val context = KoinJavaComponent.get<Context>(Context::class.java)
 
@@ -21,7 +20,8 @@ suspend fun Bitmap.saveBitmapAsJpeg(
         if (!exists()) mkdirs()
     }
 
-    val file = File(directory, System.currentTimeMillis().toString()+ Const.LOCAL.FILE.IMAGE.FORMAT)
+    val file = File(directory, generateTimestampFileName(Const.LOCAL.FILE.IMAGE.PREFIX,
+        Const.LOCAL.FILE.IMAGE.FORMAT ))
 
     file.outputStream().use { out ->
         this@saveBitmapAsJpeg.compress(Bitmap.CompressFormat.JPEG, Const.LOCAL.FILE.IMAGE.COMPRESS_QUALITY, out)
@@ -30,3 +30,22 @@ suspend fun Bitmap.saveBitmapAsJpeg(
     file
 }
 
+fun generateTimestampFileName(
+    prefix: String = "",
+    extension: String = "jpg"
+): String {
+    val now = System.currentTimeMillis()
+    val zone = java.util.TimeZone.getDefault()
+    val locale = java.util.Locale.getDefault()
+
+    val sdf = java.text.SimpleDateFormat("yyyy_MM_dd_HH_mm_ss", locale)
+    sdf.timeZone = zone
+
+    val timeText = sdf.format(java.util.Date(now))
+
+    return if (prefix.isBlank()) {
+        "${timeText}.$extension"
+    } else {
+        "${prefix}_${timeText}${Const.LOCAL.FILE.IMAGE.DOT}$extension"
+    }
+}

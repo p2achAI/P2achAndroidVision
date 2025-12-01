@@ -12,7 +12,9 @@ interface Const {
                 companion object{
                     const val CAPTURE_FILE_DIR ="captures"
                     const val COMPRESS_QUALITY = 90
-                    const val FORMAT = ".jpg"
+                    const val DOT="."
+                    const val FORMAT = "jpg"
+                    const val PREFIX = "capture"
                 }
             }
 

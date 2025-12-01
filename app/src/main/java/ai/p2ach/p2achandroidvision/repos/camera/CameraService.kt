@@ -13,6 +13,7 @@ import ai.p2ach.p2achandroidvision.repos.camera.handlers.CameraUiState
 import ai.p2ach.p2achandroidvision.repos.camera.handlers.InternalCameraHandler
 import ai.p2ach.p2achandroidvision.repos.camera.handlers.RTSPCameraHandler
 import ai.p2ach.p2achandroidvision.repos.receivers.UVCCameraReceiver
+import ai.p2ach.p2achandroidvision.utils.AlarmManagerUtil
 import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
@@ -21,6 +22,7 @@ import android.content.Intent
 import android.hardware.usb.UsbDevice
 import android.os.Binder
 import android.os.IBinder
+import android.widget.Toast
 import androidx.core.app.NotificationCompat
 import androidx.lifecycle.LifecycleService
 import androidx.lifecycle.lifecycleScope
@@ -102,7 +104,19 @@ class CameraService : LifecycleService() {
         lifecycleScope.launch {
             mdmRepo.stream().distinctUntilChanged().collect { mdmEntity ->
                 applyCameraType(mdmEntity.toCameraType(),mdmEntity)
+                startCaptureAlarm(mdmEntity)
             }
+        }
+    }
+
+
+    private fun startCaptureAlarm(mdmEntity: MDMEntity){
+
+        AlarmManagerUtil.scheduleSeries(applicationContext,
+            System.currentTimeMillis(),
+             5000,
+            10){
+            Toast.makeText(applicationContext,"alaram" ,Toast.LENGTH_SHORT).show()
         }
     }
 

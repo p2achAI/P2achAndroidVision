@@ -104,6 +104,9 @@
             android:exported="false"
             android:process=":watchdog" />
 
+        <receiver android:name=".utils.AlarmReceiver" android:exported="false"/>
+
+
 <!--        <receiver-->
 <!--            android:name=".receiver.ExternalControlReceiver"-->
 <!--            android:enabled="true"-->
