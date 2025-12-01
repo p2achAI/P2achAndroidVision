@@ -128,11 +128,8 @@ data class MDMEntity(
     var exposure: Exposure = Exposure(),
     var testing: Testing = Testing(),
     var rotation: Int = Const.MDM.SETTING.DEFAULT.DEFAULT_ROTATION,
-
-    ){
-
-
-}
+    var captureReport: CaptureReport? =null,
+    )
 
 @Serializable
 data class ROI (
@@ -187,10 +184,10 @@ data class Exposure(
 )
 
 @Serializable
-data class Capture(
-    var startTime : Date, //하루에 일정시간에 반복
-    var captureInterval : Long,
-    var captureMaxCount: Int
+data class CaptureReport(
+    var startTime : String?="",
+    var captureInterval : Long?=-1L,
+    var captureCount: Int?=-1,
     )
 
 

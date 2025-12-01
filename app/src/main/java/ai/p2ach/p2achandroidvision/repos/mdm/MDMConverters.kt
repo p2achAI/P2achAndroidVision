@@ -111,6 +111,14 @@ object MDMConverters {
 
 
 
+    @TypeConverter
+    @JvmStatic
+    fun captureReportToJson(value: CaptureReport?): String = gson.toJson(value ?: CaptureReport())
+
+    @TypeConverter
+    @JvmStatic
+    fun jsonToCaptureReport(value: String?): CaptureReport = gson.fromJson(value ?: "{}", CaptureReport::class.java)
+
 
 
     @TypeConverter

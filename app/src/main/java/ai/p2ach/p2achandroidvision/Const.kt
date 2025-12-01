@@ -142,6 +142,8 @@ interface Const {
                             const val P95 = "p95"
                             const val CAMERA_TYPE = "cameraType"
 
+                            const val CAPTURE_REPORT="captureReport"
+
                         }
                     }
                 }

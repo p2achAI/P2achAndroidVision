@@ -108,30 +108,11 @@ class CameraService : LifecycleService() {
         lifecycleScope.launch {
             mdmRepo.stream().distinctUntilChanged().collect { mdmEntity ->
                 applyCameraType(mdmEntity.toCameraType(),mdmEntity)
-                startCaptureAlarm(mdmEntity)
             }
         }
     }
 
 
-    private fun startCaptureAlarm(mdmEntity: MDMEntity){
-
-        val h = handler ?: return
-        captureCollectJob = lifecycleScope.launch {
-            h.frames.collect { bmp ->
-                captureRepo.setFrame(bmp)
-            }
-        }
-
-
-
-        AlarmManagerUtil.scheduleSeries(applicationContext,
-            System.currentTimeMillis(),
-             5000,
-            10){
-             captureRepo.captureLastFrame()
-        }
-    }
 
     private fun applyCameraType(type: CameraType,mdmEntity: MDMEntity?) {
         Log.d("CameraService applyCameraType currType=$currentType newType=$type")
@@ -165,7 +146,7 @@ class CameraService : LifecycleService() {
             }
         }
 
-
+        captureRepo.bindHandler(h,mdmEntity)
         h.startStreaming()
     }
 

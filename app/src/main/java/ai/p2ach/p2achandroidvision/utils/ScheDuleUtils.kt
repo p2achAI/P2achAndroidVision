@@ -6,6 +6,7 @@ import android.app.PendingIntent
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import java.util.Calendar
 import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
 
@@ -21,9 +22,9 @@ object AlarmManagerUtil {
     fun scheduleSeries(
         context: Context,
         startAtMillis: Long,
-        intervalMillis: Long,
-        count: Int,
-        action: AlarmAction
+        intervalMillis: Long =7000,
+        count: Int=1,
+        action: AlarmAction,
     ): String {
         val id = UUID.randomUUID().toString()
         val config = AlarmTaskConfig(
@@ -87,6 +88,51 @@ object AlarmManagerUtil {
         )
     }
 
+
+    fun scheduleAtSpecificTime(
+        context: Context,
+        hourOfDay: Int,
+        minute: Int,
+        intervalMillis: Long =0,
+        count: Int=1,
+        action: AlarmAction,
+    ): String {
+
+        val id = UUID.randomUUID().toString()
+        val config = AlarmTaskConfig(
+            id = id,
+            intervalMillis = intervalMillis,
+            remaining = count,
+            action = action
+        )
+        tasks[id] = config
+
+        val triggerAt = calculateNextTriggerTime(hourOfDay, minute)
+        scheduleAlarm(context, config, triggerAt)
+
+        return id
+    }
+
+
+
+    private fun calculateNextTriggerTime(hour: Int, minute: Int): Long {
+        val now = System.currentTimeMillis()
+        val cal = Calendar.getInstance().apply {
+            timeInMillis = now
+            set(Calendar.HOUR_OF_DAY, hour)
+            set(Calendar.MINUTE, minute)
+            set(Calendar.SECOND, 0)
+            set(Calendar.MILLISECOND, 0)
+        }
+
+
+        if (cal.timeInMillis <= now) {
+            cal.add(Calendar.DAY_OF_YEAR, 1)
+        }
+
+        return cal.timeInMillis
+    }
+
     data class AlarmTaskConfig(
         val id: String,
         val intervalMillis: Long,
@@ -94,6 +140,9 @@ object AlarmManagerUtil {
         val action: AlarmAction
     )
 }
+
+
+
 
 
 class AlarmReceiver : BroadcastReceiver() {

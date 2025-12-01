@@ -2,9 +2,11 @@ package ai.p2ach.p2achandroidvision.utils
 
 import ai.p2ach.p2achandroidlibrary.utils.Log
 import ai.p2ach.p2achandroidvision.Const
+import ai.p2ach.p2achandroidvision.repos.mdm.CaptureReport
 import ai.p2ach.p2achandroidvision.repos.mdm.MDMConverters
 import ai.p2ach.p2achandroidvision.repos.mdm.MDMEntity
 import ai.p2ach.p2achandroidvision.repos.mdm.ROI
+import androidx.room.TypeConverter
 import com.hmdm.MDMService
 
 
@@ -30,6 +32,18 @@ fun String.getOrDefaultMDM(default: ROI): ROI {
     }
 }
 
+fun String.getOrDefaultMDM(default: CaptureReport): CaptureReport {
+    return try {
+        if (this.isBlank()) default
+        else MDMConverters.jsonToCaptureReport(this)
+    } catch (e: Exception) {
+        Log.e("CaptureReport parse failed: ${e.message}")
+        default
+    }
+}
+
+
+
 fun String.getOrDefaultMDM(default: List<String>): List<String> {
     return this.takeIf { it.isNotBlank() }
         ?.split(",")
@@ -54,7 +68,12 @@ fun getNeedUpdateMDMEntity(base: MDMEntity): MDMEntity {
 
 
 
+
         deviceUuid = base.deviceUuid?: DeviceUtils.getOrCreateDeviceUuid()
+
+
+        captureReport = MDMService.Preferences.get(Const.MDM.SETTING.REMOTE.KEY.CAPTURE_REPORT,"").getOrDefaultMDM(
+            CaptureReport())
 
 
         netWorkAndApi.apply {
