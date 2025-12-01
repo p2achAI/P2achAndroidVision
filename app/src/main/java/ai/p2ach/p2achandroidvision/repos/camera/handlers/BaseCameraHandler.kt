@@ -59,7 +59,6 @@ abstract class BaseCameraHandler(
     protected var isStarted = false
     protected var isPaused = false
 
-    private val captureRepo : CaptureRepo by inject()
 
 
     private var bckImg : Mat? = null

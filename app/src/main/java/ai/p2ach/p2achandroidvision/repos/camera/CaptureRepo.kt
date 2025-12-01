@@ -3,6 +3,7 @@ package ai.p2ach.p2achandroidvision.repos.camera
 import ai.p2ach.p2achandroidlibrary.base.repos.BaseDao
 import ai.p2ach.p2achandroidlibrary.base.repos.BaseLocalRepo
 import ai.p2ach.p2achandroidvision.database.AppDataBase
+import ai.p2ach.p2achandroidvision.utils.CoroutineExtension
 import ai.p2ach.p2achandroidvision.utils.saveBitmapAsJpeg
 
 import android.content.Context
@@ -38,6 +39,11 @@ data class CaptureEntity(
 
 class CaptureRepo(private val context: Context,  private val db:AppDataBase, private val captureDao : CaptureDao) : BaseLocalRepo<CaptureEntity>(){
 
+
+    private val lastFrameLock = Any()
+    private var lastFrame: Bitmap? = null
+
+
     override fun localFlow(): Flow<CaptureEntity> = captureDao.observe().filterNotNull()
 
     override suspend fun saveLocal(data: CaptureEntity) {
@@ -56,5 +62,30 @@ class CaptureRepo(private val context: Context,  private val db:AppDataBase, pri
     suspend fun writeToLocal(bitmap : Bitmap?){
             bitmap?.saveBitmapAsJpeg()
     }
+
+    fun setFrame(bitmap: Bitmap?){
+
+        synchronized(lastFrameLock) {
+
+            lastFrame?.recycle()
+            lastFrame = bitmap?.copy(bitmap.config!!, false)
+        }
+
+
+    }
+
+    fun captureLastFrame() {
+        CoroutineExtension.launch {
+            var toSave = synchronized(lastFrameLock) {
+                if(lastFrame == null) return@launch
+                lastFrame?.copy(lastFrame!!.config!!, false)
+            } ?: return@launch
+
+            toSave?.saveBitmapAsJpeg()
+            toSave?.recycle()
+        }
+    }
+
+
 
 }

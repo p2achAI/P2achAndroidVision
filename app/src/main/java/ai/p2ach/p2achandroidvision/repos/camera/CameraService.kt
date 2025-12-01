@@ -32,6 +32,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.launch
 import org.koin.android.ext.android.inject
@@ -41,6 +42,7 @@ class CameraService : LifecycleService() {
     private val uvcCameraHandler: UVCCameraHandler by inject()
     private val rtspCameraHandler: RTSPCameraHandler by inject()
     private val internalCameraHandler: InternalCameraHandler by inject()
+    private val captureRepo: CaptureRepo by inject()
 
     val mdmRepo: MDMRepo by inject()
 
@@ -60,6 +62,7 @@ class CameraService : LifecycleService() {
     private var handler: BaseCameraHandler? = null
     private var handlerCollectJob: Job? = null
     private var handlerStateJob: Job? = null
+    private var captureCollectJob : Job? = null
     private var currentType: CameraType? = null
 
     private val _frames = MutableSharedFlow<android.graphics.Bitmap>(
@@ -94,6 +97,7 @@ class CameraService : LifecycleService() {
         uvcCameraReceiver.unregister()
 
         handlerCollectJob?.cancel()
+        captureCollectJob?.cancel()
         handler?.stopStreaming()
         handler = null
 
@@ -112,11 +116,20 @@ class CameraService : LifecycleService() {
 
     private fun startCaptureAlarm(mdmEntity: MDMEntity){
 
+        val h = handler ?: return
+        captureCollectJob = lifecycleScope.launch {
+            h.frames.collect { bmp ->
+                captureRepo.setFrame(bmp)
+            }
+        }
+
+
+
         AlarmManagerUtil.scheduleSeries(applicationContext,
             System.currentTimeMillis(),
              5000,
             10){
-            Toast.makeText(applicationContext,"alaram" ,Toast.LENGTH_SHORT).show()
+             captureRepo.captureLastFrame()
         }
     }
 
