@@ -1,8 +1,8 @@
 package ai.p2ach.p2achandroidvision.views.fragments
 
-import ai.p2ach.p2achandroidlibrary.base.fragments.BaseFragment
-import ai.p2ach.p2achandroidlibrary.utils.Log
 
+
+import ai.p2ach.p2achandroidvision.base.fragments.BaseFragment
 import ai.p2ach.p2achandroidvision.databinding.FragmentMdmBinding
 import ai.p2ach.p2achandroidvision.utils.toUiItems
 import ai.p2ach.p2achandroidvision.viewmodels.MdmViewModel

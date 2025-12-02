@@ -1,8 +1,11 @@
 package ai.p2ach.p2achandroidvision.views.fragments
-import ai.p2ach.p2achandroidlibrary.base.fragments.BaseFragment
-import ai.p2ach.p2achandroidlibrary.utils.Log
+
+
+
+import ai.p2ach.p2achandroidvision.utils.Log
 import ai.p2ach.p2achandroidvision.Const
 import ai.p2ach.p2achandroidvision.R
+import ai.p2ach.p2achandroidvision.base.fragments.BaseFragment
 import ai.p2ach.p2achandroidvision.databinding.FragmentSplashBinding
 import android.Manifest
 import android.os.Build

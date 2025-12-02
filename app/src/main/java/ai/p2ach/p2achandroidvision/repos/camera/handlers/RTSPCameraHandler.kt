@@ -1,6 +1,8 @@
 package ai.p2ach.p2achandroidvision.repos.camera.handlers
 
-import ai.p2ach.p2achandroidlibrary.utils.Log
+
+
+import ai.p2ach.p2achandroidvision.utils.Log
 import ai.p2ach.p2achandroidvision.repos.camera.handlers.FrameData.MediaImageFrame
 import ai.p2ach.p2achandroidvision.repos.camera.handlers.FrameData.YuvImageFrame
 import ai.p2ach.p2achandroidvision.utils.CoroutineExtension

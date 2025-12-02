@@ -1,6 +1,8 @@
 package ai.p2ach.p2achandroidvision.repos.mdm
 
-import ai.p2ach.p2achandroidlibrary.utils.Log
+
+
+import ai.p2ach.p2achandroidvision.utils.Log
 import androidx.room.TypeConverter
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken

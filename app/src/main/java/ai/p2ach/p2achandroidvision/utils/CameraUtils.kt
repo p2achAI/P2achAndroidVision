@@ -1,6 +1,6 @@
 package ai.p2ach.p2achandroidvision.utils
 
-import ai.p2ach.p2achandroidlibrary.utils.Log
+
 import android.hardware.camera2.CameraCharacteristics
 import android.hardware.camera2.CameraManager
 

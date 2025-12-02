@@ -1,8 +1,17 @@
 package ai.p2ach.p2achandroidvision
 
-import ai.p2ach.p2achandroidvision.repos.mdm.ROI
 
 interface Const {
+
+    interface REST_API{
+
+        interface RETROFIT{
+            companion object{
+                const val TIME_OUT=1000L
+            }
+        }
+
+    }
 
     interface LOCAL{
 

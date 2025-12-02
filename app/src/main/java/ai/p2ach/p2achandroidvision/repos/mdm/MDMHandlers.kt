@@ -1,6 +1,7 @@
 package ai.p2ach.p2achandroidvision.repos.mdm
 
-import ai.p2ach.p2achandroidlibrary.utils.Log
+
+import ai.p2ach.p2achandroidvision.utils.Log
 import ai.p2ach.p2achandroidvision.utils.CoroutineExtension
 import android.content.Context
 import com.hmdm.MDMPushHandler

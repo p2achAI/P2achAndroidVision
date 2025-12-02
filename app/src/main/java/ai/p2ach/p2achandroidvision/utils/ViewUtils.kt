@@ -1,11 +1,16 @@
 package ai.p2ach.p2achandroidvision.utils
 
-import ai.p2ach.p2achandroidvision.P2achAndroidVisionApplication
+
 import ai.p2ach.p2achandroidvision.R
 import ai.p2ach.p2achandroidvision.repos.camera.handlers.CameraType
 import ai.p2ach.p2achandroidvision.repos.camera.handlers.CameraUiState
+import android.app.AlertDialog
 import android.content.Context
+import android.content.Intent
+import android.net.Uri
+import android.provider.Settings
 import androidx.annotation.StringRes
+import androidx.fragment.app.Fragment
 import org.koin.java.KoinJavaComponent
 
 
@@ -146,4 +151,111 @@ fun getCameraStatusMessage(cameraUiState: CameraUiState) : String{
 fun @receiver:StringRes Int.getMessage(): String {
     val context = KoinJavaComponent.get<Context>(Context::class.java)
     return context.getString(this)
+}
+
+
+object AppDialog {
+
+    fun showAlert(
+        context: Context,
+        title: String? = null,
+        message: String,
+        positiveText: String = "확인",
+        cancelable: Boolean = true,
+        onPositive: (() -> Unit)? = null
+    ): AlertDialog {
+        val builder = AlertDialog.Builder(context)
+            .setMessage(message)
+            .setPositiveButton(positiveText) { dialog, _ ->
+                dialog.dismiss()
+                onPositive?.invoke()
+            }
+            .setCancelable(cancelable)
+
+        if (!title.isNullOrEmpty()) {
+            builder.setTitle(title)
+        }
+
+        val dialog = builder.create()
+        dialog.show()
+        return dialog
+    }
+
+    fun showConfirm(
+        context: Context,
+        title: String? = null,
+        message: String,
+        positiveText: String = "확인",
+        negativeText: String = "취소",
+        cancelable: Boolean = true,
+        onPositive: (() -> Unit)? = null,
+        onNegative: (() -> Unit)? = null
+    ): AlertDialog {
+        val builder = AlertDialog.Builder(context)
+            .setMessage(message)
+            .setPositiveButton(positiveText) { dialog, _ ->
+                dialog.dismiss()
+                onPositive?.invoke()
+            }
+            .setNegativeButton(negativeText) { dialog, _ ->
+                dialog.dismiss()
+                onNegative?.invoke()
+            }
+            .setCancelable(cancelable)
+
+        if (!title.isNullOrEmpty()) {
+            builder.setTitle(title)
+        }
+
+        val dialog = builder.create()
+        dialog.show()
+        return dialog
+    }
+}
+
+fun Fragment.showAlertDialog(
+    title: String? = null,
+    message: String,
+    positiveText: String = "확인",
+    cancelable: Boolean = true,
+    onPositive: (() -> Unit)? = null
+): AlertDialog {
+    return AppDialog.showAlert(
+        requireContext(),
+        title,
+        message,
+        positiveText,
+        cancelable,
+        onPositive
+    )
+}
+
+fun Fragment.showConfirmDialog(
+    title: String? = null,
+    message: String,
+    positiveText: String = "확인",
+    negativeText: String = "취소",
+    cancelable: Boolean = true,
+    onPositive: (() -> Unit)? = null,
+    onNegative: (() -> Unit)? = null
+): AlertDialog {
+    return AppDialog.showConfirm(
+        requireContext(),
+        title,
+        message,
+        positiveText,
+        negativeText,
+        cancelable,
+        onPositive,
+        onNegative
+    )
+}
+
+
+fun Fragment.openAppSettings() {
+    val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
+        .apply {
+            data = Uri.fromParts("package", requireContext().packageName, null)
+        }
+    startActivity(intent)
 }

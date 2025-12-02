@@ -1,7 +1,7 @@
 package ai.p2ach.p2achandroidvision
 
 
-import ai.p2ach.p2achandroidlibrary.utils.Log
+
 import ai.p2ach.p2achandroidvision.database.AppDataBase
 import ai.p2ach.p2achandroidvision.repos.mdm.MDMHandlers
 import ai.p2ach.p2achandroidvision.repos.mdm.MDMRepo
@@ -11,6 +11,7 @@ import ai.p2ach.p2achandroidvision.repos.camera.handlers.InternalCameraHandler
 import ai.p2ach.p2achandroidvision.repos.camera.handlers.RTSPCameraHandler
 import ai.p2ach.p2achandroidvision.repos.camera.handlers.UVCCameraHandler
 import ai.p2ach.p2achandroidvision.repos.receivers.watchdog.WatchdogScheduler
+import ai.p2ach.p2achandroidvision.utils.Log
 
 
 import ai.p2ach.p2achandroidvision.viewmodels.CameraViewModel

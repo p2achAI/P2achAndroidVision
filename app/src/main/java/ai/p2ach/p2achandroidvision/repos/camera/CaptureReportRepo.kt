@@ -1,8 +1,8 @@
 package ai.p2ach.p2achandroidvision.repos.camera
 
-import ai.p2ach.p2achandroidlibrary.base.repos.BaseDao
-import ai.p2ach.p2achandroidlibrary.base.repos.BaseLocalRepo
-import ai.p2ach.p2achandroidlibrary.utils.Log
+import ai.p2ach.p2achandroidvision.base.repos.BaseDao
+import ai.p2ach.p2achandroidvision.base.repos.BaseLocalRepo
+import ai.p2ach.p2achandroidvision.utils.Log
 import ai.p2ach.p2achandroidvision.database.AppDataBase
 import ai.p2ach.p2achandroidvision.repos.camera.handlers.BaseCameraHandler
 import ai.p2ach.p2achandroidvision.repos.mdm.MDMEntity

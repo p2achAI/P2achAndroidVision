@@ -1,7 +1,7 @@
 package ai.p2ach.p2achandroidvision.repos.receivers.watchdog
 
 
-import ai.p2ach.p2achandroidlibrary.utils.Log
+
 import ai.p2ach.p2achandroidvision.views.activities.ActivityMain
 import android.app.ActivityManager
 import android.content.BroadcastReceiver

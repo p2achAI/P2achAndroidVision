@@ -1,11 +1,13 @@
 package ai.p2ach.p2achandroidvision.views.fragments
 
-import ai.p2ach.p2achandroidlibrary.base.fragments.BaseFragment
-import ai.p2ach.p2achandroidlibrary.utils.Log
-import ai.p2ach.p2achandroidvision.R
+
+
+
+
+import ai.p2ach.p2achandroidvision.utils.Log
+import ai.p2ach.p2achandroidvision.base.fragments.BaseFragment
 import ai.p2ach.p2achandroidvision.databinding.FragmentCameraBinding
-import ai.p2ach.p2achandroidvision.repos.camera.handlers.CameraType
-import ai.p2ach.p2achandroidvision.repos.camera.handlers.CameraUiState
+
 import ai.p2ach.p2achandroidvision.utils.getCameraStatusMessage
 import ai.p2ach.p2achandroidvision.viewmodels.CameraViewModel
 import android.graphics.Bitmap

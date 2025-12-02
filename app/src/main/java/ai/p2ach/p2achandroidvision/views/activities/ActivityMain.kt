@@ -1,8 +1,9 @@
 package ai.p2ach.p2achandroidvision.views.activities
 
 
-import ai.p2ach.p2achandroidlibrary.base.activites.BaseActivity
 
+
+import ai.p2ach.p2achandroidvision.base.activites.BaseActivity
 import ai.p2ach.p2achandroidvision.databinding.ActivityMainBinding
 
 

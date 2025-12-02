@@ -191,7 +191,6 @@ dependencies {
     
 
     // local modules
-    implementation(project(":commonLibrary"))
     implementation(project(":libuvccamera"))
     implementation(project(":sdk"))
 

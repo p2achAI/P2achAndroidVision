@@ -1,12 +1,15 @@
 package ai.p2ach.p2achandroidvision.utils
 
-import ai.p2ach.p2achandroidlibrary.utils.Log
+
+
+
+import ai.p2ach.p2achandroidvision.utils.Log
 import ai.p2ach.p2achandroidvision.Const
 import ai.p2ach.p2achandroidvision.repos.mdm.CaptureReport
 import ai.p2ach.p2achandroidvision.repos.mdm.MDMConverters
 import ai.p2ach.p2achandroidvision.repos.mdm.MDMEntity
 import ai.p2ach.p2achandroidvision.repos.mdm.ROI
-import androidx.room.TypeConverter
+
 import com.hmdm.MDMService
 
 
