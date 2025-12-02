@@ -47,11 +47,15 @@ data class CaptureEntity(
     var isSended : Boolean = false
 )
 
+interface CaptureApi{
+
+}
+
 class CaptureReportRepo(
     private val context: Context,
     private val db: AppDataBase,
     private val captureDao: CaptureDao
-) : BaseLocalRepo<List<CaptureEntity>>() {
+) : BaseLocalRepo<List<CaptureEntity>, CaptureApi>() {
 
     private val lastFrameLock = Any()
     private var lastFrame: Bitmap? = null

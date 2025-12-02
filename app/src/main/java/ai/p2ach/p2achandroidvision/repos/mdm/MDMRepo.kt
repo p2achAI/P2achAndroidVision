@@ -212,7 +212,7 @@ interface MDMDao : BaseDao<MDMEntity> {
 
 }
 
-class MDMRepo(private val context: Context, private val db: AppDataBase, private val mdmDao: MDMDao): BaseLocalRepo<MDMEntity>(), KoinComponent{
+class MDMRepo(private val context: Context, private val db: AppDataBase, private val mdmDao: MDMDao): BaseLocalRepo<MDMEntity, Nothing>(), KoinComponent{
 
     private val mdmHandler : MDMHandlers by inject()
     private var mdmService = MDMService.getInstance()

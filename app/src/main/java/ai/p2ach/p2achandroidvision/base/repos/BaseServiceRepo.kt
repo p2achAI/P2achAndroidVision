@@ -15,7 +15,7 @@ import kotlinx.coroutines.flow.asStateFlow
 abstract class BaseServiceRepo<S : Service>(
     private val appContext: Context,
     private val serviceClass: Class<S>
-) : BaseLocalRepo<S>() {
+) : BaseLocalRepo<S, Nothing>() {
 
     private val _serviceState = MutableStateFlow<S?>(null)
     val serviceState = _serviceState.asStateFlow()

@@ -10,7 +10,7 @@ import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.launch
 
-abstract class BaseViewModel<T, R: BaseRepo<T>>(
+abstract class BaseViewModel<T, R: BaseRepo<T, Nothing>>(
    protected val repo :R
 ) : ViewModel() {
 
