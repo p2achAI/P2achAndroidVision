@@ -19,7 +19,7 @@ abstract class BaseRepo<T, API_SERVICE : Any>(apiClass : KClass<API_SERVICE>?=nu
 
     protected val api: API_SERVICE? by lazy {
         apiClass?.let {
-            createRetrofit(BuildConfig.API_URL).create(it.java)
+            createRetrofit(BuildConfig.PROD_API_URL).create(it.java)
         }
     }
 
