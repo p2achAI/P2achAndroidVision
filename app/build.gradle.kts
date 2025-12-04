@@ -84,7 +84,10 @@ android {
         create("prod") {
             dimension = "environment"
 
-            buildConfigField("String", "PRESIGN_PATH", "\"display-report-presign-prod\"")
+
+            buildConfigField("String", "PRESIGN_PATH", "\"display-report-presign-dev\"")
+
+//            buildConfigField("String", "PRESIGN_PATH", "\"display-report-presign-prod\"")
         }
     }
 

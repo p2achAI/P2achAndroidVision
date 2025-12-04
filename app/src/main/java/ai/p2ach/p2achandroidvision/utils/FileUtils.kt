@@ -1,6 +1,7 @@
 package ai.p2ach.p2achandroidvision.utils
 
 import ai.p2ach.p2achandroidvision.Const
+import ai.p2ach.p2achandroidvision.repos.mdm.MDMEntity
 import android.content.Context
 import android.graphics.Bitmap
 import kotlinx.coroutines.Dispatchers
@@ -9,8 +10,7 @@ import kotlinx.coroutines.withContext
 import org.koin.java.KoinJavaComponent
 import java.io.File
 
-suspend fun Bitmap.saveBitmapAsJpeg(
-
+suspend fun Bitmap.saveBitmapAsJpeg(mdmEntity: MDMEntity?
 ): File = withContext(Dispatchers.IO) {
 
 
@@ -20,7 +20,7 @@ suspend fun Bitmap.saveBitmapAsJpeg(
         if (!exists()) mkdirs()
     }
 
-    val file = File(directory, generateTimestampFileName(Const.LOCAL.FILE.IMAGE.PREFIX,
+    val file = File(directory, generateTimestampFileName(mdmEntity?.deviceName?:"",
         Const.LOCAL.FILE.IMAGE.FORMAT ))
 
     file.outputStream().use { out ->
@@ -38,7 +38,7 @@ fun generateTimestampFileName(
     val zone = java.util.TimeZone.getDefault()
     val locale = java.util.Locale.getDefault()
 
-    val sdf = java.text.SimpleDateFormat("yyyy_MM_dd_HH_mm_ss", locale)
+    val sdf = java.text.SimpleDateFormat("yyyyMMddHHmmss", locale)
     sdf.timeZone = zone
 
     val timeText = sdf.format(java.util.Date(now))

@@ -6,6 +6,30 @@ interface Const {
     interface REST_API{
 
         interface RETROFIT{
+
+
+            interface PATH{
+                companion object{
+                    const val CAPTURE_REPORT_UPLOAD_PATH="/images/"
+                }
+            }
+
+
+            interface CONTENT_TYPE{
+                companion object{
+                    const val IMAGE_JPEG="image/jpeg"
+                }
+            }
+
+            interface HEADER{
+                interface KEY{
+                    companion object{
+                        const val X_API_KEY="x-api-key"
+                        const val CONTENT_TYPE="Content-Type"
+                    }
+                }
+            }
+
             companion object{
                 const val TIME_OUT=1000L
             }

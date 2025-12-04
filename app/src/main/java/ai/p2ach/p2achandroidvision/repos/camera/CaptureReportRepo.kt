@@ -5,7 +5,9 @@ import ai.p2ach.p2achandroidvision.base.repos.BaseLocalRepo
 import ai.p2ach.p2achandroidvision.utils.Log
 import ai.p2ach.p2achandroidvision.database.AppDataBase
 import ai.p2ach.p2achandroidvision.repos.camera.handlers.BaseCameraHandler
+import ai.p2ach.p2achandroidvision.repos.mdm.MDMDao
 import ai.p2ach.p2achandroidvision.repos.mdm.MDMEntity
+import ai.p2ach.p2achandroidvision.repos.presign.PreSignRepo
 import ai.p2ach.p2achandroidvision.utils.AlarmManagerUtil
 import ai.p2ach.p2achandroidvision.utils.CoroutineExtension
 import ai.p2ach.p2achandroidvision.utils.parseTimeString
@@ -24,6 +26,11 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import org.koin.core.component.KoinComponent
+import org.koin.core.component.inject
+import java.io.File
+import kotlin.getValue
 
 
 @Dao
@@ -36,6 +43,10 @@ interface CaptureDao : BaseDao<CaptureEntity>{
     @Query("DELETE FROM table_capture")
     suspend fun clearAll()
 
+
+    @Query("SELECT * FROM table_capture WHERE isSended = 0 ORDER BY captureId ASC")
+    suspend fun getPending(): List<CaptureEntity>
+
 }
 
 
@@ -44,6 +55,7 @@ data class CaptureEntity(
     @PrimaryKey
     var captureId : String,
     var capturePath : String,
+    var deviceName : String,
     var isSended : Boolean = false
 )
 
@@ -54,8 +66,8 @@ interface CaptureApi{
 class CaptureReportRepo(
     private val context: Context,
     private val db: AppDataBase,
-    private val captureDao: CaptureDao
-) : BaseLocalRepo<List<CaptureEntity>, CaptureApi>() {
+    private val captureDao: CaptureDao,
+) : BaseLocalRepo<List<CaptureEntity>, CaptureApi>() , KoinComponent  {
 
     private val lastFrameLock = Any()
     private var lastFrame: Bitmap? = null
@@ -63,6 +75,9 @@ class CaptureReportRepo(
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
     private var frameCollectJob: Job? = null
     private var alarmId: String? = null
+
+
+    private val presignRepo : PreSignRepo by inject()
 
     override fun localFlow(): Flow<List<CaptureEntity>> =
         captureDao.observeAll()
@@ -124,7 +139,7 @@ class CaptureReportRepo(
                 ){
 
             Log.w("AlarmManagerUtil captureLastFrame ${System.currentTimeMillis()}")
-            captureLastFrame()
+            captureLastFrame(mdmEntity)
         }
     }
 
@@ -135,23 +150,53 @@ class CaptureReportRepo(
         }
     }
 
-    fun captureLastFrame() {
+    fun captureLastFrame(mdmEntity: MDMEntity?) {
         CoroutineExtension.launch {
             val toSave = synchronized(lastFrameLock) {
                 lastFrame?.let { it.copy(it.config!!, false) }
             } ?: return@launch
 
-            val captureFile = toSave.saveBitmapAsJpeg()
+            val captureFile = toSave.saveBitmapAsJpeg(mdmEntity)
 //            Log.d("captureLastFrame ${captureFile.path}")
 
             captureDao.upsert(
                 CaptureEntity(
+                    deviceName = mdmEntity?.deviceName?:"",
                     captureId = captureFile.name,
                     capturePath = captureFile.path
                 )
             )
 
             toSave.recycle()
+        }
+    }
+
+
+    suspend fun uploadPendingCaptures() {
+        val pending = captureDao.getPending()
+
+        if (pending.isEmpty()) return
+
+        withContext(Dispatchers.IO) {
+            pending.forEach { captureReports ->
+                val file = File(captureReports.capturePath)
+                if (!file.exists()) {
+                    Log.e("CaptureReportRepo", "file not found: ${captureReports.capturePath}")
+                    return@forEach
+                }
+                val success = runCatching {
+                    presignRepo.uploadCaptureReportImage(captureReports.captureId, file , captureReports.deviceName)
+                }.getOrElse {
+                    Log.e("CaptureReportRepo", "upload failed ${captureReports.captureId}: ${it.message}")
+                    false
+                }
+
+                if (success) {
+                    db.withTransaction {
+                        captureDao.upsert(captureReports.copy(isSended = true))
+                    }
+                }
+            }
         }
     }
 

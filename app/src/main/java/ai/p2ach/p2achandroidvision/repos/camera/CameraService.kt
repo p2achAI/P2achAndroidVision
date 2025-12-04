@@ -15,6 +15,7 @@ import ai.p2ach.p2achandroidvision.repos.camera.handlers.CameraUiState
 import ai.p2ach.p2achandroidvision.repos.camera.handlers.InternalCameraHandler
 import ai.p2ach.p2achandroidvision.repos.camera.handlers.RTSPCameraHandler
 import ai.p2ach.p2achandroidvision.repos.receivers.UVCCameraReceiver
+import ai.p2ach.p2achandroidvision.utils.CoroutineExtension
 import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
@@ -44,6 +45,7 @@ class CameraService : LifecycleService() {
     private val captureRepo: CaptureReportRepo by inject()
 
     val mdmRepo: MDMRepo by inject()
+
 
     private lateinit var uvcCameraReceiver: UVCCameraReceiver
 
@@ -86,6 +88,12 @@ class CameraService : LifecycleService() {
         uvcCameraReceiver.register()
 
         collectMDM()
+
+        CoroutineExtension.launch{
+            captureRepo.uploadPendingCaptures()
+        }
+
+
     }
 
 
@@ -147,6 +155,9 @@ class CameraService : LifecycleService() {
 
         captureRepo.bindHandler(h,mdmEntity)
         h.startStreaming()
+
+
+
     }
 
     private fun onUsbCameraAttached(device: UsbDevice) {

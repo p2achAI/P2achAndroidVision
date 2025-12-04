@@ -1,7 +1,11 @@
 package ai.p2ach.p2achandroidvision.repos.presign
 
 import ai.p2ach.p2achandroidvision.BuildConfig
+import ai.p2ach.p2achandroidvision.Const
 import ai.p2ach.p2achandroidvision.base.repos.BaseRepo
+import ai.p2ach.p2achandroidvision.database.AppDataBase
+import ai.p2ach.p2achandroidvision.repos.mdm.MDMEntity
+import androidx.room.withTransaction
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.emptyFlow
 import okhttp3.MediaType.Companion.toMediaType
@@ -30,11 +34,11 @@ interface PreSignApi {
     @POST(BuildConfig.PRESIGN_PATH)
     suspend fun getPreSignUrl(
         @Body body: PreSignRequest,
-        @Header("x-api-key") apiKey: String = BuildConfig.API_KEY
+        @Header(Const.REST_API.RETROFIT.HEADER.KEY.X_API_KEY) apiKey: String = BuildConfig.API_KEY
     ): PreSignResponse
 }
 
-class PreSignRepo : BaseRepo<Unit, PreSignApi>(PreSignApi::class) {
+class PreSignRepo() : BaseRepo<Unit, PreSignApi>(PreSignApi::class) {
 
     private val uploadClient by lazy { OkHttpClient() }
 
@@ -44,7 +48,7 @@ class PreSignRepo : BaseRepo<Unit, PreSignApi>(PreSignApi::class) {
         val service = api ?: return null
         return service.getPreSignUrl(
             PreSignRequest(
-                action = "upload",
+                action = Const.REST_API.RETROFIT.PRE_SIGN.ACTION.UPLOAD,
                 path = path,
                 content_type = contentType
             )
@@ -56,7 +60,7 @@ class PreSignRepo : BaseRepo<Unit, PreSignApi>(PreSignApi::class) {
         val request = Request.Builder()
             .url(url)
             .put(body)
-            .addHeader("Content-Type", contentType)
+            .addHeader(Const.REST_API.RETROFIT.HEADER.KEY.CONTENT_TYPE, contentType)
             .build()
 
         uploadClient.newCall(request).execute().use { response ->
@@ -64,9 +68,10 @@ class PreSignRepo : BaseRepo<Unit, PreSignApi>(PreSignApi::class) {
         }
     }
 
-    suspend fun uploadDisplayReportImage(captureId: String, file: File): Boolean {
-        val contentType = "image/jpeg"
-        val path = "display_report/images/$captureId"
+    suspend fun uploadCaptureReportImage(captureId: String, file: File, path:String): Boolean {
+
+        val contentType = Const.REST_API.RETROFIT.CONTENT_TYPE.IMAGE_JPEG
+        val path = "${Const.REST_API.RETROFIT.PATH.CAPTURE_REPORT_UPLOAD_PATH}$path/$captureId"
         val presign = requestUploadUrl(path, contentType) ?: return false
         return uploadFileToPresignedUrl(presign.url, file, contentType)
     }

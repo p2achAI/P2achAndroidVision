@@ -10,6 +10,7 @@ import ai.p2ach.p2achandroidvision.repos.camera.CaptureReportRepo
 import ai.p2ach.p2achandroidvision.repos.camera.handlers.InternalCameraHandler
 import ai.p2ach.p2achandroidvision.repos.camera.handlers.RTSPCameraHandler
 import ai.p2ach.p2achandroidvision.repos.camera.handlers.UVCCameraHandler
+import ai.p2ach.p2achandroidvision.repos.presign.PreSignRepo
 import ai.p2ach.p2achandroidvision.repos.receivers.watchdog.WatchdogScheduler
 import ai.p2ach.p2achandroidvision.utils.Log
 
@@ -31,9 +32,6 @@ import org.koin.dsl.module
 
 class P2achAndroidVisionApplication : Application() {
 
-
-
-
     val dbModule = module {
         single {
             Room.databaseBuilder(androidContext(), AppDataBase::class.java, Const.DB.NAME)
@@ -45,13 +43,12 @@ class P2achAndroidVisionApplication : Application() {
     }
 
 
-
-
     val repoModule = module {
 
         single { MDMRepo(androidContext(),get(), get()) }
         single { CameraServiceRepo(get()) }
         single { CaptureReportRepo(get(),get(),get()) }
+        single { PreSignRepo() }
     }
 
     val vmModule = module {
