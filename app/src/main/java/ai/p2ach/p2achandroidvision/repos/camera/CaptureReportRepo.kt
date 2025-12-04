@@ -9,6 +9,7 @@ import ai.p2ach.p2achandroidvision.repos.mdm.MDMEntity
 import ai.p2ach.p2achandroidvision.repos.presign.PreSignRepo
 import ai.p2ach.p2achandroidvision.utils.AlarmManagerUtil
 import ai.p2ach.p2achandroidvision.utils.CoroutineExtension
+import ai.p2ach.p2achandroidvision.utils.WorkerManagerUtil
 import ai.p2ach.p2achandroidvision.utils.parseTimeString
 import ai.p2ach.p2achandroidvision.utils.saveBitmapAsJpeg
 
@@ -19,6 +20,8 @@ import androidx.room.PrimaryKey
 import androidx.room.Entity
 import androidx.room.Query
 import androidx.room.withTransaction
+import androidx.work.CoroutineWorker
+import androidx.work.WorkerParameters
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -161,9 +164,10 @@ class CaptureReportRepo(
 
         if(targetCaptureCount>0 && capturedCount >= targetCaptureCount){
             scope.launch {
-                Log.d("CaptureReport targetCaptureCount : $targetCaptureCount  currCaptureCount $capturedCount cpature ended.")
+                Log.d("CaptureReport targetCaptureCount : $targetCaptureCount  currCaptureCount $capturedCount capture ended.")
                 captureCountInit()
-                uploadPendingCaptures()
+//                uploadPendingCaptures()
+                WorkerManagerUtil.enqueueUploadPendingCaptures(context)
             }
         }
     }
@@ -223,7 +227,15 @@ class CaptureReportRepo(
                     false
                 }
                 if (success) {
+
                     captureDao.upsert(captureReports.copy(isSended = true))
+
+                    val deleted = file.delete()
+                    if (deleted) {
+                        Log.d("CaptureReport file deleted: ${file.path}")
+                    } else {
+                        Log.e("CaptureReport file delete failed: ${file.path}")
+                    }
                 }
             }
 
@@ -232,4 +244,23 @@ class CaptureReportRepo(
 
     }
 
+}
+
+
+class UploadPendingCaptureReportsWorker(
+    appContext: Context,
+    params: WorkerParameters,
+  ) : CoroutineWorker(appContext, params) , KoinComponent{
+
+    private val captureReportRepo : CaptureReportRepo by inject()
+
+    override suspend fun doWork(): Result {
+        return try {
+            captureReportRepo.uploadPendingCaptures()
+            Result.success()
+        } catch (t: Throwable) {
+            Log.d("CaptureReport worker failed : ${t.message}")
+            Result.retry()
+        }
+    }
 }

@@ -7,6 +7,7 @@ import ai.p2ach.p2achandroidvision.repos.mdm.MDMHandlers
 import ai.p2ach.p2achandroidvision.repos.mdm.MDMRepo
 import ai.p2ach.p2achandroidvision.repos.camera.CameraServiceRepo
 import ai.p2ach.p2achandroidvision.repos.camera.CaptureReportRepo
+import ai.p2ach.p2achandroidvision.repos.camera.UploadPendingCaptureReportsWorker
 import ai.p2ach.p2achandroidvision.repos.camera.handlers.InternalCameraHandler
 import ai.p2ach.p2achandroidvision.repos.camera.handlers.RTSPCameraHandler
 import ai.p2ach.p2achandroidvision.repos.camera.handlers.UVCCameraHandler
@@ -26,6 +27,7 @@ import com.orhanobut.logger.AndroidLogAdapter
 import com.orhanobut.logger.Logger
 import org.koin.android.ext.koin.androidContext
 import org.koin.androidx.viewmodel.dsl.viewModel
+import org.koin.androidx.workmanager.dsl.worker
 import org.koin.core.context.startKoin
 import org.koin.dsl.module
 
@@ -77,8 +79,10 @@ class P2achAndroidVisionApplication : Application() {
         }
     }
 
-    val managerModule = module{
-
+    val workerModule = module{
+            worker {
+                UploadPendingCaptureReportsWorker(get (),get() )
+            }
 
     }
 
@@ -107,7 +111,7 @@ class P2achAndroidVisionApplication : Application() {
 //            /*Android System Logger*/
 //            androidLogger(org.koin.core.logger.Level.DEBUG)
             androidContext(this@P2achAndroidVisionApplication)
-            modules(dbModule,repoModule,vmModule, mdmModule, systemModule, managerModule)
+            modules(dbModule,repoModule,vmModule, mdmModule, systemModule, workerModule)
         }
         Logger.addLogAdapter(AndroidLogAdapter())
         WatchdogScheduler.start(this)

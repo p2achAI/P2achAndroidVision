@@ -5,7 +5,11 @@ import ai.p2ach.p2achandroidvision.Const
 import ai.p2ach.p2achandroidvision.base.repos.BaseRepo
 import ai.p2ach.p2achandroidvision.database.AppDataBase
 import ai.p2ach.p2achandroidvision.repos.mdm.MDMEntity
+import ai.p2ach.p2achandroidvision.utils.Log
+import android.content.Context
 import androidx.room.withTransaction
+import androidx.work.CoroutineWorker
+import androidx.work.WorkerParameters
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.emptyFlow
 import okhttp3.MediaType.Companion.toMediaType
@@ -55,7 +59,7 @@ class PreSignRepo() : BaseRepo<Unit, PreSignApi>(PreSignApi::class) {
         )
     }
 
-    suspend fun uploadFileToPresignedUrl(url: String, file: File, contentType: String): Boolean {
+    suspend fun uploadFileToPresignedUrl(url: String, file: File, contentType: String, where : String): Boolean {
         val body = file.asRequestBody(contentType.toMediaType())
         val request = Request.Builder()
             .url(url)
@@ -64,6 +68,7 @@ class PreSignRepo() : BaseRepo<Unit, PreSignApi>(PreSignApi::class) {
             .build()
 
         uploadClient.newCall(request).execute().use { response ->
+            Log.d("$where $response")
             return response.isSuccessful
         }
     }
@@ -73,6 +78,14 @@ class PreSignRepo() : BaseRepo<Unit, PreSignApi>(PreSignApi::class) {
         val contentType = Const.REST_API.RETROFIT.CONTENT_TYPE.IMAGE_JPEG
         val path = "${Const.REST_API.RETROFIT.PATH.CAPTURE_REPORT_UPLOAD_PATH}$path/$captureId"
         val presign = requestUploadUrl(path, contentType) ?: return false
-        return uploadFileToPresignedUrl(presign.url, file, contentType)
+        return uploadFileToPresignedUrl(presign.url, file, contentType,"CaptureReport")
     }
+
+
+
+
 }
+
+
+
+
