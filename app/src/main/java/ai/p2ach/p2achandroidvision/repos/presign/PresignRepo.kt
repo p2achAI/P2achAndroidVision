@@ -1,5 +1,6 @@
 package ai.p2ach.p2achandroidvision.repos.presign
 
+import ai.p2ach.p2achandroidvision.BuildConfig
 import ai.p2ach.p2achandroidvision.base.repos.BaseRepo
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.emptyFlow
@@ -26,10 +27,10 @@ data class PreSignResponse(
 
 interface PreSignApi {
 
-    @POST("display-report-presign-prod")
+    @POST(BuildConfig.PRESIGN_PATH)
     suspend fun getPreSignUrl(
         @Body body: PreSignRequest,
-        @Header("x-api-key") apiKey: String = "WbEl2exBfiaYj5ew7eUQO2r94Jq1MTNXy58TXbcc"
+        @Header("x-api-key") apiKey: String = BuildConfig.API_KEY
     ): PreSignResponse
 }
 

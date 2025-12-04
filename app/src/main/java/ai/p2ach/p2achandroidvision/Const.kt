@@ -9,6 +9,14 @@ interface Const {
             companion object{
                 const val TIME_OUT=1000L
             }
+
+            interface PRE_SIGN{
+               interface ACTION{
+                   companion object{
+                       const val UPLOAD="upload"
+                   }
+               }
+            }
         }
 
     }

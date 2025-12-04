@@ -51,6 +51,9 @@ android {
                 )
             }
         }
+
+        buildConfigField("String", "API_URL", "\"https://k50o0i0a90.execute-api.ap-northeast-2.amazonaws.com/prod/\"")
+        buildConfigField("String", "API_KEY", "\"shtQsXianY2bELEiqxKIB7u9ZtfekTT287EC4jxJ\"")
     }
 
 
@@ -75,20 +78,12 @@ android {
             applicationIdSuffix = ".dev"
             versionNameSuffix = "dev"
 
-            buildConfigField("String", "API_URL", "\"https://k50o0i0a90.execute-api.ap-northeast-2.amazonaws.com/prod/\"")
-            buildConfigField("String", "API_KEY", "\"CKQGF74aKl5Y8ArgPUpwF6Wt8fZvk3fM6ouAvGiU\"")
-
-            // presign endpoint only
             buildConfigField("String", "PRESIGN_PATH", "\"display-report-presign-dev\"")
         }
 
         create("prod") {
             dimension = "environment"
 
-            buildConfigField("String", "API_URL", "\"https://k50o0i0a90.execute-api.ap-northeast-2.amazonaws.com/prod/\"")
-            buildConfigField("String", "API_KEY", "\"shtQsXianY2bELEiqxKIB7u9ZtfekTT287EC4jxJ\"")
-
-            // presign endpoint only
             buildConfigField("String", "PRESIGN_PATH", "\"display-report-presign-prod\"")
         }
     }

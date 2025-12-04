@@ -14,8 +14,8 @@ import ai.p2ach.p2achandroidvision.utils.saveBitmapAsJpeg
 import android.content.Context
 import android.graphics.Bitmap
 import androidx.room.Dao
-import androidx.room.Entity
 import androidx.room.PrimaryKey
+import androidx.room.Entity
 import androidx.room.Query
 import androidx.room.withTransaction
 import kotlinx.coroutines.CoroutineScope
