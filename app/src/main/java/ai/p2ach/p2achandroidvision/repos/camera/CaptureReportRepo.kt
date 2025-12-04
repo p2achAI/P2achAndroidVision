@@ -105,21 +105,20 @@ class CaptureReportRepo(
     fun bindHandler(handler: BaseCameraHandler, mdmEntity: MDMEntity?) {
 
         val captureReport = mdmEntity?.captureReport
-        if(captureReport?.startTime.isNullOrEmpty() ||
+        if (captureReport?.startTime.isNullOrEmpty() ||
             captureReport.captureInterval == null
             || captureReport.captureCount == null
-            ||captureReport.captureInterval ==-1L
-            ||captureReport.captureCount == -1
-            ) return
+            || captureReport.captureInterval == -1L
+            || captureReport.captureCount == -1
+        ) return
 
 
-        targetCaptureCount = captureReport.captureCount?:-1
-        capturedCount =0;
+        targetCaptureCount = captureReport.captureCount ?: -1
+        capturedCount = 0;
 
-        Log.w("bindHandler ${captureReport}")
 
         frameCollectJob?.cancel()
-        frameCollectJob = scope.launch{
+        frameCollectJob = scope.launch {
             handler.frames.collect { bmp ->
                 setFrame(bmp)
             }
@@ -140,7 +139,7 @@ class CaptureReportRepo(
         var (h,m,s) =mdmEntity?.captureReport?.startTime?.parseTimeString() ?: Triple(-1,-1,-1)
 
 
-        Log.w("startCaptureReportAlarm $h : $m : $s start. " +
+        Log.w("CaptureReport startCaptureReportAlarm $h : $m : $s start. " +
                 "captureInterval -> ${mdmEntity?.captureReport?.captureInterval} " +
                 "captureCount -> ${mdmEntity?.captureReport?.captureCount}")
 
@@ -217,7 +216,6 @@ class CaptureReportRepo(
             pending.forEach { captureReports ->
                 val file = File(captureReports.capturePath)
                 if (!file.exists()) {
-                    Log.e("CaptureReport", "file not found: ${captureReports.capturePath}")
                     return@forEach
                 }
                 val success = runCatching {
