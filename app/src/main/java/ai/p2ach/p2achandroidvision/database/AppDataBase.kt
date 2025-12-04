@@ -1,7 +1,7 @@
 package ai.p2ach.p2achandroidvision.database
 
 import ai.p2ach.p2achandroidvision.repos.camera.CaptureDao
-import ai.p2ach.p2achandroidvision.repos.camera.CaptureEntity
+import ai.p2ach.p2achandroidvision.repos.camera.CaptureReportEntity
 import ai.p2ach.p2achandroidvision.repos.mdm.MDMDao
 import ai.p2ach.p2achandroidvision.repos.mdm.MDMEntity
 import ai.p2ach.p2achandroidvision.repos.mdm.MDMConverters
@@ -10,7 +10,7 @@ import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
 
 @Database(
-    entities = [MDMEntity::class, CaptureEntity::class],
+    entities = [MDMEntity::class, CaptureReportEntity::class],
     version = 1,
     exportSchema = false
 )

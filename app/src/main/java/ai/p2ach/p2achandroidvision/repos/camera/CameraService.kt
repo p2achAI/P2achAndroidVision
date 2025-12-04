@@ -89,9 +89,6 @@ class CameraService : LifecycleService() {
 
         collectMDM()
 
-        CoroutineExtension.launch{
-            captureRepo.uploadPendingCaptures()
-        }
 
 
     }
