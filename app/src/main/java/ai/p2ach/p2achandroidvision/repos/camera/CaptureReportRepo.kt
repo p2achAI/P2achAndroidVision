@@ -27,8 +27,9 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import java.io.File
@@ -70,6 +71,14 @@ interface CaptureApi{
 
 }
 
+data class CaptureReportStatus(
+    val startTime: String? = null,
+    val currentCaptureCount: Int = 0,
+    val targetCaptureCount: Int = 0,
+    val uploadedCount: Int = 0,
+    val uploadTargetCount: Int = 0
+)
+
 class CaptureReportRepo(
     private val context: Context,
     private val db: AppDataBase,
@@ -88,6 +97,10 @@ class CaptureReportRepo(
     private var capturedCount: Int = 0
 
 
+    private val _status = MutableStateFlow(CaptureReportStatus())
+    val status: StateFlow<CaptureReportStatus> = _status
+
+
 
     private val presignRepo : PreSignRepo by inject()
 
@@ -102,7 +115,9 @@ class CaptureReportRepo(
         db.withTransaction { captureDao.clearAll() }
     }
 
-    fun bindHandler(handler: BaseCameraHandler, mdmEntity: MDMEntity?) {
+    fun bindHandler(handler: BaseCameraHandler?, mdmEntity: MDMEntity?) {
+
+        if(handler == null) return
 
         val captureReport = mdmEntity?.captureReport
         if (captureReport?.startTime.isNullOrEmpty() ||
@@ -115,6 +130,15 @@ class CaptureReportRepo(
 
         targetCaptureCount = captureReport.captureCount ?: -1
         capturedCount = 0;
+
+        _status.value = CaptureReportStatus(
+            startTime = captureReport.startTime,
+            currentCaptureCount = 0,
+            targetCaptureCount = targetCaptureCount,
+            uploadedCount = 0,
+            uploadTargetCount = 0
+        )
+
 
 
         frameCollectJob?.cancel()
@@ -131,6 +155,11 @@ class CaptureReportRepo(
 
         targetCaptureCount = 0;
         capturedCount =0;
+
+        _status.value = _status.value.copy(
+            currentCaptureCount = 0,
+            targetCaptureCount = 0
+        )
     }
 
     private fun startCaptureReportAlarm(mdmEntity: MDMEntity?) {
@@ -197,6 +226,10 @@ class CaptureReportRepo(
             Log.d("CaptureReport db save $captureReportEntity")
             captureDao.upsert(captureReportEntity).runCatching {
                 capturedCount ++
+                _status.value = _status.value.copy(
+                    currentCaptureCount = capturedCount,
+                    targetCaptureCount = mdmEntity?.captureReport?.captureCount?:0
+                )
                 captureEnded()
             }
 
@@ -208,10 +241,18 @@ class CaptureReportRepo(
 
     suspend fun uploadPendingCaptures() {
 
+        var successCount = 0;
+
         db.withTransaction {
             captureDao.deleteSended()
             val pending = captureDao.getPending()
             if (pending.isEmpty()) return@withTransaction
+
+
+            _status.value = _status.value.copy(
+                uploadedCount = successCount,
+                uploadTargetCount = pending.size
+            )
 
             pending.forEach { captureReports ->
                 val file = File(captureReports.capturePath)
@@ -225,6 +266,7 @@ class CaptureReportRepo(
                     false
                 }
                 if (success) {
+                    successCount++
 
                     captureDao.upsert(captureReports.copy(isSended = true))
 
@@ -234,6 +276,11 @@ class CaptureReportRepo(
                     } else {
                         Log.e("CaptureReport file delete failed: ${file.path}")
                     }
+
+                    _status.value = _status.value.copy(
+                        uploadedCount = successCount,
+                        uploadTargetCount = _status.value.uploadTargetCount
+                    )
                 }
             }
 

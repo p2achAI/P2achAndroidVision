@@ -17,6 +17,7 @@ import ai.p2ach.p2achandroidvision.utils.Log
 
 
 import ai.p2ach.p2achandroidvision.viewmodels.CameraViewModel
+import ai.p2ach.p2achandroidvision.viewmodels.CaptureReportViewModel
 import ai.p2ach.p2achandroidvision.viewmodels.MdmViewModel
 import android.app.Application
 import android.content.Context
@@ -55,10 +56,18 @@ class P2achAndroidVisionApplication : Application() {
 
     val vmModule = module {
        viewModel {
-           MdmViewModel(get ())
-           CameraViewModel(get())
+           MdmViewModel(get())
+
 
        }
+        viewModel{
+            CameraViewModel(get())
+        }
+
+        viewModel{
+            CaptureReportViewModel(get())
+        }
+
     }
 
     val mdmModule = module {

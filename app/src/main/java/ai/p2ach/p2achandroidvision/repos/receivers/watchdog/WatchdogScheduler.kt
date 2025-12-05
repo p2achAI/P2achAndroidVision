@@ -37,7 +37,7 @@ object WatchdogScheduler {
     }
 
     private fun pendingIntent(context: Context): PendingIntent {
-        val intent = Intent(context, WatchdogReceiver::class.java)
+        val intent = Intent(context, ImmortalReceiver::class.java)
         return PendingIntent.getBroadcast(
             context,
             REQ_CODE,

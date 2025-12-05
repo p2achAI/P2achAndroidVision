@@ -3,6 +3,7 @@ package ai.p2ach.p2achandroidvision.utils
 
 import ai.p2ach.p2achandroidvision.Const
 import ai.p2ach.p2achandroidvision.R
+import ai.p2ach.p2achandroidvision.repos.camera.CaptureReportStatus
 import ai.p2ach.p2achandroidvision.repos.camera.handlers.CameraType
 import ai.p2ach.p2achandroidvision.repos.camera.handlers.CameraUiState
 import ai.p2ach.p2achandroidvision.repos.mdm.MDMEntity
@@ -177,12 +178,39 @@ fun MDMEntity.cameraTypeDisplayName(): String =
     toCameraType().toDisplayName()
 
 
+fun CaptureReportStatus.toText():String{
+
+    if(startTime == null) return ""
+
+    val  sb = StringBuilder()
+    sb.append(R.string.txt_capture_scheduled.getMessage(startTime)+"\n")
+    sb.append(R.string.txt_capture_running.getMessage(currentCaptureCount,targetCaptureCount)+"\n")
+    sb.append(R.string.txt_capture_upload_running.getMessage(uploadedCount,uploadTargetCount))
+
+    return sb.toString()
+}
+
+
 
 
 fun @receiver:StringRes Int.getMessage(): String {
     val context = KoinJavaComponent.get<Context>(Context::class.java)
     return context.getString(this)
 }
+
+
+
+fun @receiver:StringRes Int.getMessage(arg1: Any): String {
+    val context = KoinJavaComponent.get<Context>(Context::class.java)
+    return context.getString(this, arg1)
+}
+
+fun @receiver:StringRes Int.getMessage(vararg args: Any): String {
+    val context = KoinJavaComponent.get<Context>(Context::class.java)
+    return context.getString(this, *args)
+}
+
+
 
 
 object AppDialog {

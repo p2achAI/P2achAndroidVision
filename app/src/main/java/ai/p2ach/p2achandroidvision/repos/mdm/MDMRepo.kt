@@ -187,7 +187,9 @@ data class CaptureReport(
     var startTime : String?="",
     var captureInterval : Long?=-1L,
     var captureCount: Int?=-1,
-    )
+    ){
+
+}
 
 
 

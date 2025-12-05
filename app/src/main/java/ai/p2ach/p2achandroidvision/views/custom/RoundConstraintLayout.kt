@@ -2,6 +2,7 @@ package ai.p2ach.p2achandroidvision.views.common
 
 import android.content.Context
 import android.graphics.Color
+import android.graphics.drawable.ColorDrawable
 import android.graphics.drawable.GradientDrawable
 import android.util.AttributeSet
 import androidx.constraintlayout.widget.ConstraintLayout
@@ -16,17 +17,29 @@ class RoundConstraintLayout @JvmOverloads constructor(
     private val bg = GradientDrawable()
 
     init {
-        val a = context.obtainStyledAttributes(attrs, R.styleable.RoundConstraintLayout)
+        val a = context.obtainStyledAttributes(
+            attrs,
+            R.styleable.RoundConstraintLayout,
+            defStyleAttr,
+            0
+        )
 
         val radius = a.getDimension(
             R.styleable.RoundConstraintLayout_rcl_cornerRadius,
-            dp(12f)               // RoundTextView 와 동일한 기본값 적용
+            dp(12f)
         )
 
-        val bgColor = a.getColor(
-            R.styleable.RoundConstraintLayout_rcl_backgroundColor,
-            Color.parseColor("#66000000")   // RoundTextView 와 비슷한 semi black
-        )
+        val hasBgColor = a.hasValue(R.styleable.RoundConstraintLayout_rcl_backgroundColor)
+
+        val bgColor = if (hasBgColor) {
+            a.getColor(
+                R.styleable.RoundConstraintLayout_rcl_backgroundColor,
+                Color.TRANSPARENT
+            )
+        } else {
+            // 레이아웃에서 android:background 로 준 색이 있으면 그걸 사용
+            (background as? ColorDrawable)?.color ?: Color.TRANSPARENT
+        }
 
         val strokeColor = a.getColor(
             R.styleable.RoundConstraintLayout_rcl_strokeColor,
@@ -50,7 +63,6 @@ class RoundConstraintLayout @JvmOverloads constructor(
 
         background = bg
 
-        // RoundTextView 기본 padding 과 동일하게
         val defaultPadding = dp(8f).toInt()
         if (paddingLeft == 0 && paddingTop == 0 && paddingRight == 0 && paddingBottom == 0) {
             setPadding(defaultPadding, defaultPadding, defaultPadding, defaultPadding)

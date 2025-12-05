@@ -12,7 +12,9 @@ import ai.p2ach.p2achandroidvision.databinding.FragmentCameraBinding
 import ai.p2ach.p2achandroidvision.utils.getCameraStatusMessage
 import ai.p2ach.p2achandroidvision.utils.toCameraType
 import ai.p2ach.p2achandroidvision.utils.toDisplayName
+import ai.p2ach.p2achandroidvision.utils.toText
 import ai.p2ach.p2achandroidvision.viewmodels.CameraViewModel
+import ai.p2ach.p2achandroidvision.viewmodels.CaptureReportViewModel
 import ai.p2ach.p2achandroidvision.views.common.StatusLightView
 
 import android.graphics.Bitmap
@@ -35,6 +37,7 @@ import org.koin.androidx.viewmodel.ext.android.viewModel
 class FragmentCamera : BaseFragment<FragmentCameraBinding>() {
 
     private val cameraViewModel: CameraViewModel by viewModel()
+    private val captureReportViewModel : CaptureReportViewModel by viewModel()
 
     private var surfaceReady = false
     private var inputWidth = 0f
@@ -100,8 +103,19 @@ class FragmentCamera : BaseFragment<FragmentCameraBinding>() {
                 cameraViewModel.mdmFlow.distinctUntilChanged().collect {
                     mdm->
                     tvCameraType.text  = mdm.toCameraType().toDisplayName()
+
                 }
             }
+
+            viewLifecycleOwner.lifecycleScope.launch {
+                captureReportViewModel.captureReportStatus.collect {
+                    captureReportStatus ->
+                    if(captureReportStatus.startTime ==null) return@collect
+                    Log.d("captureReportStatus $captureReportStatus")
+                    tvCaptureReportStatus.text = captureReportStatus.toText()
+                }
+            }
+
 
         }
     }

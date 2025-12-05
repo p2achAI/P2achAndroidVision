@@ -114,14 +114,16 @@ class CameraService : LifecycleService() {
     private fun collectMDM() {
         lifecycleScope.launch {
             mdmRepo.stream().distinctUntilChanged().collect { mdmEntity ->
+                Log.d("MDM collect $mdmEntity")
                 applyCameraType(mdmEntity.toCameraType(),mdmEntity)
+                captureRepo.bindHandler(handler,mdmEntity)
             }
         }
     }
 
 
 
-    private fun applyCameraType(type: CameraType,mdmEntity: MDMEntity?) {
+    private fun applyCameraType(type: CameraType,mdmEntity: MDMEntity?)  {
         Log.d("CameraService applyCameraType currType=$currentType newType=$type")
         if (currentType == type) return
         currentType = type
@@ -153,7 +155,7 @@ class CameraService : LifecycleService() {
             }
         }
 
-        captureRepo.bindHandler(h,mdmEntity)
+
         h.startStreaming()
 
 

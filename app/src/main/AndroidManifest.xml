@@ -100,7 +100,7 @@
         </service>
 
         <receiver
-            android:name=".repos.receivers.watchdog.WatchdogReceiver"
+            android:name=".repos.receivers.watchdog.ImmortalReceiver"
             android:exported="false"
             android:process=":watchdog" />
 

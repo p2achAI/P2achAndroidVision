@@ -18,6 +18,9 @@
 
     <color name="blue_opacity_90">#900000FF</color>
     <color name="sky_blue_opacity_90">#9087CEEB</color>
+    <color name="sky_blue_opacity_40">#2087CEEB</color>
+
     <color name="gray_opacity_90">#90808080</color>
+    <color name="gray_opacity_40">#20808080</color>
 
 </resources>
