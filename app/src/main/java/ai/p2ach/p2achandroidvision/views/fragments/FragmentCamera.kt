@@ -7,18 +7,17 @@ package ai.p2ach.p2achandroidvision.views.fragments
 import ai.p2ach.p2achandroidvision.utils.Log
 import ai.p2ach.p2achandroidvision.base.fragments.BaseFragment
 import ai.p2ach.p2achandroidvision.databinding.FragmentCameraBinding
-import ai.p2ach.p2achandroidvision.repos.camera.handlers.CameraType
+
 
 import ai.p2ach.p2achandroidvision.utils.getCameraStatusMessage
 import ai.p2ach.p2achandroidvision.utils.toCameraType
 import ai.p2ach.p2achandroidvision.utils.toDisplayName
 import ai.p2ach.p2achandroidvision.viewmodels.CameraViewModel
-import android.content.Context
+
 import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Matrix
-import android.graphics.PixelFormat
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper

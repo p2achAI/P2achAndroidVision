@@ -9,4 +9,20 @@
         <attr name="rtvStrokeWidth" format="dimension" />
         <attr name="rtvStrokeColor" format="color" />
     </declare-styleable>
+
+
+    <declare-styleable name="RoundConstraintLayout">
+        <attr name="rcl_cornerRadius" format="dimension" />
+        <attr name="rcl_backgroundColor" format="color" />
+        <attr name="rcl_strokeColor" format="color" />
+        <attr name="rcl_strokeWidth" format="dimension" />
+    </declare-styleable>
+
+    <declare-styleable name="StatusLightView">
+        <attr name="slv_connectedColor" format="color" />
+        <attr name="slv_disconnectedColor" format="color" />
+        <attr name="slv_connectingColor" format="color" />
+    </declare-styleable>
+
+
 </resources>
