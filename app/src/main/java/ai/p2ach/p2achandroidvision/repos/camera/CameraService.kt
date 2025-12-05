@@ -166,6 +166,10 @@ class CameraService : LifecycleService() {
         if (currentType == CameraType.UVC) {
             uvcCameraHandler.startStreaming()
         }
+
+        if(currentType == CameraType.INTERNAL){
+            internalCameraHandler.startStreaming()
+        }
     }
 
     private fun onUsbCameraDetached(device: UsbDevice) {
@@ -173,7 +177,15 @@ class CameraService : LifecycleService() {
 
         if (currentType == CameraType.UVC) {
             uvcCameraHandler.stopStreaming()
+            uvcCameraHandler.onDisconnected()
         }
+
+        if(currentType == CameraType.INTERNAL){
+            internalCameraHandler.stopStreaming()
+            internalCameraHandler.onDisconnected()
+        }
+
+
     }
 
     private fun startForegroundWithNotification() {

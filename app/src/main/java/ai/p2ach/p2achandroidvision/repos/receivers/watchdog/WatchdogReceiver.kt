@@ -2,6 +2,7 @@ package ai.p2ach.p2achandroidvision.repos.receivers.watchdog
 
 
 
+import ai.p2ach.p2achandroidvision.utils.Log
 import ai.p2ach.p2achandroidvision.views.activities.ActivityMain
 import android.app.ActivityManager
 import android.content.BroadcastReceiver
@@ -17,12 +18,12 @@ class WatchdogReceiver : BroadcastReceiver() {
 
         if (!isMainProcessAlive(context)) {
 
-//            Log.d("WatchdogReceiver Main is destroyed. restart..")
-//
-//            val i = Intent(context, ActivityMain::class.java).apply {
-//                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
-//            }
-//            context.startActivity(i)
+            Log.d("WatchdogReceiver Main is destroyed. restart..")
+
+            val i = Intent(context, ActivityMain::class.java).apply {
+                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
+            }
+            context.startActivity(i)
         }
     }
 

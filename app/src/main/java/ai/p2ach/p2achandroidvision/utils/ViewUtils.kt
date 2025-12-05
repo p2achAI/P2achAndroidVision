@@ -112,6 +112,8 @@ object MdmLabelMaps {
 
 fun getCameraStatusMessage(cameraUiState: CameraUiState) : String{
 
+    Log.d("getCameraStatusMessage $cameraUiState")
+
     return when(cameraUiState){
 
         is CameraUiState.Error ->
@@ -121,15 +123,23 @@ fun getCameraStatusMessage(cameraUiState: CameraUiState) : String{
             CameraType.INTERNAL ->R.string.txt_error_connecting_internal.getMessage()
             CameraType.NONE -> R.string.txt_error_connecting_unknown.getMessage()
         }
-        is CameraUiState.Idle -> R.string.txt_progress_connecting_unknown.getMessage()
+
         is CameraUiState.Connected -> ""
-        is CameraUiState.Stoped -> ""
-        is CameraUiState.Connecting -> {
+        is CameraUiState.Disconnected ->{
             when(cameraUiState.type){
                 CameraType.UVC -> R.string.txt_error_connecting_uvc.getMessage()
                 CameraType.RTSP -> R.string.txt_error_connecting_rtsp.getMessage()
                 CameraType.INTERNAL -> R.string.txt_error_connecting_internal.getMessage()
                 CameraType.NONE -> R.string.txt_error_connecting_unknown.getMessage()
+            }
+        }
+        is CameraUiState.Stoped -> ""
+        is CameraUiState.Connecting -> {
+            when(cameraUiState.type){
+                CameraType.UVC -> R.string.txt_progress_connecting_uvc.getMessage()
+                CameraType.RTSP -> R.string.txt_progress_connecting_rtsp.getMessage()
+                CameraType.INTERNAL -> R.string.txt_progress_connecting_internal.getMessage()
+                CameraType.NONE -> R.string.txt_progress_connecting_unknown.getMessage()
 
             }
         }
@@ -141,6 +151,7 @@ fun getCameraStatusMessage(cameraUiState: CameraUiState) : String{
                 CameraType.NONE -> R.string.txt_progress_switch_unknown.getMessage()
             }
         }
+        is CameraUiState.Idle ->""
     }
 }
 

@@ -46,7 +46,7 @@ class InternalCameraHandler(
 
     private var lastFrameTimestamp: Long = System.currentTimeMillis()
     private var healthCheckerJob: Job? = null
-    private var lastStatus: String = "unknown"
+
 
 
 
@@ -59,11 +59,9 @@ class InternalCameraHandler(
 
             try {
                 createCameraPreviewSession()
-                lastStatus = "internal_opened"
                 lastFrameTimestamp = System.currentTimeMillis()
-                startHealthChecker()
             } catch (e: Throwable) {
-                lastStatus = "internal_access_failed"
+
                 stopCamera()
             }
         }
@@ -71,13 +69,14 @@ class InternalCameraHandler(
         override fun onDisconnected(camera: CameraDevice) {
 
             stopCamera()
-            lastStatus = "internal_disconnected"
+            onDisconnected()
         }
 
         override fun onError(camera: CameraDevice, error: Int) {
 
             stopCamera()
-            lastStatus = "internal_error_$error"
+            errorStreaming(error.toString())
+
         }
     }
 
@@ -94,6 +93,8 @@ class InternalCameraHandler(
         stopCamera()
 
     }
+
+
 
     override fun pause() {
         super.pause()
@@ -117,9 +118,9 @@ class InternalCameraHandler(
         try {
             val request = builder.build()
             session.setRepeatingRequest(request, null, backgroundHandler)
-            lastStatus = "internal_opened"
+
         } catch (_: Throwable) {
-            lastStatus = "internal_resume_failed"
+
         }
     }
 
@@ -223,15 +224,15 @@ class InternalCameraHandler(
         } catch (_: SecurityException) {
 
             isStarted = false
-            lastStatus = "internal_permission_denied"
+
         } catch (_: CameraAccessException) {
 
             isStarted = false
-            lastStatus = "internal_open_failed"
+
         } catch (_: Throwable) {
 
             isStarted = false
-            lastStatus = "internal_unknown_error"
+
         }
     }
 
@@ -281,18 +282,18 @@ class InternalCameraHandler(
                         try {
                             session.setRepeatingRequest(req, null, backgroundHandler)
                         } catch (_: Throwable) {
-                            lastStatus = "internal_configure_failed"
+
                         }
                     }
 
                     override fun onConfigureFailed(session: CameraCaptureSession) {
-                        lastStatus = "internal_configure_failed"
+
                     }
                 },
                 backgroundHandler
             )
         } catch (_: Throwable) {
-            lastStatus = "internal_configure_exception"
+
         }
     }
 
@@ -379,22 +380,5 @@ class InternalCameraHandler(
         stopBackgroundThread()
     }
 
-    private fun startHealthChecker() {
-        healthCheckerJob?.cancel()
-        healthCheckerJob = CoroutineExtension.launch{
-            while (isStarted) {
-                delay(10_000)
-                val diff = System.currentTimeMillis() - lastFrameTimestamp
-                if (diff > 30_000) {
-                    if (lastStatus != "internal_timeout") {
-                        lastStatus = "internal_timeout"
-                    }
-                } else {
-                    if (lastStatus != "internal_opened") {
-                        lastStatus = "internal_opened"
-                    }
-                }
-            }
-        }
-    }
+
 }

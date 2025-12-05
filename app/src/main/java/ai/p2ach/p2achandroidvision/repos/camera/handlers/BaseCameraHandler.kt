@@ -18,6 +18,7 @@ sealed class CameraUiState {
     data class Switching(val type: CameraType) : CameraUiState()
     data class Connecting(val type: CameraType) : CameraUiState()
     data class Connected(val type: CameraType) : CameraUiState()
+    data class Disconnected(val type: CameraType) : CameraUiState()
     data class Stoped(val type: CameraType) : CameraUiState()
     data class Error(val type: CameraType, val message: String? = null) : CameraUiState()
 }
@@ -33,8 +34,10 @@ enum class CameraType {
 interface CameraHandler {
     fun startStreaming()
     fun stopStreaming()
-
     fun errorStreaming(msg:String)
+
+    fun onConnected()
+    fun onDisconnected()
 
     fun pause()
     fun resume()
@@ -99,6 +102,19 @@ abstract class BaseCameraHandler(
     override fun errorStreaming(msg: String) {
         setCameraState(CameraUiState.Error(type,msg))
     }
+
+
+    override fun onConnected() {
+        setCameraState(CameraUiState.Connected(type))
+    }
+
+    override fun onDisconnected() {
+        setCameraState(CameraUiState.Disconnected(type))
+    }
+
+
+
+
 
 
 

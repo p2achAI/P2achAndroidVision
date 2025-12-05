@@ -91,7 +91,6 @@ class FragmentCamera : BaseFragment<FragmentCameraBinding>() {
                         preview.visibility = View.GONE
                         tvProgress.text = message
                         slvStatus.state = StatusLightView.State.DISCONNECTED
-
                     }
 
                 }
