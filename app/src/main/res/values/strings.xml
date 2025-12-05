@@ -34,7 +34,9 @@
     <string name="txt_error_connecting_rtsp">RTSP Url을 확인해 주세요.</string>
     <string name="txt_error_connecting_internal">내장 카메라 상태를 확인해 주세요.</string>
 
-
+    <string name="txt_camera_type_uvc">UVC Camera</string>
+    <string name="txt_camera_type_internal">Internal Camera</string>
+    <string name="txt_camera_type_rtsp">RTSP Camera</string>
 
 
 

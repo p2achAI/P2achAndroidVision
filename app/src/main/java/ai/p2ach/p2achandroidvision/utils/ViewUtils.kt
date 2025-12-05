@@ -147,7 +147,6 @@ fun getCameraStatusMessage(cameraUiState: CameraUiState) : String{
 
 
 
-
 fun @receiver:StringRes Int.getMessage(): String {
     val context = KoinJavaComponent.get<Context>(Context::class.java)
     return context.getString(this)

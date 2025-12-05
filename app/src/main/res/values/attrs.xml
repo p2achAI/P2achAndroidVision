@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="RoundTextView">
+        <attr name="rtvCornerRadius" format="dimension" />
+        <attr name="rtvBgColor" format="color" />
+        <attr name="rtvTextColor" format="color" />
+        <attr name="rtvHorizontalPadding" format="dimension" />
+        <attr name="rtvVerticalPadding" format="dimension" />
+        <attr name="rtvStrokeWidth" format="dimension" />
+        <attr name="rtvStrokeColor" format="color" />
+    </declare-styleable>
+</resources>

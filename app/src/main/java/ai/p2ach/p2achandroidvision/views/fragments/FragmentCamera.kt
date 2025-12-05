@@ -7,9 +7,11 @@ package ai.p2ach.p2achandroidvision.views.fragments
 import ai.p2ach.p2achandroidvision.utils.Log
 import ai.p2ach.p2achandroidvision.base.fragments.BaseFragment
 import ai.p2ach.p2achandroidvision.databinding.FragmentCameraBinding
+import ai.p2ach.p2achandroidvision.repos.camera.handlers.CameraType
 
 import ai.p2ach.p2achandroidvision.utils.getCameraStatusMessage
 import ai.p2ach.p2achandroidvision.viewmodels.CameraViewModel
+import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.Color
@@ -39,8 +41,6 @@ class FragmentCamera : BaseFragment<FragmentCameraBinding>() {
 
         autoBinding {
 
-            preview.setZOrderOnTop(true)
-            preview.holder.setFormat(PixelFormat.TRANSLUCENT)
 
             preview.holder.addCallback(object : SurfaceHolder.Callback {
                 override fun surfaceCreated(holder: SurfaceHolder) {
@@ -53,7 +53,14 @@ class FragmentCamera : BaseFragment<FragmentCameraBinding>() {
                     surfaceReady = false
                 }
 
-                override fun surfaceChanged(holder: SurfaceHolder, format: Int, width: Int, height: Int) {
+                override fun surfaceChanged(
+                    holder: SurfaceHolder,
+                    format: Int,
+                    width: Int,
+                    height: Int
+                ) {
+
+
                 }
             })
 
@@ -64,36 +71,36 @@ class FragmentCamera : BaseFragment<FragmentCameraBinding>() {
             }
 
             viewLifecycleOwner.lifecycleScope.launch {
-                cameraViewModel.uiState.collect {
-                    cameraUiState ->
+                cameraViewModel.uiState.collect { cameraUiState ->
                     Log.d("cameraUiState $cameraUiState")
 
                     val message = getCameraStatusMessage(cameraUiState)
-                    if(message.isEmpty()){
+                    if (message.isEmpty()) {
                         Handler(Looper.getMainLooper()).postDelayed({
                             clProgress.visibility = View.GONE
                             preview.visibility = View.VISIBLE
-                        },1000)
+                        }, 1000)
 
-                    }else{
-                        clProgress.visibility= View.VISIBLE
+                    } else {
+                        clProgress.visibility = View.VISIBLE
                         preview.visibility = View.GONE
                         tvProgress.text = message
                     }
 
                 }
             }
-
         }
-
-
     }
 
     private fun drawUsingCanvas(bitmap: Bitmap) {
         if (!surfaceReady) return
 //        Log.d("drawUsingCanvas")
         val holder = binding.preview.holder
-        val canvas: Canvas? = try { holder.lockCanvas() } catch (_: Throwable) { null }
+        val canvas: Canvas? = try {
+            holder.lockCanvas()
+        } catch (_: Throwable) {
+            null
+        }
         if (canvas == null) return
 
         val canvasWidth = canvas.width.toFloat()
@@ -128,7 +135,9 @@ class FragmentCamera : BaseFragment<FragmentCameraBinding>() {
         canvas.drawColor(Color.BLACK)
         canvas.drawBitmap(bitmap, matrix, null)
 
-        try { holder.unlockCanvasAndPost(canvas) } catch (t : Throwable) {
+        try {
+            holder.unlockCanvasAndPost(canvas)
+        } catch (t: Throwable) {
             Log.d("${t.toString()}")
         }
     }
@@ -143,4 +152,8 @@ class FragmentCamera : BaseFragment<FragmentCameraBinding>() {
             else -> 0
         }
     }
+
+
 }
+
+

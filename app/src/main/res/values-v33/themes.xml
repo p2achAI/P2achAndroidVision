@@ -2,10 +2,11 @@
 <resources>
 
         <style name="Theme.P2achVision.Fragment" parent="Theme.MaterialComponents.DayNight.NoActionBar">
-                <item name="android:windowBackground">@color/black</item>
+<!--                <item name="android:windowBackground">@color/black</item>-->
+<!--                <item name="android:background">@color/black</item> SurfaceView까지 black으로 막음-->
                 <item name="android:statusBarColor">@color/black</item>
                 <item name="android:navigationBarColor">@color/black</item>
-                <item name="android:background">@color/black</item>
+
 
                 <item name="colorPrimary">@color/black</item>
                 <item name="colorPrimaryVariant">@color/black</item>
