@@ -13,6 +13,7 @@ import ai.p2ach.p2achandroidvision.utils.getCameraStatusMessage
 import ai.p2ach.p2achandroidvision.utils.toCameraType
 import ai.p2ach.p2achandroidvision.utils.toDisplayName
 import ai.p2ach.p2achandroidvision.viewmodels.CameraViewModel
+import ai.p2ach.p2achandroidvision.views.common.StatusLightView
 
 import android.graphics.Bitmap
 import android.graphics.Canvas
@@ -82,12 +83,15 @@ class FragmentCamera : BaseFragment<FragmentCameraBinding>() {
                         Handler(Looper.getMainLooper()).postDelayed({
                             clProgress.visibility = View.GONE
                             preview.visibility = View.VISIBLE
+                            slvStatus.state = StatusLightView.State.CONNECTED
                         }, 1000)
 
                     } else {
                         clProgress.visibility = View.VISIBLE
                         preview.visibility = View.GONE
                         tvProgress.text = message
+                        slvStatus.state = StatusLightView.State.DISCONNECTED
+
                     }
 
                 }
