@@ -1,9 +1,11 @@
 package ai.p2ach.p2achandroidvision.utils
 
 
+import ai.p2ach.p2achandroidvision.Const
 import ai.p2ach.p2achandroidvision.R
 import ai.p2ach.p2achandroidvision.repos.camera.handlers.CameraType
 import ai.p2ach.p2achandroidvision.repos.camera.handlers.CameraUiState
+import ai.p2ach.p2achandroidvision.repos.mdm.MDMEntity
 import android.app.AlertDialog
 import android.content.Context
 import android.content.Intent
@@ -143,6 +145,25 @@ fun getCameraStatusMessage(cameraUiState: CameraUiState) : String{
 }
 
 
+
+fun CameraType.toDisplayName(): String =
+    when (this) {
+        CameraType.UVC -> R.string.txt_camera_type_uvc.getMessage()
+        CameraType.INTERNAL -> R.string.txt_camera_type_internal.getMessage()
+        CameraType.RTSP -> R.string.txt_camera_type_rtsp.getMessage()
+        else -> R.string.txt_progress_connecting_unknown.getMessage()
+    }
+
+fun MDMEntity.toCameraType(): CameraType =
+    when (cameraType.lowercase()) {
+        Const.CAMERA_TYPE.UVC.lowercase() -> CameraType.UVC
+        Const.CAMERA_TYPE.RTSP.lowercase() -> CameraType.RTSP
+        Const.CAMERA_TYPE.INTERNAL.lowercase() -> CameraType.INTERNAL
+        else -> CameraType.UVC
+    }
+
+fun MDMEntity.cameraTypeDisplayName(): String =
+    toCameraType().toDisplayName()
 
 
 

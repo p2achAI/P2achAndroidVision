@@ -3,6 +3,7 @@ package ai.p2ach.p2achandroidvision.repos.camera
 
 import ai.p2ach.p2achandroidvision.base.repos.BaseServiceRepo
 import ai.p2ach.p2achandroidvision.repos.camera.handlers.CameraUiState
+import ai.p2ach.p2achandroidvision.repos.mdm.MDMEntity
 import android.content.Context
 import android.graphics.Bitmap
 import android.os.IBinder
@@ -21,6 +22,7 @@ class CameraServiceRepo(
     val frames: Flow<Bitmap> =
         serviceState.filterNotNull().flatMapLatest { it.frames }
     val uiStateFlow : Flow<CameraUiState> = serviceState.filterNotNull().flatMapLatest { it.uiState }
+    val mdmFlow: Flow<MDMEntity> = serviceState.filterNotNull().flatMapLatest { it.mdmRepo.stream()}
 
     override fun getServiceFromBinder(binder: IBinder): CameraService {
         val b = binder as CameraService.LocalBinder

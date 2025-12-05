@@ -12,4 +12,5 @@ import android.view.SurfaceHolder
 class CameraViewModel(private val cameraServiceRepo: CameraServiceRepo): BaseViewModel<CameraService, CameraServiceRepo>(cameraServiceRepo) {
     val frames = cameraServiceRepo.frames
     val uiState = cameraServiceRepo.uiStateFlow
+    val mdmFlow = cameraServiceRepo.mdmFlow
 }

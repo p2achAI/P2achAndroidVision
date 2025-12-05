@@ -10,6 +10,8 @@ import ai.p2ach.p2achandroidvision.databinding.FragmentCameraBinding
 import ai.p2ach.p2achandroidvision.repos.camera.handlers.CameraType
 
 import ai.p2ach.p2achandroidvision.utils.getCameraStatusMessage
+import ai.p2ach.p2achandroidvision.utils.toCameraType
+import ai.p2ach.p2achandroidvision.utils.toDisplayName
 import ai.p2ach.p2achandroidvision.viewmodels.CameraViewModel
 import android.content.Context
 import android.graphics.Bitmap
@@ -25,6 +27,8 @@ import android.view.SurfaceHolder
 import android.view.View
 import androidx.core.view.doOnLayout
 import androidx.lifecycle.lifecycleScope
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.launch
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
@@ -71,7 +75,7 @@ class FragmentCamera : BaseFragment<FragmentCameraBinding>() {
             }
 
             viewLifecycleOwner.lifecycleScope.launch {
-                cameraViewModel.uiState.collect { cameraUiState ->
+                cameraViewModel.uiState.distinctUntilChanged().filterNotNull().collect { cameraUiState ->
                     Log.d("cameraUiState $cameraUiState")
 
                     val message = getCameraStatusMessage(cameraUiState)
@@ -89,6 +93,14 @@ class FragmentCamera : BaseFragment<FragmentCameraBinding>() {
 
                 }
             }
+
+            viewLifecycleOwner.lifecycleScope.launch {
+                cameraViewModel.mdmFlow.distinctUntilChanged().collect {
+                    mdm->
+                    tvCameraType.text  = mdm.toCameraType().toDisplayName()
+                }
+            }
+
         }
     }
 
