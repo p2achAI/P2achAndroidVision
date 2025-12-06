@@ -179,37 +179,56 @@ fun MDMEntity.cameraTypeDisplayName(): String =
     toCameraType().toDisplayName()
 
 
-fun CaptureReportStatus.toText():String{
+fun List<CaptureReportStatus>.toText(selectedIndex: Int? = null): String {
 
-    if(startTime == null) return ""
+    if (isEmpty()) return ""
 
-    val  sb = StringBuilder()
+    val sb = StringBuilder()
 
-    val prefix = when (dayOfWeek) {
-        Calendar.MONDAY    -> R.string.txt_capture_scheduled_weekly
-            .getMessage(R.string.txt_week_mon.getMessage())
-        Calendar.TUESDAY   -> R.string.txt_capture_scheduled_weekly
-            .getMessage(R.string.txt_week_tue.getMessage())
-        Calendar.WEDNESDAY -> R.string.txt_capture_scheduled_weekly
-            .getMessage(R.string.txt_week_wed.getMessage())
-        Calendar.THURSDAY  -> R.string.txt_capture_scheduled_weekly
-            .getMessage(R.string.txt_week_thu.getMessage())
-        Calendar.FRIDAY    -> R.string.txt_capture_scheduled_weekly
-            .getMessage(R.string.txt_week_fri.getMessage())
-        Calendar.SATURDAY  -> R.string.txt_capture_scheduled_weekly
-            .getMessage(R.string.txt_week_sat.getMessage())
-        Calendar.SUNDAY    -> R.string.txt_capture_scheduled_weekly
-            .getMessage(R.string.txt_week_sun.getMessage())
-        else -> {
-            // dayOfWeek 가 -1 이거나 이상한 값이면 "매일"
-            R.string.txt_capture_scheduled_everyday.getMessage()
+    this.forEachIndexed { index, it ->
+
+        if (it.startTime.isNullOrEmpty()) return ""
+
+
+        val prefix = when (it.dayOfWeek) {
+            Calendar.MONDAY    -> R.string.txt_capture_scheduled_weekly
+                .getMessage(R.string.txt_week_mon.getMessage())
+            Calendar.TUESDAY   -> R.string.txt_capture_scheduled_weekly
+                .getMessage(R.string.txt_week_tue.getMessage())
+            Calendar.WEDNESDAY -> R.string.txt_capture_scheduled_weekly
+                .getMessage(R.string.txt_week_wed.getMessage())
+            Calendar.THURSDAY  -> R.string.txt_capture_scheduled_weekly
+                .getMessage(R.string.txt_week_thu.getMessage())
+            Calendar.FRIDAY    -> R.string.txt_capture_scheduled_weekly
+                .getMessage(R.string.txt_week_fri.getMessage())
+            Calendar.SATURDAY  -> R.string.txt_capture_scheduled_weekly
+                .getMessage(R.string.txt_week_sat.getMessage())
+            Calendar.SUNDAY    -> R.string.txt_capture_scheduled_weekly
+                .getMessage(R.string.txt_week_sun.getMessage())
+            else -> R.string.txt_capture_scheduled_everyday.getMessage()
         }
-    }
-    sb.append(R.string.txt_capture_scheduled.getMessage(prefix,startTime)+"\n")
-    sb.append(R.string.txt_capture_running.getMessage(currentCaptureCount,targetCaptureCount)+"\n")
-    sb.append(R.string.txt_capture_upload_running.getMessage(uploadedCount,uploadTargetCount))
 
-    return sb.toString()
+        sb.append(
+            R.string.txt_capture_scheduled
+                .getMessage(prefix, it.startTime)
+        )
+        sb.append("\n")
+
+        sb.append(
+            R.string.txt_capture_running
+                .getMessage(it.currentCaptureCount, it.targetCaptureCount)
+        )
+        sb.append("\n")
+
+        sb.append(
+            R.string.txt_capture_upload_running
+                .getMessage(it.uploadedCount, it.uploadTargetCount)
+        )
+
+        sb.append("\n\n")
+    }
+
+    return sb.toString().trim()
 }
 
 

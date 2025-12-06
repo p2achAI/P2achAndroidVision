@@ -7,5 +7,5 @@ import ai.p2ach.p2achandroidvision.repos.camera.CaptureReportStatus
 
 class CaptureReportViewModel(private val captureReportRepo: CaptureReportRepo) : BaseViewModel<List<CaptureReportEntity>,
         CaptureReportRepo>(captureReportRepo) {
-     val captureReportStatus = captureReportRepo.captureReportStatus
+     val captureReportStatus = captureReportRepo.captureReportStatuses
 }

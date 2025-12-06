@@ -127,7 +127,7 @@ data class MDMEntity(
     var exposure: Exposure = Exposure(),
     var testing: Testing = Testing(),
     var rotation: Int = Const.MDM.SETTING.DEFAULT.DEFAULT_ROTATION,
-    var captureReport: CaptureReport? =null,
+    var captureReports: List<CaptureReport> =emptyList(),
     )
 
 @Serializable

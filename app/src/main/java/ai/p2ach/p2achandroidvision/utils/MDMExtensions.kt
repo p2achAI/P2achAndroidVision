@@ -35,10 +35,10 @@ fun String.getOrDefaultMDM(default: ROI): ROI {
     }
 }
 
-fun String.getOrDefaultMDM(default: CaptureReport): CaptureReport {
+fun String.getOrDefaultCaptureReports(default: List<CaptureReport>): List<CaptureReport> {
     return try {
         if (this.isBlank()) default
-        else MDMConverters.jsonToCaptureReport(this)
+        else MDMConverters.jsonToCaptureReports(this)
     } catch (e: Exception) {
         Log.e("CaptureReport parse failed: ${e.message}")
         default
@@ -75,8 +75,8 @@ fun getNeedUpdateMDMEntity(base: MDMEntity): MDMEntity {
         deviceUuid = base.deviceUuid?: DeviceUtils.getOrCreateDeviceUuid()
 
 
-        captureReport = MDMService.Preferences.get(Const.MDM.SETTING.REMOTE.KEY.CAPTURE_REPORT,"").getOrDefaultMDM(
-            CaptureReport())
+        captureReports = MDMService.Preferences.get(Const.MDM.SETTING.REMOTE.KEY.CAPTURE_REPORT,"").getOrDefaultCaptureReports(
+            emptyList<CaptureReport>())
 
 
         netWorkAndApi.apply {

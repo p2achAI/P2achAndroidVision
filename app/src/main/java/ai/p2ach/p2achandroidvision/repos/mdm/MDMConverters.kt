@@ -115,11 +115,20 @@ object MDMConverters {
 
     @TypeConverter
     @JvmStatic
-    fun captureReportToJson(value: CaptureReport?): String = gson.toJson(value ?: CaptureReport())
+    fun captureReportsToJson(value: List<CaptureReport>?): String =
+        gson.toJson(value ?: emptyList<CaptureReport>())
 
     @TypeConverter
     @JvmStatic
-    fun jsonToCaptureReport(value: String?): CaptureReport = gson.fromJson(value ?: "{}", CaptureReport::class.java)
+    fun jsonToCaptureReports(value: String?): List<CaptureReport> {
+        return try {
+            val type = object : TypeToken<List<CaptureReport>>() {}.type
+            gson.fromJson<List<CaptureReport>>(value ?: "[]", type)
+        } catch (e: Exception) {
+            Log.e("CaptureReports is not correct. ${e.message}")
+            emptyList()
+        }
+    }
 
 
 

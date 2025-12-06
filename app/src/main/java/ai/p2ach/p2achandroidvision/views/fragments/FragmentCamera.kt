@@ -107,10 +107,11 @@ class FragmentCamera : BaseFragment<FragmentCameraBinding>() {
 
             viewLifecycleOwner.lifecycleScope.launch {
                 captureReportViewModel.captureReportStatus.collect {
-                    captureReportStatus ->
-                    if(captureReportStatus.startTime ==null) return@collect
+                    captureReportStatuses ->
+                    if(captureReportStatuses ==null) return@collect
 //                    Log.d("captureReportStatus $captureReportStatus")
-                    tvCaptureReportStatus.text = captureReportStatus.toText()
+
+                    tvCaptureReportStatus.text = captureReportStatuses.toText()
                 }
             }
 
