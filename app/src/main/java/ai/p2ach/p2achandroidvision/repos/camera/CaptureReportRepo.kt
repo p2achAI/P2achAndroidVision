@@ -12,6 +12,7 @@ import ai.p2ach.p2achandroidvision.utils.CoroutineExtension
 import ai.p2ach.p2achandroidvision.utils.WorkerManagerUtil
 import ai.p2ach.p2achandroidvision.utils.parseTimeString
 import ai.p2ach.p2achandroidvision.utils.saveBitmapAsJpeg
+import ai.p2ach.p2achandroidvision.utils.toCalendarDayOfWeek
 
 import android.content.Context
 import android.graphics.Bitmap
@@ -29,6 +30,7 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.cancel
 import kotlinx.coroutines.launch
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
@@ -76,7 +78,8 @@ data class CaptureReportStatus(
     val currentCaptureCount: Int = 0,
     val targetCaptureCount: Int = 0,
     val uploadedCount: Int = 0,
-    val uploadTargetCount: Int = 0
+    val uploadTargetCount: Int = 0,
+    val dayOfWeek: Int = -1
 )
 
 class CaptureReportRepo(
@@ -97,8 +100,8 @@ class CaptureReportRepo(
     private var capturedCount: Int = 0
 
 
-    private val _status = MutableStateFlow(CaptureReportStatus())
-    val status: StateFlow<CaptureReportStatus> = _status
+    private val _captureReportStatus = MutableStateFlow(CaptureReportStatus())
+    val captureReportStatus: StateFlow<CaptureReportStatus> = _captureReportStatus
 
 
 
@@ -131,14 +134,14 @@ class CaptureReportRepo(
         targetCaptureCount = captureReport.captureCount ?: -1
         capturedCount = 0;
 
-        _status.value = CaptureReportStatus(
+        updateCaptureReportStatus(
             startTime = captureReport.startTime,
             currentCaptureCount = 0,
             targetCaptureCount = targetCaptureCount,
             uploadedCount = 0,
-            uploadTargetCount = 0
+            uploadTargetCount = targetCaptureCount,
+            dayOfWeek = mdmEntity?.captureReport?.dayOfWeek.toCalendarDayOfWeek() ?: -1
         )
-
 
 
         frameCollectJob?.cancel()
@@ -156,7 +159,7 @@ class CaptureReportRepo(
         targetCaptureCount = 0;
         capturedCount =0;
 
-        _status.value = _status.value.copy(
+        updateCaptureReportStatus(
             currentCaptureCount = 0,
             targetCaptureCount = 0
         )
@@ -166,7 +169,7 @@ class CaptureReportRepo(
 
         alarmId?.let { AlarmManagerUtil.cancel(context, it) }
         var (h,m,s) =mdmEntity?.captureReport?.startTime?.parseTimeString() ?: Triple(-1,-1,-1)
-
+        val dayOfWeek = mdmEntity?.captureReport?.dayOfWeek.toCalendarDayOfWeek()
 
         Log.w("CaptureReport startCaptureReportAlarm $h : $m : $s start. " +
                 "captureInterval -> ${mdmEntity?.captureReport?.captureInterval} " +
@@ -179,6 +182,7 @@ class CaptureReportRepo(
                 second = s,
                 intervalMillis = mdmEntity?.captureReport?.captureInterval?:-1L,
                 count = mdmEntity?.captureReport?.captureCount?:-1,
+                dayOfWeek = dayOfWeek
                 ){
 
             captureLastFrame(mdmEntity)
@@ -187,6 +191,26 @@ class CaptureReportRepo(
 
         }
     }
+
+    private fun updateCaptureReportStatus(
+        startTime: String? = null,
+        currentCaptureCount: Int? = null,
+        targetCaptureCount: Int? = null,
+        uploadedCount: Int? = null,
+        uploadTargetCount: Int? = null,
+        dayOfWeek: Int? = null
+    ) {
+        val curr = _captureReportStatus.value
+        _captureReportStatus.value = curr.copy(
+            startTime = startTime ?: curr.startTime,
+            currentCaptureCount = currentCaptureCount ?: curr.currentCaptureCount,
+            targetCaptureCount = targetCaptureCount ?: curr.targetCaptureCount,
+            uploadedCount = uploadedCount ?: curr.uploadedCount,
+            uploadTargetCount = uploadTargetCount ?: curr.uploadTargetCount,
+            dayOfWeek = dayOfWeek ?: curr.dayOfWeek
+        )
+    }
+
 
     private fun captureEnded(){
 
@@ -226,10 +250,7 @@ class CaptureReportRepo(
             Log.d("CaptureReport db save $captureReportEntity")
             captureDao.upsert(captureReportEntity).runCatching {
                 capturedCount ++
-                _status.value = _status.value.copy(
-                    currentCaptureCount = capturedCount,
-                    targetCaptureCount = mdmEntity?.captureReport?.captureCount?:0
-                )
+                updateCaptureReportStatus(currentCaptureCount = capturedCount, targetCaptureCount =  mdmEntity?.captureReport?.captureCount?:0)
                 captureEnded()
             }
 
@@ -249,10 +270,9 @@ class CaptureReportRepo(
             if (pending.isEmpty()) return@withTransaction
 
 
-            _status.value = _status.value.copy(
-                uploadedCount = successCount,
-                uploadTargetCount = pending.size
-            )
+            updateCaptureReportStatus(uploadedCount = successCount, uploadTargetCount = pending.size)
+
+
 
             pending.forEach { captureReports ->
                 val file = File(captureReports.capturePath)
@@ -277,10 +297,9 @@ class CaptureReportRepo(
                         Log.e("CaptureReport file delete failed: ${file.path}")
                     }
 
-                    _status.value = _status.value.copy(
-                        uploadedCount = successCount,
-                        uploadTargetCount = _status.value.uploadTargetCount
-                    )
+                    updateCaptureReportStatus(uploadedCount = successCount, uploadTargetCount = _captureReportStatus.value.uploadTargetCount)
+
+
                 }
             }
 

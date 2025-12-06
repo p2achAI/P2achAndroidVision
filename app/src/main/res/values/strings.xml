@@ -43,10 +43,21 @@
 
 
 
-    <string name="txt_capture_scheduled">캡처 예약됨: %1$s</string>
+    <string name="txt_capture_scheduled_everyday">매일</string>
+    <string name="txt_capture_scheduled">캡처 예약됨: %1$s %2$s</string>
     <string name="txt_capture_running">캡처 완료 (%1$d / %2$d)</string>
     <string name="txt_capture_upload_running">서버 전송 완료 (%1$d / %2$d)</string>
+    <string name="txt_capture_scheduled_weekly">매주 %1$s</string>
 
+
+
+    <string name="txt_week_mon">월요일</string>
+    <string name="txt_week_tue">화요일</string>
+    <string name="txt_week_wed">수요일</string>
+    <string name="txt_week_thu">목요일</string>
+    <string name="txt_week_fri">금요일</string>
+    <string name="txt_week_sat">토요일</string>
+    <string name="txt_week_sun">일요일</string>
 
 
 

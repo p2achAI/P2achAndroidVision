@@ -15,11 +15,12 @@ typealias AlarmAction = () -> Unit
 object AlarmManagerUtil {
 
     private const val ACTION_ALARM = "ai.p2ach.p2achandroidvision.ALARM"
-    const val EXTRA_ID = "extra_id"
+    private const val EXTRA_ID = "extra_id"
 
     private val tasks = ConcurrentHashMap<String, AlarmTaskConfig>()
 
-    fun scheduleAfter(
+    // 기존 그대로
+    fun scheduleSeries(
         context: Context,
         startAtMillis: Long,
         intervalMillis: Long = 7000,
@@ -65,6 +66,7 @@ object AlarmManagerUtil {
     private fun scheduleAlarm(context: Context, config: AlarmTaskConfig, triggerAt: Long) {
         val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
         val pendingIntent = buildPendingIntent(context, config.id)
+
         alarmManager.setExactAndAllowWhileIdle(
             AlarmManager.RTC_WAKEUP,
             triggerAt,
@@ -86,18 +88,21 @@ object AlarmManagerUtil {
         )
     }
 
+    /**
+     * 특정 요일 + 시각 기준으로 첫 트리거를 잡는 버전
+     *
+     * @param dayOfWeek Calendar.MONDAY..SUNDAY, null이면 기존처럼 "오늘/내일" 기준
+     */
     fun scheduleAtSpecificTime(
         context: Context,
         hourOfDay: Int,
         minute: Int,
-        second: Int = -1,
-        intervalMillis: Long = -1,
+        second: Int = 0,
+        intervalMillis: Long = 0,
         count: Int = 1,
+        dayOfWeek: Int? = null,
         action: AlarmAction,
     ): String {
-
-
-
         val id = UUID.randomUUID().toString()
         val config = AlarmTaskConfig(
             id = id,
@@ -107,24 +112,47 @@ object AlarmManagerUtil {
         )
         tasks[id] = config
 
-        val triggerAt = calculateNextTriggerTime(hourOfDay, minute, second)
+        val triggerAt = calculateNextTriggerTime(
+            hour = hourOfDay,
+            minute = minute,
+            second = second,
+            dayOfWeek = dayOfWeek
+        )
         scheduleAlarm(context, config, triggerAt)
 
         return id
     }
 
-    private fun calculateNextTriggerTime(hour: Int, minute: Int, second: Int): Long {
+    private fun calculateNextTriggerTime(
+        hour: Int,
+        minute: Int,
+        second: Int,
+        dayOfWeek: Int? = null
+    ): Long {
         val now = System.currentTimeMillis()
         val cal = Calendar.getInstance().apply {
             timeInMillis = now
+
+            if (dayOfWeek != null) {
+                set(Calendar.DAY_OF_WEEK, dayOfWeek)
+            }
             set(Calendar.HOUR_OF_DAY, hour)
             set(Calendar.MINUTE, minute)
             set(Calendar.SECOND, second)
             set(Calendar.MILLISECOND, 0)
         }
+
+        // 이미 지난 시각이면
         if (cal.timeInMillis <= now) {
-            cal.add(Calendar.DAY_OF_YEAR, 1)
+            if (dayOfWeek != null) {
+                // 지정 요일 기준으로 다음 주
+                cal.add(Calendar.WEEK_OF_YEAR, 1)
+            } else {
+                // 기존 동작: 다음 날
+                cal.add(Calendar.DAY_OF_YEAR, 1)
+            }
         }
+
         return cal.timeInMillis
     }
 
@@ -137,9 +165,8 @@ object AlarmManagerUtil {
 }
 
 class AlarmReceiver : BroadcastReceiver() {
-
     override fun onReceive(context: Context, intent: Intent) {
-        val id = intent.getStringExtra(AlarmManagerUtil.EXTRA_ID) ?: return
+        val id = intent.getStringExtra("extra_id") ?: return
         AlarmManagerUtil.onAlarm(context, id)
     }
 }

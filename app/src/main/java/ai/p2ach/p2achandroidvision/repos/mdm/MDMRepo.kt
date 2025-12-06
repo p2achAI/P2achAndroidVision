@@ -184,6 +184,7 @@ data class Exposure(
 
 @Serializable
 data class CaptureReport(
+    var dayOfWeek : String?="",
     var startTime : String?="",
     var captureInterval : Long?=-1L,
     var captureCount: Int?=-1,

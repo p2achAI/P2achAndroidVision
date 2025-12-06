@@ -1,5 +1,7 @@
 package ai.p2ach.p2achandroidvision.utils
 
+import java.util.Calendar
+
 fun String.parseTimeString(): Triple<Int, Int, Int> {
 
     if (this.isBlank()) return Triple(0, 0, 0)
@@ -40,4 +42,20 @@ fun String.parseTimeString(): Triple<Int, Int, Int> {
 
     }
 
+}
+
+
+fun String?.toCalendarDayOfWeek(): Int? {
+    if (this.isNullOrBlank()) return null
+
+    return when (this.trim().lowercase()) {
+        "sun", "sunday" -> Calendar.SUNDAY
+        "mon", "monday" -> Calendar.MONDAY
+        "tue", "tues", "tuesday" -> Calendar.TUESDAY
+        "wed", "weds", "wednesday" -> Calendar.WEDNESDAY
+        "thu", "thur", "thurs", "thursday" -> Calendar.THURSDAY
+        "fri", "friday" -> Calendar.FRIDAY
+        "sat", "saturday" -> Calendar.SATURDAY
+        else -> null
+    }
 }
