@@ -166,9 +166,9 @@ class InternalCameraHandler(
 
         Log.d("openCameraInternal $cameraId")
 
-
         if (cameraId == null) {
             isStarted = false
+            onDisconnected()
             return
         }
 

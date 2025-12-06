@@ -79,16 +79,14 @@ class FragmentCamera : BaseFragment<FragmentCameraBinding>() {
 
             viewLifecycleOwner.lifecycleScope.launch {
                 cameraViewModel.uiState.distinctUntilChanged().filterNotNull().collect { cameraUiState ->
-                    Log.d("cameraUiState $cameraUiState")
+
 
                     val message = getCameraStatusMessage(cameraUiState)
+                    Log.d("cameraUiState $cameraUiState message $message" )
                     if (message.isEmpty()) {
-                        Handler(Looper.getMainLooper()).postDelayed({
-                            clProgress.visibility = View.GONE
-                            preview.visibility = View.VISIBLE
-                            slvStatus.state = StatusLightView.State.CONNECTED
-                        }, 1000)
-
+                        clProgress.visibility = View.GONE
+                        preview.visibility = View.VISIBLE
+                        slvStatus.state = StatusLightView.State.CONNECTED
                     } else {
                         clProgress.visibility = View.VISIBLE
                         preview.visibility = View.GONE
@@ -111,7 +109,7 @@ class FragmentCamera : BaseFragment<FragmentCameraBinding>() {
                 captureReportViewModel.captureReportStatus.collect {
                     captureReportStatus ->
                     if(captureReportStatus.startTime ==null) return@collect
-                    Log.d("captureReportStatus $captureReportStatus")
+//                    Log.d("captureReportStatus $captureReportStatus")
                     tvCaptureReportStatus.text = captureReportStatus.toText()
                 }
             }
