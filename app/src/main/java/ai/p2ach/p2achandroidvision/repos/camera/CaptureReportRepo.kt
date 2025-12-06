@@ -109,16 +109,19 @@ class CaptureReportRepo(
 
         val reports: List<CaptureReport> = mdmEntity?.captureReports.orEmpty()
         if (reports.isEmpty()) return
-
+        Log.d("bindHandler report $reports")
         val initialStatuses = reports.map { report ->
-            CaptureReportStatus(
-                startTime = report.startTime,
-                currentCaptureCount = 0,
-                targetCaptureCount = report.captureCount ?: 0,
-                uploadedCount = 0,
-                uploadTargetCount = report.captureCount ?: 0,
-                dayOfWeek = report.dayOfWeek.toCalendarDayOfWeek()
-            )
+
+                CaptureReportStatus(
+                    startTime = report.startTime,
+                    currentCaptureCount = 0,
+                    targetCaptureCount = report.captureCount ?: 0,
+                    uploadedCount = 0,
+                    uploadTargetCount = report.captureCount ?: 0,
+                    dayOfWeek = report.dayOfWeek.toCalendarDayOfWeek()
+                )
+
+
         }
 
         _captureReportStatuses.value = initialStatuses
