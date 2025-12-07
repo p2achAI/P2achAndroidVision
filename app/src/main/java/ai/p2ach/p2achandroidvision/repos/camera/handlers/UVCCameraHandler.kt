@@ -29,7 +29,7 @@ import java.nio.ByteBuffer
 
 class UVCCameraHandler(
     private val context: Context
-) : BaseCameraHandler(CameraType.UVC) {
+) : BaseCameraHandler(CameraType.UVC) , CameraInfo {
 
 
 
@@ -39,6 +39,8 @@ class UVCCameraHandler(
 
     private val mainHandler = Handler(Looper.getMainLooper())
     private val permissionAction = "ai.p2ach.USB_PERMISSION"
+
+    private  var maxSize : Size? = null
 
     private val usbListener = object : USBMonitor.OnDeviceConnectListener {
 
@@ -170,21 +172,22 @@ class UVCCameraHandler(
         val fHdPixels = 1920 * 1080
         val maxSupported =
             supportedSizes.maxByOrNull { it.width * it.height } ?: defaultSize
-        val maxSize = if (maxSupported.width * maxSupported.height > fHdPixels) {
+        maxSize = if (maxSupported.width * maxSupported.height > fHdPixels) {
             Size(0, 0, 0, 1920, 1080)
         } else {
             maxSupported
         }
 
+        if (maxSize == null) return
 
-        camera.setPreviewSize(maxSize.width, maxSize.height, format)
+        camera.setPreviewSize(maxSize!!.width, maxSize!!.height, format)
 
         camera.setFrameCallback(object : IFrameCallback {
             override fun onFrame(frame: ByteBuffer?) {
                 if(frame == null) return
                 if (!isStarted || isPaused) return
 
-                val mat = convertToMat(frame, maxSize.width, maxSize.height)
+                val mat = convertToMat(frame, maxSize!!.width, maxSize!!.height)
                 processImage(mat,device?.deviceId.toString())
                 mat.release()
             }
@@ -258,5 +261,20 @@ class UVCCameraHandler(
     override fun getExposure(): Int {
         TODO("Not yet implemented")
     }
+
+    override fun getCameraId(): String = uvcCamera?.device?.deviceId?.toString()?:""
+
+    override fun getCameraVId(): String =  uvcCamera?.device?.vendorId?.toString()?:""
+
+    override fun getCameraPId(): String = uvcCamera?.device?.productId?.toString()?:""
+
+    override fun getCameraStatus(): String =""
+
+    override fun getCameraStatusLog(): String =""
+
+    override fun getCameraResolution(): String = if(maxSize !=null)"${maxSize!!.width}X${maxSize!!.height}" else "camera no attached."
+
+
+
 }
 

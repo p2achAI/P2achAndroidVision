@@ -4,6 +4,8 @@ import ai.p2ach.p2achandroidvision.BuildConfig
 import ai.p2ach.p2achandroidvision.Const
 import ai.p2ach.p2achandroidvision.base.repos.BaseRepo
 import ai.p2ach.p2achandroidvision.repos.camera.handlers.BaseCameraHandler
+import ai.p2ach.p2achandroidvision.repos.camera.handlers.CameraInfo
+import ai.p2ach.p2achandroidvision.repos.camera.handlers.CameraType
 import ai.p2ach.p2achandroidvision.repos.mdm.MDMEntity
 import ai.p2ach.p2achandroidvision.utils.AlarmManagerUtil
 import ai.p2ach.p2achandroidvision.utils.CoroutineExtension
@@ -25,7 +27,22 @@ import java.util.concurrent.atomic.AtomicLong
 import android.net.TrafficStats
 import android.os.Build
 import android.os.SystemClock
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import okhttp3.ResponseBody
 import org.koin.java.KoinJavaComponent
+import retrofit2.Call
+import retrofit2.Response
+
+
+
+sealed class MonitorUiState {
+    data object Normal: MonitorUiState()
+    data object AbNormal : MonitorUiState()
+}
+
+
 
 data class MonitoringRequest(
     @SerializedName("device_id")
@@ -58,28 +75,28 @@ data class MonitoringLabels(
     @SerializedName("app_start_time")
     val appStartTime: String,
     @SerializedName("camera_name")
-    var cameraName: String? = "",
+    val cameraName: String,
     @SerializedName("camera_vid")
-    var cameraVid: String? = "",
+    val cameraVid: String,
     @SerializedName("camera_pid")
-    var cameraPid: String? = "",
+    val cameraPid: String,
     @SerializedName("camera_status")
-    var cameraStatus: String? = "",
+    val cameraStatus: String,
     @SerializedName("camera_status_log")
-    var cameraStatusLog: String? = "",
+    val cameraStatusLog: String,
     @SerializedName("camera_rotation")
-    var cameraRotation: Int? = -1,
+    val cameraRotation: Int,
     @SerializedName("camera_flip")
-    var cameraFlip: String? = "",
+    val cameraFlip: Boolean,
     @SerializedName("camera_resolution")
-    var cameraResolution: String? = ""
+    val cameraResolution: String
 )
 
 data class MonitoringMetrics(
     @SerializedName("app_up_time_sec")
     val appUpTimeSec: Long,
     @SerializedName("camera_health")
-    val cameraHealth: Int? = -1,
+    val cameraHealth: Int,
     @SerializedName("temperature")
     val temperature: Float,
     @SerializedName("cpu_usage")
@@ -89,27 +106,27 @@ data class MonitoringMetrics(
     @SerializedName("app_start_time")
     val appStartTime: String,
     @SerializedName("camera_status")
-    val cameraStatus: String? = "",
+    val cameraStatus: String,
     @SerializedName("camera_status_log")
-    val cameraStatusLog: String? = "",
+    val cameraStatusLog: String,
     @SerializedName("camera_rotation")
-    val cameraRotation: Int? = -1,
+    val cameraRotation: Int,
     @SerializedName("camera_flip")
-    val cameraFlip: String? = "",
+    val cameraFlip: Boolean,
     @SerializedName("camera_resolution")
-    val cameraResolution: String? = "",
+    val cameraResolution: String,
     @SerializedName("processed_frame_count")
-    val processedFrameCount: Long? = -1,
+    val processedFrameCount: Long,
     @SerializedName("last_processed_frame_ts")
-    var lastProcessedFrameTs: String?=""
+    val lastProcessedFrameTs: String
 )
 
 interface MonitoringApi {
-    @POST("device_monitor_server")
+    @POST("recognition/")
     suspend fun sendHealthCheck(
         @Body body: MonitoringRequest,
         @Header("x-api-key") apiKey: String = BuildConfig.API_KEY
-    )
+    ) : Response<ResponseBody>
 }
 
 class MonitoringRepo : BaseRepo<Unit, MonitoringApi>(MonitoringApi::class) {
@@ -142,21 +159,52 @@ class MonitoringRepo : BaseRepo<Unit, MonitoringApi>(MonitoringApi::class) {
 
     private lateinit var monitoringAlarmId  : String
 
+    private val _monitorUiState = MutableStateFlow<MonitorUiState>(MonitorUiState.AbNormal)
+    val monitorUiState : StateFlow<MonitorUiState>  = _monitorUiState.asStateFlow()
+
+
     fun bindHandler(handler: BaseCameraHandler?, mdmEntity: MDMEntity) {
         currentHandler = handler
         currentMdm = mdmEntity
-
 
         monitoringAlarmId = AlarmManagerUtil.scheduleInfiniteFromNow(
             context= KoinJavaComponent.get<Context>(Context::class.java),
             Const.ALARM_WOKER.MONITORING.MONITORING_INTERVAL
         ){
-            startMonitoring()
+
+            CoroutineExtension.launch{
+                val response = startMonitoring()
+                Log.d("monitor response $response")
+                if(response == null) {
+                    _monitorUiState.value = MonitorUiState.AbNormal
+                    return@launch
+                }
+                if(response.isSuccessful){
+                    Log.d("monitor response isSuccessful ${response.code()}")
+                    _monitorUiState.value = MonitorUiState.Normal
+                }else{
+                    Log.d("monitor response error ${response.errorBody()}")
+                    _monitorUiState.value = MonitorUiState.AbNormal
+                }
+
+            }
+
+
         }
 
     }
 
-    fun startMonitoring() {
+
+    fun stopMonitoring() {
+
+        AlarmManagerUtil.cancel(KoinJavaComponent.get<Context>(Context::class.java), monitoringAlarmId)
+
+    }
+
+
+    private suspend fun startMonitoring() : Response<ResponseBody>? {
+
+
         TrafficStats.setThreadStatsTag(1001)
 
         cpuStatAvailable = tryReadFile("/proc/stat")
@@ -185,39 +233,53 @@ class MonitoringRepo : BaseRepo<Unit, MonitoringApi>(MonitoringApi::class) {
                 }
             }
         }
-        Log.d("buildRequest ${buildRequest()}")
 
-    }
-
-
-    fun stopMonitoring() {
-
-        AlarmManagerUtil.cancel(KoinJavaComponent.get<Context>(Context::class.java), monitoringAlarmId)
-
-    }
-
-
-    private suspend fun sendHealthCheck() {
         TrafficStats.setThreadStatsTag(0xF00A)
-        val service = api ?: return
-        val request = buildRequest()
-        service.sendHealthCheck(request)
+
+        val service = api ?: return null
+        val request = buildRequest() ?: return null
+
+        return runCatching {
+            Log.d("")
+            service.sendHealthCheck(request)
+        }.onFailure {
+            Log.e(TAG, "sendHealthCheck failed: ${it.message}")
+        }.getOrNull()
+
     }
 
 
-    private fun buildRequest(): MonitoringRequest {
+    private fun buildRequest(): MonitoringRequest? {
+        val handler = currentHandler ?: run {
+            Log.w("Monitoring buildRequest: currentHandler is null")
+            return null
+        }
 
-        val deviceName = currentMdm.deviceName
-        val appMode =currentMdm.featureFlags.appMode
+        val cameraInfo = handler as? CameraInfo ?: run {
+            Log.w("Monitoring buildRequest: handler is not CameraInfo: ${handler::class.java}")
+            return null
+        }
+
+
+        val mdm = currentMdm
+        if (mdm == null) {
+            Log.w("Monitoring buildRequest: currentMdm is null")
+            return null
+        }
+
+        val deviceName = mdm.deviceName
+        val appMode = mdm.featureFlags.appMode
 
         val reportWallMs = System.currentTimeMillis()
         val deviceUptimeMs = SystemClock.elapsedRealtime()
         val bootEpoch = reportWallMs - deviceUptimeMs
-       /* val lastFrameTsIso = toIsoUtc(
-            if (MonitoringData.LAST_FRAME_TS > 0L)
-                bootEpoch + MonitoringData.LAST_FRAME_TS
+        val lastFrameTsIso = toIsoUtc(
+            if (handler.getCameraLastFrameTs() > 0L)
+                bootEpoch + handler.getCameraLastFrameTs()
             else 0L
-        )*/
+        )
+
+
 
         val avgCpuUsage = synchronized(cpuUsageSamples) {
             if (cpuUsageSamples.isNotEmpty()) {
@@ -228,28 +290,57 @@ class MonitoringRepo : BaseRepo<Unit, MonitoringApi>(MonitoringApi::class) {
         }
         cpuUsageSamples.clear()
 
-        val labels = MonitoringLabels(
-            id = deviceName,
-            mode = MODE,
-            appType = "ai",
-            osVersion = "android_sdk_${Build.VERSION.SDK_INT}_(${Build.VERSION.RELEASE})",
-            appVersion = BuildConfig.VERSION_NAME,
-            appMode = appMode,
-            model = Build.MODEL,
-            hwSerialNumber = Build.ID,
-            manufacturer = Build.MANUFACTURER,
-            appStartTime = INITIAL_CAMERA_TIMESTAMP
-        )
 
-        val metrics = MonitoringMetrics(
-            appUpTimeSec = getRunningTimeInMinutes(),
-         /*   cameraHealth = if (MonitoringData.CAM_HEALTH) 1 else 0,*/
-            temperature = getCpuTemperature(),
-            cpuUsage = avgCpuUsage,
-            memUsage = getMemoryUsageInMB().toFloat(),
-            appStartTime = INITIAL_CAMERA_TIMESTAMP,
-            /*lastProcessedFrameTs = lastFrameTsIso*/
-        )
+
+        val labels = runCatching {
+            MonitoringLabels(
+                id = deviceName,
+                mode = MODE,
+                appType = "ai",
+                osVersion = "android_sdk_${Build.VERSION.SDK_INT}_(${Build.VERSION.RELEASE})",
+                appVersion = BuildConfig.VERSION_NAME,
+                appMode = appMode,
+                model = Build.MODEL,
+                hwSerialNumber = Build.ID,
+                manufacturer = Build.MANUFACTURER,
+                appStartTime = INITIAL_CAMERA_TIMESTAMP,
+                cameraName = cameraInfo.getCameraId(),
+                cameraVid = cameraInfo.getCameraVId(),
+                cameraPid = cameraInfo.getCameraPId(),
+                cameraStatus = cameraInfo.getCameraStatus(),
+                cameraStatusLog = cameraInfo.getCameraStatusLog(),
+                cameraRotation = handler.getCameraRotation(),
+                cameraFlip = handler.getCameraFlip(),
+                cameraResolution = cameraInfo.getCameraResolution()
+            )
+        }.getOrElse { e ->
+            Log.e("Monitoring", "buildRequest: labels build failed: ${e.message}")
+            return null
+        }
+
+
+
+        val metrics = runCatching {
+            MonitoringMetrics(
+                appUpTimeSec = getRunningTimeInMinutes(),
+                cameraHealth = if (handler.getCameraHealth()) 1 else 0,
+                temperature = getCpuTemperature(),
+                cpuUsage = avgCpuUsage,
+                memUsage = getMemoryUsageInMB().toFloat(),
+                appStartTime = INITIAL_CAMERA_TIMESTAMP,
+                cameraStatus = cameraInfo.getCameraStatus(),
+                cameraStatusLog = cameraInfo.getCameraStatusLog(),
+                cameraRotation = handler.getCameraRotation(),
+                cameraFlip = handler.getCameraFlip(),
+                cameraResolution = cameraInfo.getCameraResolution(),
+                processedFrameCount = handler.getCameraProcessedFrameCount(),
+                lastProcessedFrameTs = lastFrameTsIso
+            )
+        }.getOrElse { e ->
+            Log.e("Monitoring", "buildRequest: metrics build failed: ${e.message}")
+            return null
+        }
+
 
         return MonitoringRequest(
             deviceId = deviceName,

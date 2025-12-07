@@ -116,7 +116,7 @@
 
 
     <ai.p2ach.p2achandroidvision.views.common.RoundConstraintLayout
-        android:id="@+id/clAppStatus"
+        android:id="@+id/clMonitorStatus"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         app:layout_constraintRight_toRightOf="parent"

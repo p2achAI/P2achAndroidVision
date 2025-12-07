@@ -16,6 +16,7 @@ import android.media.Image
 import android.media.ImageReader
 import android.os.Handler
 import android.os.HandlerThread
+import android.util.Size
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -25,12 +26,13 @@ import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import org.opencv.core.CvType
 import org.opencv.core.Mat
+
 import org.opencv.imgproc.Imgproc
 import kotlin.math.abs
 
 class InternalCameraHandler(
     private val context: Context
-) : BaseCameraHandler(CameraType.INTERNAL) , KoinComponent {
+) : BaseCameraHandler(CameraType.INTERNAL) , KoinComponent , CameraInfo {
 
    val cameraManager : CameraManager by inject()
 
@@ -47,7 +49,7 @@ class InternalCameraHandler(
     private var lastFrameTimestamp: Long = System.currentTimeMillis()
     private var healthCheckerJob: Job? = null
 
-
+    private var targetSize : Size?=null
 
 
     private val yuv = Mat()
@@ -178,13 +180,13 @@ class InternalCameraHandler(
             val map = characteristics?.get(CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP)
             val availableSizes = map?.getOutputSizes(ImageFormat.YUV_420_888).orEmpty()
 
-            val targetSize = availableSizes
+            targetSize = (availableSizes
                 .filter { size ->
                     val ratio = size.width.toFloat() / size.height.toFloat()
                     abs(ratio - (16f / 9f)) < 0.01f
                 }
                 .maxByOrNull { it.width * it.height }
-                ?: availableSizes.maxByOrNull { it.width * it.height }
+                ?: availableSizes.maxByOrNull { it.width * it.height })!!
 
             if (targetSize == null) {
                 isStarted = false
@@ -192,8 +194,8 @@ class InternalCameraHandler(
             }
 
             imageReader = ImageReader.newInstance(
-                targetSize.width,
-                targetSize.height,
+                targetSize!!.width,
+                targetSize!!.height,
                 ImageFormat.YUV_420_888,
                 4
             )
@@ -380,5 +382,15 @@ class InternalCameraHandler(
         stopBackgroundThread()
     }
 
+    override fun getCameraId(): String = "${CameraType.INTERNAL.name} ${cameraDevice?.id?:""}"
 
+    override fun getCameraVId(): String =""
+
+    override fun getCameraPId(): String =""
+
+    override fun getCameraStatus(): String =""
+
+    override fun getCameraStatusLog(): String =""
+
+    override fun getCameraResolution(): String= if(targetSize !=null) "${targetSize!!.width}X${targetSize!!.height}" else "camera no attached"
 }

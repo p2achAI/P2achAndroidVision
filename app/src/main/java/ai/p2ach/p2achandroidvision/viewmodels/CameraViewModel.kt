@@ -13,4 +13,5 @@ class CameraViewModel(private val cameraServiceRepo: CameraServiceRepo): BaseVie
     val frames = cameraServiceRepo.frames
     val uiState = cameraServiceRepo.uiStateFlow
     val mdmFlow = cameraServiceRepo.mdmFlow
+    val monitorFlow = cameraServiceRepo.monitorFlow
 }

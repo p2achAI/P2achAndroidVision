@@ -2,6 +2,7 @@ package ai.p2ach.p2achandroidvision.repos.camera.handlers
 
 import ai.p2ach.p2achandroidvision.repos.mdm.MDMEntity
 import android.graphics.Bitmap
+import android.os.SystemClock
 import androidx.core.graphics.createBitmap
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -43,6 +44,21 @@ interface CameraHandler {
     fun resume()
 }
 
+
+interface CameraInfo{
+
+    fun getCameraId(): String
+    fun getCameraVId():String
+    fun getCameraPId(): String
+
+    fun getCameraStatus():String
+    fun getCameraStatusLog():String
+    fun getCameraResolution() : String
+
+
+
+}
+
 interface CameraCallback {
     fun onFrameProcessed(bitmap: Bitmap?)
 }
@@ -54,6 +70,8 @@ abstract class BaseCameraHandler(
     private val inputImg = Mat()
     private val resultImg = Mat()
     private val drawImg = Mat()
+    private var lastFrameAt: Long = 0L
+    private var totalFrameCount: Long = 0L
     protected var isStarted = false
     protected var isPaused = false
 
@@ -61,6 +79,7 @@ abstract class BaseCameraHandler(
 
     private var bckImg : Mat? = null
     var mdmEntity : MDMEntity? = null
+
     private var bitmapPool: MutableList<Bitmap> = mutableListOf()
 
     private val _frames = MutableSharedFlow<Bitmap>(
@@ -123,11 +142,8 @@ abstract class BaseCameraHandler(
 
     override fun onFrameProcessed(bitmap: Bitmap?) {
         emitFrame(bitmap)
-//
-//        CoroutineScope(Dispatchers.IO).launch {
-//            captureRepo.writeToLocal(bitmap)
-//        }
-
+        lastFrameAt = SystemClock.elapsedRealtime()
+        totalFrameCount += 1
 
     }
 
@@ -189,6 +205,26 @@ abstract class BaseCameraHandler(
     abstract fun applyManualExposure(exposure: Int)
     abstract fun getAutoExposureMode() : Boolean
     abstract fun getExposure() : Int
+
+
+
+
+    fun getCameraHealth() : Boolean =uiState.value.toStatus()
+    fun getCameraRotation(): Int = mdmEntity?.rotation?:0
+    fun getCameraFlip(): Boolean = mdmEntity?.featureFlags?.flip?:false
+    fun getCameraLastFrameTs(): Long = lastFrameAt
+    fun getCameraProcessedFrameCount() : Long = totalFrameCount
+
+
+    fun CameraUiState.toStatus(): Boolean {
+        return when (this) {
+            is CameraUiState.Connected -> true
+            else -> false
+        }
+    }
+
+
+
 
 
 }

@@ -35,7 +35,7 @@ import java.util.concurrent.atomic.AtomicBoolean
 
 class RTSPCameraHandler(
     private val context: Context
-) : BaseCameraHandler(CameraType.RTSP) {
+) : BaseCameraHandler(CameraType.RTSP) , CameraInfo {
 
     private val rtsp = Rtsp()
 
@@ -47,6 +47,7 @@ class RTSPCameraHandler(
 
     private val startStopLock = Mutex()
     private var reconnectJob: Job? = null
+    var url :String=""
 
     private val rtspStatusListener = object : RtspStatusListener {
         override fun onConnecting() {
@@ -96,7 +97,7 @@ class RTSPCameraHandler(
         }
 
         private fun onError() {
-            val url = mdmEntity?.netWorkAndApi?.rtspUrl.orEmpty()
+            url = mdmEntity?.netWorkAndApi?.rtspUrl.orEmpty()
             val timeoutMs = mdmEntity?.netWorkAndApi?.rtspTimeoutMs ?: 5_000
             if (url.isEmpty()) return
 
@@ -238,7 +239,7 @@ class RTSPCameraHandler(
 
     private fun initPlayer() {
         CoroutineExtension.launch {
-            val url = mdmEntity?.netWorkAndApi?.rtspUrl.orEmpty()
+            url = mdmEntity?.netWorkAndApi?.rtspUrl.orEmpty()
             if (url.isEmpty()) {
                 Log.e("RTSP", "rtspUrl empty")
                 return@launch
@@ -260,7 +261,7 @@ class RTSPCameraHandler(
             startStopLock.withLock {
                 if (rtsp.isStarted()) return@withLock
 
-                val url = mdmEntity?.netWorkAndApi?.rtspUrl.orEmpty()
+                url = mdmEntity?.netWorkAndApi?.rtspUrl.orEmpty()
                 if (url.isEmpty()) return@withLock
 
                 isStarted = true
@@ -435,6 +436,18 @@ class RTSPCameraHandler(
     override fun getExposure(): Int {
         TODO("Not yet implemented")
     }
+
+    override fun getCameraId(): String  = url
+
+    override fun getCameraVId(): String =""
+
+    override fun getCameraPId(): String =""
+
+    override fun getCameraStatus(): String =""
+
+    override fun getCameraStatusLog(): String=""
+
+    override fun getCameraResolution(): String ="${originWidth}X${originHeight}"
 }
 
 sealed class FrameData {

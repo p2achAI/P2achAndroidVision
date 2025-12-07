@@ -14,6 +14,7 @@ import ai.p2ach.p2achandroidvision.views.activities.ActivityMain
 import ai.p2ach.p2achandroidvision.repos.camera.handlers.CameraUiState
 import ai.p2ach.p2achandroidvision.repos.camera.handlers.InternalCameraHandler
 import ai.p2ach.p2achandroidvision.repos.camera.handlers.RTSPCameraHandler
+import ai.p2ach.p2achandroidvision.repos.monitoring.MonitorUiState
 import ai.p2ach.p2achandroidvision.repos.monitoring.MonitoringRepo
 import ai.p2ach.p2achandroidvision.repos.receivers.UVCCameraReceiver
 import ai.p2ach.p2achandroidvision.utils.CoroutineExtension
@@ -77,6 +78,7 @@ class CameraService : LifecycleService() {
 
     private val _uiState = MutableStateFlow<CameraUiState>(CameraUiState.Idle)
     val uiState: StateFlow<CameraUiState> = _uiState.asStateFlow()
+    val monitorUiState  : StateFlow<MonitorUiState> = monitoringRepo.monitorUiState
 
 
 

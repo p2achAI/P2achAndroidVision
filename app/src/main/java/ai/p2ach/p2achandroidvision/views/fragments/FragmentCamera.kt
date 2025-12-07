@@ -7,6 +7,7 @@ package ai.p2ach.p2achandroidvision.views.fragments
 import ai.p2ach.p2achandroidvision.utils.Log
 import ai.p2ach.p2achandroidvision.base.fragments.BaseFragment
 import ai.p2ach.p2achandroidvision.databinding.FragmentCameraBinding
+import ai.p2ach.p2achandroidvision.repos.monitoring.MonitorUiState
 
 
 import ai.p2ach.p2achandroidvision.utils.getCameraStatusMessage
@@ -31,6 +32,8 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.launch
 import org.koin.androidx.viewmodel.ext.android.viewModel
+import ai.p2ach.p2achandroidvision.R
+import androidx.core.content.ContextCompat
 
 class FragmentCamera : BaseFragment<FragmentCameraBinding>() {
 
@@ -108,12 +111,25 @@ class FragmentCamera : BaseFragment<FragmentCameraBinding>() {
                     captureReportStatuses ->
                     if(captureReportStatuses ==null) return@collect
 //                    Log.d("captureReportStatus $captureReportStatus")
-
                     tvCaptureReportStatus.text = captureReportStatuses.toText()
                 }
             }
 
+            viewLifecycleOwner.lifecycleScope.launch {
+                cameraViewModel.monitorFlow
+                    .distinctUntilChanged()
+                    .collect { monitorUiState ->
 
+                        val colorRes = when (monitorUiState) {
+                            is MonitorUiState.Normal -> R.color.green_opacity_50
+                            else                     -> R.color.red_opacity_50
+                        }
+
+                        clMonitorStatus.setBackgroundColor(
+                            ContextCompat.getColor(requireContext(), colorRes)
+                        )
+                    }
+            }
         }
     }
 
