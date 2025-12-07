@@ -14,6 +14,7 @@ import ai.p2ach.p2achandroidvision.views.activities.ActivityMain
 import ai.p2ach.p2achandroidvision.repos.camera.handlers.CameraUiState
 import ai.p2ach.p2achandroidvision.repos.camera.handlers.InternalCameraHandler
 import ai.p2ach.p2achandroidvision.repos.camera.handlers.RTSPCameraHandler
+import ai.p2ach.p2achandroidvision.repos.monitoring.MonitoringRepo
 import ai.p2ach.p2achandroidvision.repos.receivers.UVCCameraReceiver
 import ai.p2ach.p2achandroidvision.utils.CoroutineExtension
 import android.app.Notification
@@ -35,6 +36,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.launch
 import org.koin.android.ext.android.inject
 
@@ -44,6 +46,7 @@ class CameraService : LifecycleService() {
     private val rtspCameraHandler: RTSPCameraHandler by inject()
     private val internalCameraHandler: InternalCameraHandler by inject()
     private val captureRepo: CaptureReportRepo by inject()
+    private val monitoringRepo: MonitoringRepo by inject()
 
     val mdmRepo: MDMRepo by inject()
 
@@ -64,7 +67,6 @@ class CameraService : LifecycleService() {
     private var handler: BaseCameraHandler? = null
     private var handlerCollectJob: Job? = null
     private var handlerStateJob: Job? = null
-    private var captureCollectJob : Job? = null
     private var currentType: CameraType? = null
 
     private val _frames = MutableSharedFlow<android.graphics.Bitmap>(
@@ -104,7 +106,6 @@ class CameraService : LifecycleService() {
         uvcCameraReceiver.unregister()
 
         handlerCollectJob?.cancel()
-        captureCollectJob?.cancel()
         handler?.stopStreaming()
         handler = null
 
@@ -113,10 +114,11 @@ class CameraService : LifecycleService() {
 
     private fun collectMDM() {
         lifecycleScope.launch {
-            mdmRepo.stream().distinctUntilChanged().collect { mdmEntity ->
+            mdmRepo.stream().distinctUntilChanged().filterNotNull().collect { mdmEntity ->
                 Log.d("MDM collect $mdmEntity")
                 applyCameraType(mdmEntity.toCameraType(),mdmEntity)
                 captureRepo.bindHandler(handler,mdmEntity)
+                monitoringRepo.bindHandler(handler,mdmEntity)
             }
         }
     }

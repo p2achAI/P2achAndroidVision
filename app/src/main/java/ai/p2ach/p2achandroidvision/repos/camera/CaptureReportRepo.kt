@@ -104,7 +104,7 @@ class CaptureReportRepo(
     /**
      * MDMEntity.captureReports: List<CaptureReport> 기준
      */
-    fun bindHandler(handler: BaseCameraHandler?, mdmEntity: MDMEntity?) {
+    fun bindHandler(handler: BaseCameraHandler?, mdmEntity: MDMEntity) {
         if (handler == null) return
 
         val reports: List<CaptureReport> = mdmEntity?.captureReports.orEmpty()

@@ -1,5 +1,6 @@
 package ai.p2ach.p2achandroidvision.utils
 
+import ai.p2ach.p2achandroidvision.Const
 import android.annotation.SuppressLint
 import android.app.AlarmManager
 import android.app.PendingIntent
@@ -27,6 +28,7 @@ object AlarmManagerUtil {
         count: Int = 1,
         action: AlarmAction,
     ): String {
+
         val id = UUID.randomUUID().toString()
         val config = AlarmTaskConfig(
             id = id,
@@ -48,11 +50,14 @@ object AlarmManagerUtil {
 
     internal fun onAlarm(context: Context, id: String) {
         val config = tasks[id] ?: return
-        if (config.remaining <= 0) {
-            tasks.remove(id)
+        runCatching { config.action.invoke() }
+
+        if (config.remaining == Const.ALARM_WOKER.WORK_INFINITY) {
+            val nextAt = System.currentTimeMillis() + config.intervalMillis
+            scheduleAlarm(context, config, triggerAt = nextAt)
             return
         }
-        runCatching { config.action.invoke() }
+
         config.remaining -= 1
         if (config.remaining > 0) {
             val nextAt = System.currentTimeMillis() + config.intervalMillis
@@ -162,6 +167,25 @@ object AlarmManagerUtil {
         var remaining: Int,
         val action: AlarmAction
     )
+
+    fun scheduleInfiniteFromNow(
+        context: Context,
+        intervalMillis: Long,
+        action: AlarmAction
+    ): String {
+        val id = UUID.randomUUID().toString()
+        val config = AlarmTaskConfig(
+            id = id,
+            intervalMillis = intervalMillis,
+            remaining = Const.ALARM_WOKER.WORK_INFINITY,
+            action = action
+        )
+        tasks[id] = config
+
+        scheduleAlarm(context, config, System.currentTimeMillis())
+        return id
+    }
+
 }
 
 class AlarmReceiver : BroadcastReceiver() {

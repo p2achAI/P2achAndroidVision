@@ -3,6 +3,19 @@ package ai.p2ach.p2achandroidvision
 
 interface Const {
 
+    interface ALARM_WOKER{
+
+        interface MONITORING{
+            companion object{
+                const val MONITORING_INTERVAL = 6000L
+            }
+        }
+
+        companion object{
+            const val WORK_INFINITY =-1
+        }
+    }
+
     interface REST_API{
 
         interface RETROFIT{

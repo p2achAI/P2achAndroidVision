@@ -11,6 +11,7 @@ import ai.p2ach.p2achandroidvision.repos.camera.UploadPendingCaptureReportsWorke
 import ai.p2ach.p2achandroidvision.repos.camera.handlers.InternalCameraHandler
 import ai.p2ach.p2achandroidvision.repos.camera.handlers.RTSPCameraHandler
 import ai.p2ach.p2achandroidvision.repos.camera.handlers.UVCCameraHandler
+import ai.p2ach.p2achandroidvision.repos.monitoring.MonitoringRepo
 import ai.p2ach.p2achandroidvision.repos.presign.PreSignRepo
 import ai.p2ach.p2achandroidvision.repos.receivers.watchdog.WatchdogScheduler
 import ai.p2ach.p2achandroidvision.utils.Log
@@ -52,6 +53,7 @@ class P2achAndroidVisionApplication : Application() {
         single { CameraServiceRepo(get()) }
         single { CaptureReportRepo(get(),get(),get()) }
         single { PreSignRepo() }
+        single { MonitoringRepo() }
     }
 
     val vmModule = module {
