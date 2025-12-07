@@ -129,7 +129,7 @@ object MDMConverters {
 
             raw
                 .filterNotNull()
-                .filterNot { it == empty }    
+                .filterNot { it == empty }
         } catch (e: Exception) {
             Log.e("CaptureReports parse error: ${e.message}")
             emptyList()

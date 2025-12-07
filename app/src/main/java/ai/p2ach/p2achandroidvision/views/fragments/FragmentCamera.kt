@@ -22,8 +22,6 @@ import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Matrix
 import android.os.Bundle
-import android.os.Handler
-import android.os.Looper
 import android.view.Surface
 import android.view.SurfaceHolder
 import android.view.View

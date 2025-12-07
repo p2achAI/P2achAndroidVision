@@ -16,11 +16,13 @@
     <color name="gray">#FF808080</color>
 
 
+    <color name="red_opacity_50">#50FF0000</color>
+    <color name="green_opacity_50">#5000FF00</color>
     <color name="blue_opacity_90">#900000FF</color>
     <color name="sky_blue_opacity_90">#9087CEEB</color>
-    <color name="sky_blue_opacity_40">#2087CEEB</color>
+    <color name="sky_blue_opacity_40">#4087CEEB</color>
 
     <color name="gray_opacity_90">#90808080</color>
-    <color name="gray_opacity_40">#20808080</color>
+    <color name="gray_opacity_40">#40808080</color>
 
 </resources>
