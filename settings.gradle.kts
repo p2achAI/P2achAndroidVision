@@ -9,22 +9,21 @@ pluginManagement {
             }
         }
         mavenCentral()
-        maven { url =uri("https://raw.githubusercontent.com/saki4510t/libcommon/master/repository/" )}
+//        maven { url =uri("https://raw.githubusercontent.com/saki4510t/libcommon/master/repository/" )}
     }
 }
-dependencyResolutionManagement {
-    repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
-    repositories {
-        google()
-        mavenCentral()
-        maven("https://jitpack.io")
-        maven { url = uri("https://raw.githubusercontent.com/saki4510t/libcommon/master/repository/") }
-    }
-}
+//dependencyResolutionManagement {
+//    repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+//    repositories {
+//        google()
+//        mavenCentral()
+//        maven("https://jitpack.io")
+//        maven { url = uri("https://raw.githubusercontent.com/saki4510t/libcommon/master/repository/") }
+//    }
+//}
 
 rootProject.name = "P2achAndroidVision"
 include(":app")
-include(":libuvccamera")
-project(":libuvccamera").projectDir = file("libuvccamera")
+
 
 

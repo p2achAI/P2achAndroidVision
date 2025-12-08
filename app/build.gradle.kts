@@ -193,10 +193,12 @@ dependencies {
 
     
 
-    // local modules
-    implementation(project(":libuvccamera"))
-
-
+//    implementation(files('libs/libuvccamera-release.aar'))
+    implementation(files("libs/libuvccamera-release.aar"))
+    implementation("com.serenegiant:common:2.12.4") {
+        exclude(module = "support-v4")
+        exclude(group = "com.android.support", module = "support-compat")
+    }
     //reflect
     implementation(libs.kotlin.reflect)
 
