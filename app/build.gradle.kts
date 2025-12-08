@@ -31,8 +31,8 @@ android {
         applicationId = "ai.p2ach.p2achandroidvision"
         minSdk = 28
         targetSdk = 36
-        versionCode = 1
-        versionName = "1.0"
+        versionCode = 3
+        versionName = "1.2"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
         buildConfigField("String", "MDM_API_KEY", "\"c4Bz60gRwz\"")
