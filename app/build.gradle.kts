@@ -57,12 +57,12 @@ android {
     }
 
 
-    externalNativeBuild {
-        cmake {
-            path = file("src/main/cpp/CMakeLists.txt")
-            version = "3.22.1"
-        }
-    }
+//    externalNativeBuild {
+//        cmake {
+//            path = file("src/main/cpp/CMakeLists.txt")
+//            version = "3.22.1"
+//        }
+//    }
 
     splits {
         abi {
@@ -127,13 +127,13 @@ android {
     flavorDimensions += "environment"
 
 
-    externalNativeBuild {
-        cmake {
-            // 레거시랑 동일 경로/버전
-            path = file("src/main/cpp/CMakeLists.txt")
-            version = "3.22.1"
-        }
-    }
+//    externalNativeBuild {
+//        cmake {
+//            // 레거시랑 동일 경로/버전
+//            path = file("src/main/cpp/CMakeLists.txt")
+//            version = "3.22.1"
+//        }
+//    }
 
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
