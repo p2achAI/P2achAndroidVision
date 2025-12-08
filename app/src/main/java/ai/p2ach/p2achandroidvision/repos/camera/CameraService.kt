@@ -18,6 +18,7 @@ import ai.p2ach.p2achandroidvision.repos.monitoring.MonitorUiState
 import ai.p2ach.p2achandroidvision.repos.monitoring.MonitoringRepo
 import ai.p2ach.p2achandroidvision.repos.receivers.UVCCameraReceiver
 import ai.p2ach.p2achandroidvision.utils.CoroutineExtension
+import ai.p2ach.p2achandroidvision.utils.onChanged
 import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
@@ -38,6 +39,7 @@ import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.shareIn
 import kotlinx.coroutines.launch
 import org.koin.android.ext.android.inject
 
@@ -75,7 +77,6 @@ class CameraService : LifecycleService() {
         extraBufferCapacity = 1
     )
     val frames: SharedFlow<android.graphics.Bitmap> = _frames
-
     private val _uiState = MutableStateFlow<CameraUiState>(CameraUiState.Idle)
     val uiState: StateFlow<CameraUiState> = _uiState.asStateFlow()
     val monitorUiState  : StateFlow<MonitorUiState> = monitoringRepo.monitorUiState
@@ -116,12 +117,19 @@ class CameraService : LifecycleService() {
 
     private fun collectMDM() {
         lifecycleScope.launch {
-            mdmRepo.stream().distinctUntilChanged().filterNotNull().collect { mdmEntity ->
-                Log.d("MDM collect $mdmEntity")
-                applyCameraType(mdmEntity.toCameraType(),mdmEntity)
-                captureRepo.bindHandler(handler,mdmEntity)
-                monitoringRepo.bindHandler(handler,mdmEntity)
-            }
+
+            mdmRepo.stream().filterNotNull()
+                .onChanged({it.cameraType }){
+                    mdmEntity , ct ->
+                    applyCameraType(mdmEntity.toCameraType(), mdmEntity = mdmEntity)
+                }.onChanged({it.captureReports}){
+                    mdmEntity, cr->
+                    captureRepo.bindHandler(handler,mdmEntity)
+                }.collect {
+                    mDMEntity ->
+                    monitoringRepo.bindHandler(handler,mDMEntity)
+                }
+
         }
     }
 

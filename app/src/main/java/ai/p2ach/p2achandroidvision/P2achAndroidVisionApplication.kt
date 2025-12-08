@@ -53,7 +53,7 @@ class P2achAndroidVisionApplication : Application() {
         single { CameraServiceRepo(get()) }
         single { CaptureReportRepo(get(),get(),get()) }
         single { PreSignRepo() }
-        single { MonitoringRepo() }
+        single { MonitoringRepo(get()) }
     }
 
     val vmModule = module {

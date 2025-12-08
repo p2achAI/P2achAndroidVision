@@ -129,7 +129,7 @@ interface MonitoringApi {
     ) : Response<ResponseBody>
 }
 
-class MonitoringRepo : BaseRepo<Unit, MonitoringApi>(MonitoringApi::class) {
+class MonitoringRepo(private val context : Context) : BaseRepo<Unit, MonitoringApi>(MonitoringApi::class) {
 
     companion object {
         private const val TAG = "MonitoringRepo"
@@ -157,7 +157,7 @@ class MonitoringRepo : BaseRepo<Unit, MonitoringApi>(MonitoringApi::class) {
 
     override fun stream(): Flow<Unit> = emptyFlow()
 
-    private lateinit var monitoringAlarmId  : String
+    private var monitoringAlarmId  : String?=null
 
     private val _monitorUiState = MutableStateFlow<MonitorUiState>(MonitorUiState.AbNormal)
     val monitorUiState : StateFlow<MonitorUiState>  = _monitorUiState.asStateFlow()
@@ -167,13 +167,32 @@ class MonitoringRepo : BaseRepo<Unit, MonitoringApi>(MonitoringApi::class) {
         currentHandler = handler
         currentMdm = mdmEntity
 
+        startMonitoring()
+    }
+
+
+
+
+    fun stopMonitoring() {
+
+        monitoringAlarmId?.let {
+            AlarmManagerUtil.cancel(context, it)
+        }
+
+
+
+    }
+
+    private fun startMonitoring(){
+
+        stopMonitoring()
         monitoringAlarmId = AlarmManagerUtil.scheduleInfiniteFromNow(
-            context= KoinJavaComponent.get<Context>(Context::class.java),
+            context= context,
             Const.ALARM_WOKER.MONITORING.MONITORING_INTERVAL
         ){
 
             CoroutineExtension.launch{
-                val response = startMonitoring()
+                val response = requestMonitoring()
                 Log.d("monitor response $response")
                 if(response == null) {
                     _monitorUiState.value = MonitorUiState.AbNormal
@@ -195,14 +214,7 @@ class MonitoringRepo : BaseRepo<Unit, MonitoringApi>(MonitoringApi::class) {
     }
 
 
-    fun stopMonitoring() {
-
-        AlarmManagerUtil.cancel(KoinJavaComponent.get<Context>(Context::class.java), monitoringAlarmId)
-
-    }
-
-
-    private suspend fun startMonitoring() : Response<ResponseBody>? {
+    private suspend fun requestMonitoring() : Response<ResponseBody>? {
 
 
         TrafficStats.setThreadStatsTag(1001)
@@ -239,12 +251,8 @@ class MonitoringRepo : BaseRepo<Unit, MonitoringApi>(MonitoringApi::class) {
         val service = api ?: return null
         val request = buildRequest() ?: return null
 
-        return runCatching {
-            Log.d("")
-            service.sendHealthCheck(request)
-        }.onFailure {
-            Log.e(TAG, "sendHealthCheck failed: ${it.message}")
-        }.getOrNull()
+        return  service.sendHealthCheck(request)
+
 
     }
 

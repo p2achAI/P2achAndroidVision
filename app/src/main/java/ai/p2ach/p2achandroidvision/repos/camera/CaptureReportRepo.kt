@@ -105,11 +105,12 @@ class CaptureReportRepo(
      * MDMEntity.captureReports: List<CaptureReport> 기준
      */
     fun bindHandler(handler: BaseCameraHandler?, mdmEntity: MDMEntity) {
-        if (handler == null) return
 
+
+        if (handler == null) return
         val reports: List<CaptureReport> = mdmEntity?.captureReports.orEmpty()
         if (reports.isEmpty()) return
-        Log.d("bindHandler report $reports")
+
         val initialStatuses = reports.map { report ->
 
                 CaptureReportStatus(
@@ -120,8 +121,6 @@ class CaptureReportRepo(
                     uploadTargetCount = report.captureCount ?: 0,
                     dayOfWeek = report.dayOfWeek.toCalendarDayOfWeek()
                 )
-
-
         }
 
         _captureReportStatuses.value = initialStatuses
@@ -251,7 +250,6 @@ class CaptureReportRepo(
             Log.d("CaptureReport db save $captureReportEntity")
             captureDao.upsert(captureReportEntity)
 
-            // 상태 업데이트
             val currentStatuses = _captureReportStatuses.value
             if (index in currentStatuses.indices) {
                 val status = currentStatuses[index]
@@ -277,10 +275,7 @@ class CaptureReportRepo(
         }
     }
 
-    /**
-     * 모든 pending 캡처를 업로드
-     * 업로드 상태(업로드된 장수 / 전체 장수)는 전체 스케줄에 공통 적용
-     */
+
     suspend fun uploadPendingCaptures() {
         var successCount = 0
 
