@@ -25,6 +25,7 @@ import android.app.Application
 import android.content.Context
 import android.hardware.camera2.CameraManager
 import android.hardware.usb.UsbManager
+import android.net.ConnectivityManager
 import androidx.room.Room
 import com.orhanobut.logger.AndroidLogAdapter
 import com.orhanobut.logger.Logger
@@ -89,6 +90,11 @@ class P2achAndroidVisionApplication : Application() {
         single<UsbManager>{
             androidContext().getSystemService(Context.USB_SERVICE) as UsbManager
         }
+
+        single<ConnectivityManager>{
+            androidContext().getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+        }
+
     }
 
     val workerModule = module{

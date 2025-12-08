@@ -7,7 +7,7 @@ package ai.p2ach.p2achandroidvision.views.fragments
 import ai.p2ach.p2achandroidvision.utils.Log
 import ai.p2ach.p2achandroidvision.base.fragments.BaseFragment
 import ai.p2ach.p2achandroidvision.databinding.FragmentCameraBinding
-import ai.p2ach.p2achandroidvision.repos.monitoring.MonitorUiState
+import ai.p2ach.p2achandroidvision.repos.monitoring.MonitoringUiState
 
 
 import ai.p2ach.p2achandroidvision.utils.getCameraStatusMessage
@@ -121,7 +121,7 @@ class FragmentCamera : BaseFragment<FragmentCameraBinding>() {
                     .collect { monitorUiState ->
 
                         val colorRes = when (monitorUiState) {
-                            is MonitorUiState.Normal -> R.color.green_opacity_50
+                            is MonitoringUiState.Normal -> R.color.green_opacity_50
                             else                     -> R.color.red_opacity_50
                         }
 

@@ -7,7 +7,7 @@ interface Const {
 
         interface MONITORING{
             companion object{
-                const val MONITORING_INTERVAL = 60000L
+                const val MONITORING_INTERVAL = 5 * 6000L
             }
         }
 

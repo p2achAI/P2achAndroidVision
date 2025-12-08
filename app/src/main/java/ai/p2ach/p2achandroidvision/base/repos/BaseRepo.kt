@@ -1,7 +1,5 @@
 package ai.p2ach.p2achandroidvision.base.repos
 
-
-
 import ai.p2ach.p2achandroidvision.BuildConfig
 import ai.p2ach.p2achandroidvision.Const
 import kotlinx.coroutines.flow.Flow
@@ -13,9 +11,14 @@ import java.util.concurrent.TimeUnit
 import kotlin.reflect.KClass
 
 
+sealed class ApiResult<out T> {
+    data class Success<T>(val data: T) : ApiResult<T>()
+    data class Error(val throwable: Throwable) : ApiResult<Nothing>()
+}
+
 abstract class BaseRepo<T, API_SERVICE : Any>(
-    private val apiClass: KClass<API_SERVICE>? = null,
-){
+    apiClass: KClass<API_SERVICE>? = null,
+) {
     abstract fun stream(): Flow<T>
 
     protected open fun provideHeaders(): Map<String, String> = emptyMap()
@@ -27,27 +30,27 @@ abstract class BaseRepo<T, API_SERVICE : Any>(
     }
 
     private fun createRetrofit(baseUrl: String): Retrofit {
-        val client = OkHttpClient.Builder()
+        val clientBuilder = OkHttpClient.Builder()
             .connectTimeout(Const.REST_API.RETROFIT.TIME_OUT, TimeUnit.SECONDS)
             .readTimeout(Const.REST_API.RETROFIT.TIME_OUT, TimeUnit.SECONDS)
             .writeTimeout(Const.REST_API.RETROFIT.TIME_OUT, TimeUnit.SECONDS)
-            .addInterceptor { chain ->
-                val request = chain.request()
-                val builder = request.newBuilder()
-
-
-                provideHeaders().forEach { (key, value) ->
-                    builder.addHeader(key, value)
-                }
-
-                chain.proceed(builder.build())
-            }
             .addInterceptor(
                 HttpLoggingInterceptor().apply {
                     level = HttpLoggingInterceptor.Level.BODY
                 }
             )
-            .build()
+
+        val headers = provideHeaders()
+        if (headers.isNotEmpty()) {
+            clientBuilder.addInterceptor { chain ->
+                val original = chain.request()
+                val builder = original.newBuilder()
+                headers.forEach { (k, v) -> builder.addHeader(k, v) }
+                chain.proceed(builder.build())
+            }
+        }
+
+        val client = clientBuilder.build()
 
         return Retrofit.Builder()
             .baseUrl(baseUrl)
@@ -55,4 +58,14 @@ abstract class BaseRepo<T, API_SERVICE : Any>(
             .addConverterFactory(GsonConverterFactory.create())
             .build()
     }
+
+    protected suspend fun <R> safeApiCall(
+        block: suspend API_SERVICE.() -> R
+    ): ApiResult<R> {
+        val service = api ?: return ApiResult.Error(IllegalStateException("Api not initialized"))
+        return try {
+            ApiResult.Success(service.block())
+        }catch (e: Exception){
+            ApiResult.Error(e)
+        }}
 }

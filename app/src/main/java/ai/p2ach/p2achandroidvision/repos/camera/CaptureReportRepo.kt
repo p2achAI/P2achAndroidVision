@@ -296,19 +296,11 @@ class CaptureReportRepo(
                     return@forEach
                 }
 
-                val success = runCatching {
-                    presignRepo.uploadCaptureReportImage(
-                        captureReports.captureId,
-                        file,
-                        captureReports.deviceName
-                    )
-                }.getOrElse {
-                    Log.e(
-                        "CaptureReport",
-                        "upload failed ${captureReports.captureId}: ${it.message}"
-                    )
-                    false
-                }
+                val success =  presignRepo.uploadCaptureReportImage(
+                    captureReports.captureId,
+                    file,
+                    captureReports.deviceName
+                )
 
                 if (success) {
                     successCount++

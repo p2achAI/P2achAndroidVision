@@ -2,20 +2,20 @@ package ai.p2ach.p2achandroidvision.repos.monitoring
 
 import ai.p2ach.p2achandroidvision.BuildConfig
 import ai.p2ach.p2achandroidvision.Const
+import ai.p2ach.p2achandroidvision.base.repos.ApiResult
 import ai.p2ach.p2achandroidvision.base.repos.BaseRepo
 import ai.p2ach.p2achandroidvision.repos.camera.handlers.BaseCameraHandler
 import ai.p2ach.p2achandroidvision.repos.camera.handlers.CameraInfo
-import ai.p2ach.p2achandroidvision.repos.camera.handlers.CameraType
 import ai.p2ach.p2achandroidvision.repos.mdm.MDMEntity
 import ai.p2ach.p2achandroidvision.utils.AlarmManagerUtil
 import ai.p2ach.p2achandroidvision.utils.CoroutineExtension
 import ai.p2ach.p2achandroidvision.utils.Log
+import ai.p2ach.p2achandroidvision.utils.WorkerManagerUtil
 import android.content.Context
 import com.google.gson.annotations.SerializedName
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.emptyFlow
 import retrofit2.http.Body
-import retrofit2.http.Header
 import retrofit2.http.POST
 import java.io.BufferedReader
 import java.io.FileReader
@@ -27,19 +27,21 @@ import java.util.concurrent.atomic.AtomicLong
 import android.net.TrafficStats
 import android.os.Build
 import android.os.SystemClock
+import androidx.work.CoroutineWorker
+import androidx.work.WorkerParameters
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import okhttp3.ResponseBody
-import org.koin.java.KoinJavaComponent
-import retrofit2.Call
+import org.koin.core.component.KoinComponent
+import org.koin.core.component.inject
 import retrofit2.Response
+import kotlin.getValue
 
 
-
-sealed class MonitorUiState {
-    data object Normal: MonitorUiState()
-    data object AbNormal : MonitorUiState()
+sealed class MonitoringUiState {
+    data object Normal: MonitoringUiState()
+    data object AbNormal : MonitoringUiState()
 }
 
 
@@ -140,7 +142,6 @@ class MonitoringRepo(private val context : Context) : BaseRepo<Unit, MonitoringA
 
     companion object {
         private const val TAG = "MonitoringRepo"
-        private const val INTERVAL_MIN: Long = 15
         private val MODE =
             if (BuildConfig.FLAVOR.contains("prod")) "production" else "development"
 
@@ -166,15 +167,15 @@ class MonitoringRepo(private val context : Context) : BaseRepo<Unit, MonitoringA
 
     private var monitoringAlarmId  : String?=null
 
-    private val _monitorUiState = MutableStateFlow<MonitorUiState>(MonitorUiState.AbNormal)
-    val monitorUiState : StateFlow<MonitorUiState>  = _monitorUiState.asStateFlow()
+    private val _monitorUiState = MutableStateFlow<MonitoringUiState>(MonitoringUiState.AbNormal)
+    val monitorUiState : StateFlow<MonitoringUiState>  = _monitorUiState.asStateFlow()
 
 
     fun bindHandler(handler: BaseCameraHandler?, mdmEntity: MDMEntity) {
         currentHandler = handler
         currentMdm = mdmEntity
 
-        startMonitoring()
+        WorkerManagerUtil.enqueueStartMonitoring(context)
     }
 
 
@@ -185,12 +186,12 @@ class MonitoringRepo(private val context : Context) : BaseRepo<Unit, MonitoringA
         monitoringAlarmId?.let {
             AlarmManagerUtil.cancel(context, it)
         }
-
+        monitoringAlarmId = null
 
 
     }
 
-    private fun startMonitoring(){
+    fun startMonitoring(){
 
         stopMonitoring()
         monitoringAlarmId = AlarmManagerUtil.scheduleInfiniteFromNow(
@@ -198,21 +199,23 @@ class MonitoringRepo(private val context : Context) : BaseRepo<Unit, MonitoringA
             Const.ALARM_WOKER.MONITORING.MONITORING_INTERVAL
         ){
 
-            CoroutineExtension.launch{
-                val response = requestMonitoring()
-                Log.d("monitor response $response")
-                if(response == null) {
-                    _monitorUiState.value = MonitorUiState.AbNormal
-                    return@launch
-                }
-                if(response.isSuccessful){
-                    Log.d("monitor response isSuccessful ${response.code()}")
-                    _monitorUiState.value = MonitorUiState.Normal
-                }else{
-                    Log.d("monitor response error ${response.errorBody()}")
-                    _monitorUiState.value = MonitorUiState.AbNormal
-                }
+            CoroutineExtension.launch {
+                when(val result = requestMonitoring()) {
+                    is ApiResult.Success -> {
+                        if (result.data.isSuccessful) {
+                            setMonitoringState(MonitoringUiState.Normal)
+                        } else {
+                            setMonitoringState(MonitoringUiState.AbNormal)
+                        }
+                    }
 
+                    is ApiResult.Error -> {
+                        Log.e("${result.throwable}")
+                        setMonitoringState(MonitoringUiState.AbNormal)
+                    }
+
+                    else -> {}
+                }
             }
 
 
@@ -221,7 +224,7 @@ class MonitoringRepo(private val context : Context) : BaseRepo<Unit, MonitoringA
     }
 
 
-    private suspend fun requestMonitoring() : Response<ResponseBody>? {
+    private suspend fun requestMonitoring() : ApiResult<Response<ResponseBody>>? {
 
 
         TrafficStats.setThreadStatsTag(1001)
@@ -258,7 +261,7 @@ class MonitoringRepo(private val context : Context) : BaseRepo<Unit, MonitoringA
         val service = api ?: return null
         val request = buildRequest() ?: return null
 
-        return  service.sendHealthCheck(request)
+        return  safeApiCall {sendHealthCheck(request)}
 
 
     }
@@ -450,6 +453,40 @@ class MonitoringRepo(private val context : Context) : BaseRepo<Unit, MonitoringA
         } catch (e: Exception) {
             e.printStackTrace()
             -1f
+        }
+    }
+
+    private fun setMonitoringState(ms : MonitoringUiState){
+        _monitorUiState.value = ms
+    }
+
+    fun setMonitoringStateAbNormal(){
+        setMonitoringState(MonitoringUiState.AbNormal)
+    }
+
+    fun setMonitoringStateNormal(){
+        setMonitoringState(MonitoringUiState.Normal)
+    }
+
+
+
+}
+
+
+class StartMonitoringWorker(
+    appContext: Context,
+    params: WorkerParameters
+) : CoroutineWorker(appContext, params), KoinComponent {
+
+    private val monitoringRepo: MonitoringRepo by inject()
+
+    override suspend fun doWork(): Result {
+        return try {
+            monitoringRepo.startMonitoring()
+            Result.success()
+        } catch (t: Throwable) {
+            Log.d("MonitoringWorker worker failed : ${t.message}")
+            Result.retry()
         }
     }
 }

@@ -5,7 +5,6 @@ import ai.p2ach.p2achandroidvision.utils.Log
 import ai.p2ach.p2achandroidvision.Const
 import ai.p2ach.p2achandroidvision.R
 import ai.p2ach.p2achandroidvision.repos.camera.handlers.BaseCameraHandler
-import ai.p2ach.p2achandroidvision.repos.camera.handlers.CameraHandler
 import ai.p2ach.p2achandroidvision.repos.camera.handlers.CameraType
 import ai.p2ach.p2achandroidvision.repos.camera.handlers.UVCCameraHandler
 import ai.p2ach.p2achandroidvision.repos.mdm.MDMEntity
@@ -15,10 +14,9 @@ import ai.p2ach.p2achandroidvision.views.activities.ActivityMain
 import ai.p2ach.p2achandroidvision.repos.camera.handlers.CameraUiState
 import ai.p2ach.p2achandroidvision.repos.camera.handlers.InternalCameraHandler
 import ai.p2ach.p2achandroidvision.repos.camera.handlers.RTSPCameraHandler
-import ai.p2ach.p2achandroidvision.repos.monitoring.MonitorUiState
+import ai.p2ach.p2achandroidvision.repos.monitoring.MonitoringUiState
 import ai.p2ach.p2achandroidvision.repos.monitoring.MonitoringRepo
 import ai.p2ach.p2achandroidvision.repos.receivers.UVCCameraReceiver
-import ai.p2ach.p2achandroidvision.utils.CoroutineExtension
 import ai.p2ach.p2achandroidvision.utils.onChanged
 import android.app.Notification
 import android.app.NotificationChannel
@@ -26,6 +24,10 @@ import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.Intent
 import android.hardware.usb.UsbDevice
+import android.net.ConnectivityManager
+import android.net.Network
+import android.net.NetworkCapabilities
+import android.net.NetworkRequest
 import android.os.Binder
 import android.os.IBinder
 import androidx.core.app.NotificationCompat
@@ -36,13 +38,11 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filterNotNull
-import kotlinx.coroutines.flow.shareIn
 import kotlinx.coroutines.launch
 import org.koin.android.ext.android.inject
+import org.koin.java.KoinJavaComponent
 
 class CameraService : LifecycleService() {
 
@@ -73,6 +73,36 @@ class CameraService : LifecycleService() {
     private var handlerStateJob: Job? = null
     private var currentType: CameraType? = null
 
+    val networkRequest = NetworkRequest.Builder()
+        .addCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
+        .build()
+
+    private val connectivityManager  = KoinJavaComponent.get<ConnectivityManager>(
+        ConnectivityManager::class.java)
+
+
+    private val netWorkCallback = object  :ConnectivityManager.NetworkCallback(){
+
+        override fun onLosing(network: Network, maxMsToLive: Int) {
+            super.onLosing(network, maxMsToLive)
+            Log.d("netWorkCallback onLosing")
+            monitoringRepo.setMonitoringStateAbNormal()
+        }
+
+        override fun onLost(network: Network) {
+            super.onLost(network)
+            Log.d("netWorkCallback onLost")
+            monitoringRepo.setMonitoringStateAbNormal()
+        }
+
+        override fun onUnavailable() {
+            super.onUnavailable()
+            Log.d("netWorkCallback onUnavailable")
+            monitoringRepo.setMonitoringStateAbNormal()
+        }
+    }
+
+
     private val _frames = MutableSharedFlow<android.graphics.Bitmap>(
         replay = 0,
         extraBufferCapacity = 1
@@ -80,7 +110,7 @@ class CameraService : LifecycleService() {
     val frames: SharedFlow<android.graphics.Bitmap> = _frames
     private val _uiState = MutableStateFlow<CameraUiState>(CameraUiState.Idle)
     val uiState: StateFlow<CameraUiState> = _uiState.asStateFlow()
-    val monitorUiState  : StateFlow<MonitorUiState> = monitoringRepo.monitorUiState
+    val monitorUiState  : StateFlow<MonitoringUiState> = monitoringRepo.monitorUiState
 
 
     private var currMdmEntity : MDMEntity ? =null
@@ -101,6 +131,7 @@ class CameraService : LifecycleService() {
         uvcCameraReceiver.register()
 
         collectMDM()
+        registerConnectivityManager()
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
@@ -116,6 +147,15 @@ class CameraService : LifecycleService() {
     }
 
 
+    private fun registerConnectivityManager(){
+        connectivityManager.registerNetworkCallback(networkRequest,netWorkCallback)
+    }
+
+    private fun unRegisterConnectivityManager(){
+        connectivityManager.unregisterNetworkCallback(netWorkCallback)
+    }
+
+
 
 
     override fun onDestroy() {
@@ -124,6 +164,7 @@ class CameraService : LifecycleService() {
         handlerCollectJob?.cancel()
         handler?.stopStreaming()
         handler = null
+        unRegisterConnectivityManager()
 
         super.onDestroy()
     }
