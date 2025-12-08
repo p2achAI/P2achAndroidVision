@@ -119,7 +119,7 @@ class P2achAndroidVisionApplication : Application() {
 
         try {
             System.loadLibrary("opencv_java4")
-            System.loadLibrary("p2ach-vision")
+//            System.loadLibrary("p2ach-vision")
         }catch (e: Exception){
             Log.d("onCreate ${e.message}")
         }
