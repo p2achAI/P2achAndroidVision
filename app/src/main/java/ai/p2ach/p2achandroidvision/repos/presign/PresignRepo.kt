@@ -78,6 +78,7 @@ class PreSignRepo() : BaseRepo<Unit, PreSignApi>(PreSignApi::class) {
         val contentType = Const.REST_API.RETROFIT.CONTENT_TYPE.IMAGE_JPEG
         val path = "${Const.REST_API.RETROFIT.PATH.CAPTURE_REPORT_UPLOAD_PATH}$path/$captureId"
         val presign = requestUploadUrl(path, contentType) ?: return false
+        Log.d("uploadCaptureReport presign url ${presign.url}")
         return uploadFileToPresignedUrl(presign.url, file, contentType,"CaptureReport")
     }
 

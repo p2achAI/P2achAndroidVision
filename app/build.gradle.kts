@@ -1,9 +1,6 @@
-import org.gradle.internal.declarativedsl.parsing.main
-
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
-    // 루트에서 apply false 한 KSP를 모듈에서 활성화
     id("com.google.devtools.ksp")
 }
 
@@ -19,7 +16,6 @@ android {
         viewBinding = true
         dataBinding = true
     }
-
 
     sourceSets {
         getByName("main") {
@@ -37,15 +33,12 @@ android {
 
         buildConfigField("String", "MDM_API_KEY", "\"c4Bz60gRwz\"")
 
-        // 레거시와 동일한 ABI 필터
         ndk {
             abiFilters += listOf("armeabi-v7a", "arm64-v8a")
         }
 
-        // 레거시 defaultConfig 의 cmake 인자
         externalNativeBuild {
             cmake {
-                // 네온 사용
                 arguments += listOf(
                     "-DANDROID_ARM_NEON=TRUE"
                 )
@@ -56,21 +49,11 @@ android {
         buildConfigField("String", "API_KEY", "\"shtQsXianY2bELEiqxKIB7u9ZtfekTT287EC4jxJ\"")
     }
 
-
-//    externalNativeBuild {
-//        cmake {
-//            path = file("src/main/cpp/CMakeLists.txt")
-//            version = "3.22.1"
-//        }
-//    }
-
     splits {
         abi {
-            isEnable =  false
+            isEnable = false
         }
     }
-
-
 
     productFlavors {
         create("dev") {
@@ -84,21 +67,16 @@ android {
         create("prod") {
             dimension = "environment"
 
-
-            buildConfigField("String", "PRESIGN_PATH", "\"display-report-presign-dev\"")
-
-//            buildConfigField("String", "PRESIGN_PATH", "\"display-report-presign-prod\"")
+            buildConfigField("String", "PRESIGN_PATH", "\"display-report-presign-prod\"")
         }
     }
 
     buildTypes {
-
         debug {
             isDebuggable = true
 
             externalNativeBuild {
                 cmake {
-                    // 레거시: -DCMAKE_BUILD_TYPE=Debug
                     arguments += listOf(
                         "-DCMAKE_BUILD_TYPE=Debug"
                     )
@@ -115,7 +93,6 @@ android {
 
             externalNativeBuild {
                 cmake {
-                    // 레거시: -DCMAKE_BUILD_TYPE=Release
                     arguments += listOf(
                         "-DCMAKE_BUILD_TYPE=Release"
                     )
@@ -125,15 +102,6 @@ android {
     }
 
     flavorDimensions += "environment"
-
-
-//    externalNativeBuild {
-//        cmake {
-//            // 레거시랑 동일 경로/버전
-//            path = file("src/main/cpp/CMakeLists.txt")
-//            version = "3.22.1"
-//        }
-//    }
 
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
@@ -151,7 +119,6 @@ ksp {
 }
 
 dependencies {
-    // AndroidX
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
     implementation(libs.androidx.lifecycle.runtime.ktx)
@@ -162,51 +129,33 @@ dependencies {
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
 
-    // logger
     implementation(libs.orhanobut.logger)
-
-    // rtsp
     implementation(libs.rtsp.client.android)
 
-    // mdm AAR (중첩 dependencies 블록 제거)
     implementation(files("libs/lib-hmdm.aar"))
 
-    // Room (KSP만 사용, kapt 제거)
     implementation(libs.room.runtime)
     implementation(libs.room.ktx)
     ksp(libs.room.compiler)
 
-    // Koin
     implementation(libs.koin.core)
     implementation(libs.koin.android)
     implementation(libs.koin.androidx.workmanager)
 
-    // Retrofit/OkHttp
     implementation(libs.retrofit)
     implementation(libs.retrofit.gson)
     implementation(libs.okhttp)
     implementation(libs.okhttp.logging)
 
-
-
-    //reflect
     implementation(libs.kotlin.reflect)
-
-
     implementation(libs.ted.permission)
 
-    
-
-    /*Camera*/
     implementation(files("libs/libuvccamera-release.aar"))
     implementation("com.serenegiant:common:2.12.4") {
         exclude(module = "support-v4")
         exclude(group = "com.android.support", module = "support-compat")
     }
     implementation(libs.opencv)
-    /*ai*/
+
     implementation(libs.p2achVisionSdk)
-//    implementation(libs.p2achVisionSdk)
-
-
 }

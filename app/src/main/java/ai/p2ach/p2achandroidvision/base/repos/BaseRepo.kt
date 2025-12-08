@@ -2,6 +2,7 @@ package ai.p2ach.p2achandroidvision.base.repos
 
 import ai.p2ach.p2achandroidvision.BuildConfig
 import ai.p2ach.p2achandroidvision.Const
+import ai.p2ach.p2achandroidvision.utils.Log
 import kotlinx.coroutines.flow.Flow
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
@@ -44,6 +45,10 @@ abstract class BaseRepo<T, API_SERVICE : Any>(
         if (headers.isNotEmpty()) {
             clientBuilder.addInterceptor { chain ->
                 val original = chain.request()
+
+                Log.d("retrofit request url ${original.url}")
+
+
                 val builder = original.newBuilder()
                 headers.forEach { (k, v) -> builder.addHeader(k, v) }
                 chain.proceed(builder.build())
