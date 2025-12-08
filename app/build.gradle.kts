@@ -187,23 +187,26 @@ dependencies {
     implementation(libs.okhttp)
     implementation(libs.okhttp.logging)
 
-    implementation(libs.opencv)
 
 
-
-    
-
-//    implementation(files('libs/libuvccamera-release.aar'))
-    implementation(files("libs/libuvccamera-release.aar"))
-    implementation("com.serenegiant:common:2.12.4") {
-        exclude(module = "support-v4")
-        exclude(group = "com.android.support", module = "support-compat")
-    }
     //reflect
     implementation(libs.kotlin.reflect)
 
 
     implementation(libs.ted.permission)
+
+    
+
+    /*Camera*/
+    implementation(files("libs/libuvccamera-release.aar"))
+    implementation("com.serenegiant:common:2.12.4") {
+        exclude(module = "support-v4")
+        exclude(group = "com.android.support", module = "support-compat")
+    }
+    implementation(libs.opencv)
+    /*ai*/
+    implementation(libs.p2achVisionSdk)
+//    implementation(libs.p2achVisionSdk)
 
 
 }
