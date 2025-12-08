@@ -122,14 +122,21 @@ data class MonitoringMetrics(
 )
 
 interface MonitoringApi {
-    @POST("recognition/")
+    @POST("device_monitor_server/")
     suspend fun sendHealthCheck(
         @Body body: MonitoringRequest,
-        @Header("x-api-key") apiKey: String = BuildConfig.API_KEY
     ) : Response<ResponseBody>
 }
 
 class MonitoringRepo(private val context : Context) : BaseRepo<Unit, MonitoringApi>(MonitoringApi::class) {
+
+
+    override fun provideHeaders(): Map<String, String> {
+        return mapOf(
+            "x-api-key" to BuildConfig.API_KEY,
+            "Content-Type" to "application/json",
+        )
+    }
 
     companion object {
         private const val TAG = "MonitoringRepo"
@@ -300,7 +307,7 @@ class MonitoringRepo(private val context : Context) : BaseRepo<Unit, MonitoringA
 
 
 
-        val labels = runCatching {
+        val labels =
             MonitoringLabels(
                 id = deviceName,
                 mode = MODE,
@@ -321,14 +328,10 @@ class MonitoringRepo(private val context : Context) : BaseRepo<Unit, MonitoringA
                 cameraFlip = handler.getCameraFlip(),
                 cameraResolution = cameraInfo.getCameraResolution()
             )
-        }.getOrElse { e ->
-            Log.e("Monitoring", "buildRequest: labels build failed: ${e.message}")
-            return null
-        }
 
 
 
-        val metrics = runCatching {
+        val metrics =
             MonitoringMetrics(
                 appUpTimeSec = getRunningTimeInMinutes(),
                 cameraHealth = if (handler.getCameraHealth()) 1 else 0,
@@ -344,10 +347,7 @@ class MonitoringRepo(private val context : Context) : BaseRepo<Unit, MonitoringA
                 processedFrameCount = handler.getCameraProcessedFrameCount(),
                 lastProcessedFrameTs = lastFrameTsIso
             )
-        }.getOrElse { e ->
-            Log.e("Monitoring", "buildRequest: metrics build failed: ${e.message}")
-            return null
-        }
+
 
 
         return MonitoringRequest(

@@ -4,6 +4,7 @@ import ai.p2ach.p2achandroidvision.base.repos.BaseRepo
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.catch
@@ -41,16 +42,22 @@ abstract class BaseViewModel<T, R: BaseRepo<T, *>>(
         }
     }
 
-    protected fun collectRepoFlow(flow: kotlinx.coroutines.flow.Flow<T?>) {
-        viewModelScope.launch(Dispatchers.IO) {
-            flow.onStart {
-                _loading.value = true
-            }.catch { e ->
-                _error.value = e
-            }.collect { value ->
-                _data.value = value
-                _loading.value = false
-            }
+    protected fun <T> collectRepoFlow(
+        flow: Flow<T>,
+        state: MutableStateFlow<T?>? = null,
+        onSuccess: ((T) -> Unit)? = null,
+        onError: ((Throwable) -> Unit)? = null
+    ) {
+        viewModelScope.launch {
+            flow
+                .catch { e ->
+                    state?.value = null
+                    onError?.invoke(e)
+                }
+                .collect { data ->
+                    state?.value = data
+                    onSuccess?.invoke(data)
+                }
         }
     }
 }

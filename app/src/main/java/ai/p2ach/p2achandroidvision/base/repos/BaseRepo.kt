@@ -13,9 +13,12 @@ import java.util.concurrent.TimeUnit
 import kotlin.reflect.KClass
 
 
-abstract class BaseRepo<T, API_SERVICE : Any>(apiClass : KClass<API_SERVICE>?=null,
+abstract class BaseRepo<T, API_SERVICE : Any>(
+    private val apiClass: KClass<API_SERVICE>? = null,
 ){
     abstract fun stream(): Flow<T>
+
+    protected open fun provideHeaders(): Map<String, String> = emptyMap()
 
     protected val api: API_SERVICE? by lazy {
         apiClass?.let {
@@ -28,6 +31,17 @@ abstract class BaseRepo<T, API_SERVICE : Any>(apiClass : KClass<API_SERVICE>?=nu
             .connectTimeout(Const.REST_API.RETROFIT.TIME_OUT, TimeUnit.SECONDS)
             .readTimeout(Const.REST_API.RETROFIT.TIME_OUT, TimeUnit.SECONDS)
             .writeTimeout(Const.REST_API.RETROFIT.TIME_OUT, TimeUnit.SECONDS)
+            .addInterceptor { chain ->
+                val request = chain.request()
+                val builder = request.newBuilder()
+
+
+                provideHeaders().forEach { (key, value) ->
+                    builder.addHeader(key, value)
+                }
+
+                chain.proceed(builder.build())
+            }
             .addInterceptor(
                 HttpLoggingInterceptor().apply {
                     level = HttpLoggingInterceptor.Level.BODY
@@ -41,6 +55,4 @@ abstract class BaseRepo<T, API_SERVICE : Any>(apiClass : KClass<API_SERVICE>?=nu
             .addConverterFactory(GsonConverterFactory.create())
             .build()
     }
-
-
 }

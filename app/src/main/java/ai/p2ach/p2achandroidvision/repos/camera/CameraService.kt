@@ -108,6 +108,7 @@ class CameraService : LifecycleService() {
         when(intent?.action){
             Intent.ACTION_TIME_CHANGED ,  Intent.ACTION_TIMEZONE_CHANGED->
                 notifyCaptureBindHandler()
+
         }
 
 
