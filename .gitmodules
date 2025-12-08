@@ -1,12 +1,4 @@
-[submodule "commonLibrary"]
-	path = commonLibrary
-	url = git@github.com:p2achAI/commonLibrary.git
-	branch = main
 [submodule "libuvccamera"]
 	path = libuvccamera
 	url = git@github.com:p2achAI/libuvccamera-only.git
-	branch = main
-[submodule "app/src/main/cpp"]
-	path = app/src/main/cpp
-	url = git@github.com:p2achAI/p2ach_vision_cpp.git
 	branch = main
