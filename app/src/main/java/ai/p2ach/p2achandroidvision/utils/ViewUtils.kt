@@ -220,10 +220,10 @@ fun List<CaptureReportStatus>.toText(selectedIndex: Int? = null): String {
         )
         sb.append("\n")
 
-        sb.append(
+        /*sb.append(
             R.string.txt_capture_upload_running
                 .getMessage(it.uploadedCount, it.uploadTargetCount)
-        )
+        )*/
 
         sb.append("\n\n")
     }
