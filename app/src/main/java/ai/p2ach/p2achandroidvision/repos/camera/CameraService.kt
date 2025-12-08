@@ -5,6 +5,7 @@ import ai.p2ach.p2achandroidvision.utils.Log
 import ai.p2ach.p2achandroidvision.Const
 import ai.p2ach.p2achandroidvision.R
 import ai.p2ach.p2achandroidvision.repos.camera.handlers.BaseCameraHandler
+import ai.p2ach.p2achandroidvision.repos.camera.handlers.CameraHandler
 import ai.p2ach.p2achandroidvision.repos.camera.handlers.CameraType
 import ai.p2ach.p2achandroidvision.repos.camera.handlers.UVCCameraHandler
 import ai.p2ach.p2achandroidvision.repos.mdm.MDMEntity
@@ -82,6 +83,10 @@ class CameraService : LifecycleService() {
     val monitorUiState  : StateFlow<MonitorUiState> = monitoringRepo.monitorUiState
 
 
+    private var currMdmEntity : MDMEntity ? =null
+
+
+
 
 
     override fun onCreate() {
@@ -96,11 +101,18 @@ class CameraService : LifecycleService() {
         uvcCameraReceiver.register()
 
         collectMDM()
-
-
-
     }
 
+    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+
+        when(intent?.action){
+            Intent.ACTION_TIME_CHANGED ,  Intent.ACTION_TIMEZONE_CHANGED->
+                notifyCaptureBindHandler()
+        }
+
+
+        return super.onStartCommand(intent, flags, startId)
+    }
 
 
 
@@ -121,19 +133,27 @@ class CameraService : LifecycleService() {
             mdmRepo.stream().filterNotNull()
                 .onChanged({it.cameraType }){
                     mdmEntity , ct ->
-                    applyCameraType(mdmEntity.toCameraType(), mdmEntity = mdmEntity)
+                    currMdmEntity= mdmEntity
+                    applyCameraType(mdmEntity.toCameraType(), mdmEntity = currMdmEntity)
                 }.onChanged({it.captureReports}){
                     mdmEntity, cr->
-                    captureRepo.bindHandler(handler,mdmEntity)
+                    currMdmEntity = mdmEntity
+                    notifyCaptureBindHandler()
                 }.collect {
                     mDMEntity ->
-                    monitoringRepo.bindHandler(handler,mDMEntity)
+                    currMdmEntity =mDMEntity
+                    monitoringRepo.bindHandler(handler,currMdmEntity!!)
                 }
 
         }
     }
 
-
+    fun notifyCaptureBindHandler(){
+        Log.d("notifyCaptureBindHandler $handler $currMdmEntity")
+        handler?: return
+        currMdmEntity?: return
+        captureRepo.bindHandler(handler,currMdmEntity!!)
+    }
 
     private fun applyCameraType(type: CameraType,mdmEntity: MDMEntity?)  {
         Log.d("CameraService applyCameraType currType=$currentType newType=$type")

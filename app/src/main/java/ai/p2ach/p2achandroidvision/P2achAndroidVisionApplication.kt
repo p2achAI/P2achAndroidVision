@@ -3,6 +3,7 @@ package ai.p2ach.p2achandroidvision
 
 
 import ai.p2ach.p2achandroidvision.database.AppDataBase
+import ai.p2ach.p2achandroidvision.repos.camera.CameraService
 import ai.p2ach.p2achandroidvision.repos.mdm.MDMHandlers
 import ai.p2ach.p2achandroidvision.repos.mdm.MDMRepo
 import ai.p2ach.p2achandroidvision.repos.camera.CameraServiceRepo
