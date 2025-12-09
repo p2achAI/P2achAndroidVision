@@ -38,14 +38,19 @@ fun generateTimestampFileName(
     val zone = java.util.TimeZone.getDefault()
     val locale = java.util.Locale.getDefault()
 
-    val sdf = java.text.SimpleDateFormat("yyyyMMddHHmmss", locale)
-    sdf.timeZone = zone
+    val dateFormat = java.text.SimpleDateFormat("yyyyMMdd", locale).apply {
+        timeZone = zone
+    }
+    val timeFormat = java.text.SimpleDateFormat("HHmmss", locale).apply {
+        timeZone = zone
+    }
 
-    val timeText = sdf.format(java.util.Date(now))
+    val dateText = dateFormat.format(java.util.Date(now))
+    val timeText = timeFormat.format(java.util.Date(now))
 
     return if (prefix.isBlank()) {
-        "${timeText}.$extension"
+        "${dateText}_${timeText}.$extension"
     } else {
-        "${prefix}_${timeText}${Const.LOCAL.FILE.IMAGE.DOT}$extension"
+        "${prefix}_${dateText}_${timeText}${Const.LOCAL.FILE.IMAGE.DOT}$extension"
     }
 }

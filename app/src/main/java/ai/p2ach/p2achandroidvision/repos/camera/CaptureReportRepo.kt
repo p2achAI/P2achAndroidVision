@@ -229,9 +229,7 @@ class CaptureReportRepo(
         }
     }
 
-    /**
-     * 알람 콜백에서 index 별로 호출됨
-     */
+
     fun captureLastFrameForIndex(index: Int, mdmEntity: MDMEntity?) {
         CoroutineExtension.launch {
             val toSave = synchronized(lastFrameLock) {
