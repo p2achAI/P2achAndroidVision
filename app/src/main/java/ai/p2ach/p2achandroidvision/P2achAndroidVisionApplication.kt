@@ -3,6 +3,7 @@ package ai.p2ach.p2achandroidvision
 
 
 import ai.p2ach.p2achandroidvision.database.AppDataBase
+import ai.p2ach.p2achandroidvision.database.Migration
 import ai.p2ach.p2achandroidvision.repos.camera.CameraService
 import ai.p2ach.p2achandroidvision.repos.mdm.MDMHandlers
 import ai.p2ach.p2achandroidvision.repos.mdm.MDMRepo
@@ -41,7 +42,7 @@ class P2achAndroidVisionApplication : Application() {
     val dbModule = module {
         single {
             Room.databaseBuilder(androidContext(), AppDataBase::class.java, Const.DB.NAME)
-                .fallbackToDestructiveMigration(true)
+                .addMigrations(Migration.MIGRATION_1_2)
                 .build()
         }
         single { get<AppDataBase>().MDMDao() }
@@ -119,7 +120,7 @@ class P2achAndroidVisionApplication : Application() {
 
         try {
             System.loadLibrary("opencv_java4")
-//            System.loadLibrary("p2ach-vision")
+            System.loadLibrary("p2ach-vision")
         }catch (e: Exception){
             Log.d("onCreate ${e.message}")
         }

@@ -1,5 +1,6 @@
 package ai.p2ach.p2achandroidvision.repos.camera
 
+import ai.p2ach.p2achandroidvision.Const
 import ai.p2ach.p2achandroidvision.base.repos.BaseDao
 import ai.p2ach.p2achandroidvision.base.repos.BaseLocalRepo
 import ai.p2ach.p2achandroidvision.database.AppDataBase
@@ -38,20 +39,20 @@ import java.io.File
 @Dao
 interface CaptureDao : BaseDao<CaptureReportEntity> {
 
-    @Query("SELECT * FROM table_capture ORDER BY captureId ASC")
+    @Query("SELECT * FROM ${Const.DB.TABLE.CAPTURE_REPORT_NAME} ORDER BY captureId ASC")
     fun observeAll(): Flow<List<CaptureReportEntity>>
 
-    @Query("DELETE FROM table_capture")
+    @Query("DELETE FROM ${Const.DB.TABLE.CAPTURE_REPORT_NAME}")
     suspend fun clearAll()
 
-    @Query("SELECT * FROM table_capture WHERE isSended = 0 ORDER BY captureId ASC")
+    @Query("SELECT * FROM ${Const.DB.TABLE.CAPTURE_REPORT_NAME} WHERE isSended = 0 ORDER BY captureId ASC")
     suspend fun getPending(): List<CaptureReportEntity>
 
-    @Query("DELETE FROM table_capture WHERE isSended = 1")
+    @Query("DELETE FROM ${Const.DB.TABLE.CAPTURE_REPORT_NAME} WHERE isSended = 1")
     suspend fun deleteSended()
 }
 
-@Entity(tableName = "table_capture")
+@Entity(tableName = Const.DB.TABLE.CAPTURE_REPORT_NAME)
 data class CaptureReportEntity(
     @PrimaryKey
     var captureId: String,

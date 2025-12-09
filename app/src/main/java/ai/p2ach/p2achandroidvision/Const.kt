@@ -90,7 +90,17 @@ interface Const {
     interface DB{
         companion object{
             const val NAME = "p2achvision.db"
+
         }
+
+        interface TABLE{
+            companion object{
+                const val MDM_NAME="table_mdm"
+                const val AI_MODEL_NAME="table_ai_model"
+                const val CAPTURE_REPORT_NAME="table_capture_report"
+            }
+        }
+
     }
 
 

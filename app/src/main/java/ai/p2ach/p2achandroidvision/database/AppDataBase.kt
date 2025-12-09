@@ -11,7 +11,7 @@ import androidx.room.TypeConverters
 
 @Database(
     entities = [MDMEntity::class, CaptureReportEntity::class],
-    version = 1,
+    version = 2,
     exportSchema = false
 )
 @TypeConverters(MDMConverters::class)
@@ -19,3 +19,5 @@ abstract class AppDataBase : RoomDatabase() {
     abstract fun MDMDao(): MDMDao
     abstract fun CaptureDao() : CaptureDao
 }
+
+
