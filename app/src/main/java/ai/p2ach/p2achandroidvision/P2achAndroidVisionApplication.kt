@@ -4,6 +4,7 @@ package ai.p2ach.p2achandroidvision
 
 import ai.p2ach.p2achandroidvision.database.AppDataBase
 import ai.p2ach.p2achandroidvision.database.Migration
+import ai.p2ach.p2achandroidvision.repos.ai.AiModelRepo
 import ai.p2ach.p2achandroidvision.repos.camera.CameraService
 import ai.p2ach.p2achandroidvision.repos.mdm.MDMHandlers
 import ai.p2ach.p2achandroidvision.repos.mdm.MDMRepo
@@ -42,11 +43,14 @@ class P2achAndroidVisionApplication : Application() {
     val dbModule = module {
         single {
             Room.databaseBuilder(androidContext(), AppDataBase::class.java, Const.DB.NAME)
-                .addMigrations(Migration.MIGRATION_1_2)
+              /*  .addMigrations(Migration.MIGRATION_1_2)
+                .addMigrations(Migration.MIGRATION_2_3)*/
+                .fallbackToDestructiveMigration(true)
                 .build()
         }
         single { get<AppDataBase>().MDMDao() }
         single { get<AppDataBase>().CaptureDao() }
+        single { get<AppDataBase>().AiModelDao() }
     }
 
 
@@ -57,6 +61,7 @@ class P2achAndroidVisionApplication : Application() {
         single { CaptureReportRepo(get(),get(),get()) }
         single { PreSignRepo() }
         single { MonitoringRepo(get()) }
+        single { AiModelRepo(get(),get()) }
     }
 
     val vmModule = module {

@@ -110,7 +110,7 @@ data class Testing(
 
 
 
-@Entity(tableName = "table_mdm")
+@Entity(tableName = Const.DB.TABLE.MDM_NAME)
 data class MDMEntity(
     @PrimaryKey var deviceName: String = Const.MDM.SETTING.DEFAULT.DEFAULT_DEVICE_NAME,
     var cameraType:String= Const.MDM.SETTING.DEFAULT.DEFAULT_CAMERA_TYPE,
