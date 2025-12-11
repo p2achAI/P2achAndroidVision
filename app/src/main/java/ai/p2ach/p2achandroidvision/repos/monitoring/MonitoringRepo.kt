@@ -2,7 +2,7 @@ package ai.p2ach.p2achandroidvision.repos.monitoring
 
 import ai.p2ach.p2achandroidvision.BuildConfig
 import ai.p2ach.p2achandroidvision.Const
-import ai.p2ach.p2achandroidvision.base.repos.ApiResult
+
 import ai.p2ach.p2achandroidvision.base.repos.BaseRepo
 import ai.p2ach.p2achandroidvision.repos.camera.handlers.BaseCameraHandler
 import ai.p2ach.p2achandroidvision.repos.camera.handlers.CameraInfo
@@ -200,21 +200,11 @@ class MonitoringRepo(private val context : Context) : BaseRepo<Unit, MonitoringA
         ){
 
             CoroutineExtension.launch {
-                when(val result = requestMonitoring()) {
-                    is ApiResult.Success -> {
-                        if (result.data.isSuccessful) {
-                            setMonitoringState(MonitoringUiState.Normal)
-                        } else {
-                            setMonitoringState(MonitoringUiState.AbNormal)
-                        }
-                    }
-
-                    is ApiResult.Error -> {
-                        Log.e("${result.throwable}")
-                        setMonitoringState(MonitoringUiState.AbNormal)
-                    }
-
-                    else -> {}
+                var monitoringResult = requestMonitoring()
+                if(monitoringResult == null)  setMonitoringStateAbNormal()
+                else{
+                    if(monitoringResult.isSuccessful) setMonitoringStateNormal()
+                    else setMonitoringStateAbNormal()
                 }
             }
 
@@ -224,7 +214,7 @@ class MonitoringRepo(private val context : Context) : BaseRepo<Unit, MonitoringA
     }
 
 
-    private suspend fun requestMonitoring() : ApiResult<Response<ResponseBody>>? {
+    private suspend fun requestMonitoring() : Response<ResponseBody>? {
 
 
         TrafficStats.setThreadStatsTag(1001)
@@ -261,7 +251,7 @@ class MonitoringRepo(private val context : Context) : BaseRepo<Unit, MonitoringA
         val service = api ?: return null
         val request = buildRequest() ?: return null
 
-        return  safeApiCall {sendHealthCheck(request)}
+        return  request {sendHealthCheck(request)}
 
 
     }

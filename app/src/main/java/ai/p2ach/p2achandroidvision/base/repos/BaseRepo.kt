@@ -12,10 +12,10 @@ import java.util.concurrent.TimeUnit
 import kotlin.reflect.KClass
 
 
-sealed class ApiResult<out T> {
-    data class Success<T>(val data: T) : ApiResult<T>()
-    data class Error(val throwable: Throwable) : ApiResult<Nothing>()
-}
+//sealed class ApiResult<out T> {
+//    data class Success<T>(val data: T) : ApiResult<T>()
+//    data class Error(val throwable: Throwable) : ApiResult<Nothing>()
+//}
 
 abstract class BaseRepo<T, API_SERVICE : Any>(
     apiClass: KClass<API_SERVICE>? = null,
@@ -64,13 +64,21 @@ abstract class BaseRepo<T, API_SERVICE : Any>(
             .build()
     }
 
-    protected suspend fun <R> safeApiCall(
+    protected suspend fun <R> request(
+        onError: ((Throwable) -> Unit)? = null,
         block: suspend API_SERVICE.() -> R
-    ): ApiResult<R> {
-        val service = api ?: return ApiResult.Error(IllegalStateException("Api not initialized"))
+    ): R? {
+        val service = api ?: run {
+            val e = IllegalStateException("Api not initialized")
+            onError?.invoke(e)
+            return null
+        }
+
         return try {
-            ApiResult.Success(service.block())
-        }catch (e: Exception){
-            ApiResult.Error(e)
-        }}
+            service.block()
+        } catch (e: Throwable) {
+            onError?.invoke(e)
+            null
+        }
+    }
 }

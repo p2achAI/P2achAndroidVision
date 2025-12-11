@@ -4,6 +4,7 @@ package ai.p2ach.p2achandroidvision.repos.camera
 import ai.p2ach.p2achandroidvision.utils.Log
 import ai.p2ach.p2achandroidvision.Const
 import ai.p2ach.p2achandroidvision.R
+import ai.p2ach.p2achandroidvision.repos.ai.AiModelRepo
 import ai.p2ach.p2achandroidvision.repos.camera.handlers.BaseCameraHandler
 import ai.p2ach.p2achandroidvision.repos.camera.handlers.CameraType
 import ai.p2ach.p2achandroidvision.repos.camera.handlers.UVCCameraHandler
@@ -39,6 +40,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.launch
 import org.koin.android.ext.android.inject
@@ -51,6 +53,8 @@ class CameraService : LifecycleService() {
     private val internalCameraHandler: InternalCameraHandler by inject()
     private val captureRepo: CaptureReportRepo by inject()
     private val monitoringRepo: MonitoringRepo by inject()
+
+    private val aiModelRepo : AiModelRepo by inject()
 
     val mdmRepo: MDMRepo by inject()
 
@@ -71,6 +75,8 @@ class CameraService : LifecycleService() {
     private var handler: BaseCameraHandler? = null
     private var handlerCollectJob: Job? = null
     private var handlerStateJob: Job? = null
+
+    private var aiModelCollectJob : Job? = null
     private var currentType: CameraType? = null
 
     val networkRequest = NetworkRequest.Builder()
@@ -231,6 +237,14 @@ class CameraService : LifecycleService() {
 
 
         h.startStreaming()
+
+
+        aiModelCollectJob = lifecycleScope.launch {
+            aiModelRepo.stream().collect {
+                it->
+                Log.d("aiModelRepo $it")
+            }
+        }
 
 
 

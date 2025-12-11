@@ -30,6 +30,8 @@ interface Const {
 
             interface CONTENT_TYPE{
                 companion object{
+
+                    const val APPLICATION_JSON="application/json"
                     const val IMAGE_JPEG="image/jpeg"
                 }
             }
