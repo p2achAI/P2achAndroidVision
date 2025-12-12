@@ -14,7 +14,7 @@ import androidx.room.TypeConverters
 
 @Database(
     entities = [MDMEntity::class, CaptureReportEntity::class, AiModelEntity::class ],
-    version = 1,
+    version = 2,
     exportSchema = false
 )
 @TypeConverters(MDMConverters::class)

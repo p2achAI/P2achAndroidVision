@@ -201,10 +201,12 @@ class MonitoringRepo(private val context : Context) : BaseRepo<Unit, MonitoringA
 
             CoroutineExtension.launch {
                 var monitoringResult = requestMonitoring()
+
+                Log.d("monitoringResult $monitoringResult")
+
                 if(monitoringResult == null)  setMonitoringStateAbNormal()
                 else{
-                    if(monitoringResult.isSuccessful) setMonitoringStateNormal()
-                    else setMonitoringStateAbNormal()
+                    setMonitoringStateNormal()
                 }
             }
 
@@ -214,7 +216,7 @@ class MonitoringRepo(private val context : Context) : BaseRepo<Unit, MonitoringA
     }
 
 
-    private suspend fun requestMonitoring() : Response<ResponseBody>? {
+    private suspend fun requestMonitoring() : ResponseBody? {
 
 
         TrafficStats.setThreadStatsTag(1001)
