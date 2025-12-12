@@ -31,7 +31,7 @@ data class PreSignDisplayReportUrlResponse(
 
 
 data class PreSignAiModelRequest(
-    val file_keys: List<String>
+    val file_key: String
 )
 
 
@@ -106,20 +106,11 @@ class PreSignRepo() : BaseRepo<Unit, PreSignApi>(PreSignApi::class) {
     }
 
 
-    suspend fun requestAiModelDownLoadUrl(fileKeys:List<String>): PreSignAiModelUrlResponse? {
-      return  request { getAiModelPreSignUrl(body = PreSignAiModelRequest(file_keys = fileKeys)) }
+    suspend fun requestAiModelDownLoadUrl(fileKey : String): PreSignAiModelUrlResponse? {
+      return  request { getAiModelPreSignUrl(body = PreSignAiModelRequest(file_key = fileKey)) }
     }
 
 
-    suspend fun downLoadAiModel(){
-
-        val modelKeys  = DeviceUtils.getRequiredModelKeys()
-        var modelDownLoadUrs  = emptyArray<String>()
-        requestAiModelDownLoadUrl(modelKeys)
-
-
-
-    }
 
 
 
