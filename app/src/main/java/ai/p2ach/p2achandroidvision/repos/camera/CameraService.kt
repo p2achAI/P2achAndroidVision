@@ -191,6 +191,7 @@ class CameraService : LifecycleService() {
                     mDMEntity ->
                     currMdmEntity =mDMEntity
                     monitoringRepo.bindHandler(handler,currMdmEntity!!)
+                    aiModelRepo.preload(mdmEntity = mDMEntity)
                 }
 
         }
@@ -239,12 +240,14 @@ class CameraService : LifecycleService() {
         h.startStreaming()
 
 
-        aiModelCollectJob = lifecycleScope.launch {
-            aiModelRepo.stream().collect {
-                it->
-                Log.d("aiModelRepo $it")
-            }
-        }
+//        aiModelCollectJob = lifecycleScope.launch {
+//            aiModelRepo.stream().collect {
+//                it->
+//                Log.d("aiModelRepo $it")
+//            }
+//        }
+
+
 
 
 

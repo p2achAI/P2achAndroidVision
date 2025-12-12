@@ -5,10 +5,17 @@ package ai.p2ach.p2achandroidvision.utils
 
 import ai.p2ach.p2achandroidvision.utils.Log
 import ai.p2ach.p2achandroidvision.Const
+import ai.p2ach.p2achandroidvision.repos.mdm.CamParam
 import ai.p2ach.p2achandroidvision.repos.mdm.CaptureReport
 import ai.p2ach.p2achandroidvision.repos.mdm.MDMConverters
 import ai.p2ach.p2achandroidvision.repos.mdm.MDMEntity
+import ai.p2ach.p2achandroidvision.repos.mdm.QuadrangleLine
+import ai.p2ach.p2achandroidvision.repos.mdm.QuadrangleRegion
 import ai.p2ach.p2achandroidvision.repos.mdm.ROI
+import ai.p2ach.vision.sdk.datatypes.VisionSdkSettings
+import ai.p2ach.vision.sdk.datatypes.CamParam as SdkCamParam
+import ai.p2ach.vision.sdk.datatypes.QuadrangleRegion as SdkQuadrangleRegion
+import ai.p2ach.vision.sdk.datatypes.QuadrangleLine as SdkQuadrangleLine
 
 import com.hmdm.MDMService
 
@@ -363,6 +370,83 @@ fun MDMEntity.toUiItems(): List<MdmUiItem> {
 
     return items
 }
+
+
+
+
+fun MDMEntity.toVisionSdkSettings(): VisionSdkSettings =
+    VisionSdkSettings(
+        hwType = hwType,
+        middlewareUrl = netWorkAndApi.middlewareUrl,
+        drawGrid = featureFlags.drawGrid,
+        rotation = rotation,
+        dataSendingInterval = timingsAndParameters.dataSendingInterval.toLong(),
+        dataCollectionInterval = timingsAndParameters.dataCollectionInterval,
+        use_reid = featureFlags.use_reid,
+        use_ageGender_NpuModel = featureFlags.use_ageGender_NpuModel,
+        useVideofile = featureFlags.useVideofile,
+        videofilepaths = testing.videofilepaths,
+        videofileUris = testing.videofileUris,
+        use_pose = featureFlags.use_pose,
+        use_headpose = featureFlags.use_headpose,
+        use_yolo = featureFlags.use_yolo,
+        use_par = featureFlags.use_par,
+        use_deepsort = featureFlags.use_deepsort,
+        use_face = featureFlags.use_face,
+        use_4split = featureFlags.use_4split,
+        contents_mode = featureFlags.contents_mode,
+        flip = featureFlags.flip,
+        track_frms = timingsAndParameters.track_frms,
+        ageMode = timingsAndParameters.ageMode,
+        devMode = featureFlags.devMode,
+        genderThr = timingsAndParameters.genderThr,
+        use_age_comp = featureFlags.use_age_comp,
+        camParam = camParam.toSdk(),
+        corridorRegion = QuadrangleRegion().toSdk(),
+        junctionRegion = QuadrangleRegion().toSdk(),
+        tvWidth = topView.tvWidth,
+        tvHeight = topView.tvHeight,
+    )
+
+fun CamParam.toSdk(): SdkCamParam =
+    SdkCamParam(
+        focal_x = focal_x,
+        focal_y = focal_y,
+        rot_x = rot_x,
+        rot_y = rot_y,
+        rot_z = rot_z,
+        did_w = did_w,
+        did_h = did_h,
+        did_l = did_l,
+        did_t = did_t,
+        scale1 = scale1,
+        scale2 = scale2
+    )
+
+fun QuadrangleRegion.toSdk(): SdkQuadrangleRegion =
+    SdkQuadrangleRegion(
+        leftLine = leftLine.toSdk(),
+        rightLine = rightLine.toSdk()
+    )
+
+fun QuadrangleLine.toSdk(): SdkQuadrangleLine =
+    SdkQuadrangleLine(
+        startX = startX,
+        startY = startY,
+        endX = endX,
+        endY = endY
+    )
+
+fun ROI.toVisionSdk(): ai.p2ach.vision.sdk.datatypes.ROI {
+    return ai.p2ach.vision.sdk.datatypes.ROI(
+        top,
+        left,
+        width,
+        height
+    )
+}
+
+
 
 
 

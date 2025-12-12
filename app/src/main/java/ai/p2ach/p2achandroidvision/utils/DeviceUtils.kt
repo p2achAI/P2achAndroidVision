@@ -188,7 +188,7 @@ object DeviceUtils {
 
         val rk3588Profile = AiHwProfile(
             basePathFor = { defaultModelBasePath(HwType.RK3588) },
-            defaults = AiFeatureToggles(),
+            defaults = AiFeatureToggles(use_pose = true, use_headpose = true, use_par = true),
             models = listOf(
                 AiModelEntry(
                     "yolov8_pose.rknn",
@@ -338,4 +338,17 @@ object DeviceUtils {
 
         )
     }
+
+    private fun defaultBasePath(): String {
+        val hwType = getHwType()
+        return when (hwType) {
+            HwType.RK3328, HwType.CPU -> "models/cpu"
+            else -> "models/${hwType.name.lowercase()}"
+        }
+    }
+
+    fun getModelPath(context: Context): String {
+        return File(context.filesDir, "${defaultBasePath()}/").absolutePath
+    }
+
 }

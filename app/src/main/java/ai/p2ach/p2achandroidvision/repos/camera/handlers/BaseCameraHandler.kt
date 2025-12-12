@@ -1,6 +1,14 @@
 package ai.p2ach.p2achandroidvision.repos.camera.handlers
 
+import ai.p2ach.p2achandroidvision.repos.mdm.CamParam
 import ai.p2ach.p2achandroidvision.repos.mdm.MDMEntity
+import ai.p2ach.p2achandroidvision.utils.toSdk
+import ai.p2ach.p2achandroidvision.utils.toVisionSdk
+import ai.p2ach.vision.sdk.NativeLib
+import ai.p2ach.vision.sdk.Renderer
+import ai.p2ach.vision.sdk.datatypes.AnalysisResult
+import ai.p2ach.vision.sdk.datatypes.ROI
+import android.content.Context
 import android.graphics.Bitmap
 import android.os.SystemClock
 import androidx.core.graphics.createBitmap
@@ -11,6 +19,7 @@ import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import org.koin.core.component.KoinComponent
+import org.koin.java.KoinJavaComponent
 import org.opencv.android.Utils
 import org.opencv.core.Mat
 
@@ -61,6 +70,7 @@ interface CameraInfo{
 
 interface CameraCallback {
     fun onFrameProcessed(bitmap: Bitmap?)
+//    fun onAnalysisResult(analysisResult: AnalysisResult?, cameraId:String?)
 }
 
 abstract class BaseCameraHandler(
@@ -76,8 +86,11 @@ abstract class BaseCameraHandler(
     protected var isPaused = false
 
 
-
     private var bckImg : Mat? = null
+
+    private var renderer = Renderer(KoinJavaComponent.get<Context>(Context::class.java),CamParam().toSdk())
+
+
     var mdmEntity : MDMEntity? = null
 
     private var bitmapPool: MutableList<Bitmap> = mutableListOf()
@@ -91,6 +104,9 @@ abstract class BaseCameraHandler(
 
     private val _uiState = MutableStateFlow<CameraUiState>(CameraUiState.Idle)
     val uiState: StateFlow<CameraUiState> = _uiState.asStateFlow()
+
+
+
 
     protected fun emitFrame(bitmap: Bitmap?) {
         if (!isStarted || isPaused) return
@@ -180,21 +196,38 @@ abstract class BaseCameraHandler(
     }
 
 
+
+
     protected fun processImage(srcImg : Mat, cameraId: String?) {
 
-        srcImg.copyTo(inputImg)    // rotation 0 => no rotation
 
+        val rotation = 0
+        val analysisResult : AnalysisResult?
+
+        val inputImg = renderer.prepareInput(srcImg, rotation)
+
+        val resultBitmap = getReusableBitmap(inputImg.cols(), inputImg.rows(), Bitmap.Config.RGB_565) ?: createBitmap(
+            inputImg.cols(),
+            inputImg.rows(),
+            Bitmap.Config.RGB_565
+        )
         inputImg.copyTo(resultImg)
-
-        val resultBitmap =
-            getReusableBitmap(inputImg.cols(), inputImg.rows(), Bitmap.Config.RGB_565)
-                ?: createBitmap(
-                    inputImg.cols(),
-                    inputImg.rows(),
-                    Bitmap.Config.RGB_565
-                )
-
         resultBitmap.eraseColor(0)
+
+
+        NativeLib.processorStatus = NativeLib.ProcessorStatus.Running
+
+
+        analysisResult = if(inputImg.cols() > 0 && inputImg.height() > 0) {
+            NativeLib.process(inputImg.nativeObjAddr, mdmEntity?.roi?.toVisionSdk()?: ROI())
+        } else {
+            null
+        }
+
+//        onAnalysisResult(analysisResult, cameraId)
+        NativeLib.processorStatus = NativeLib.ProcessorStatus.Initialized
+
+
         Utils.matToBitmap(inputImg, resultBitmap)
 
 //        Log.d("processImage")

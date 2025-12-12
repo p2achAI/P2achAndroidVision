@@ -4,10 +4,13 @@ import ai.p2ach.p2achandroidvision.Const
 import ai.p2ach.p2achandroidvision.base.repos.BaseDao
 import ai.p2ach.p2achandroidvision.base.repos.BaseRepo
 import ai.p2ach.p2achandroidvision.database.AppDataBase
+import ai.p2ach.p2achandroidvision.repos.mdm.MDMEntity
 import ai.p2ach.p2achandroidvision.repos.presign.PreSignRepo
 import ai.p2ach.p2achandroidvision.utils.CoroutineExtension
 import ai.p2ach.p2achandroidvision.utils.DeviceUtils
 import ai.p2ach.p2achandroidvision.utils.Log
+import ai.p2ach.p2achandroidvision.utils.toVisionSdkSettings
+import ai.p2ach.vision.sdk.NativeLib
 import android.content.Context
 import androidx.room.Dao
 import androidx.room.Entity
@@ -16,90 +19,117 @@ import androidx.room.Query
 import androidx.room.withTransaction
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.emptyFlow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import java.io.File
 import java.io.FileOutputStream
-import java.net.URL
-import kotlin.collections.component1
-import kotlin.collections.component2
-
-
-/*
-* 파일 유효성 체크 필요함.
-* */
 
 @Entity(tableName = Const.DB.TABLE.AI_MODEL_NAME)
 data class AiModelEntity(
     @PrimaryKey val binaryPath: String,
-    var isSelected : Boolean? = false
-    )
+    var isSelected: Boolean? = false
+)
 
 @Dao
-interface AiModelDao : BaseDao<AiModelEntity>{
+interface AiModelDao : BaseDao<AiModelEntity> {
 
     @Query("SELECT * FROM table_ai_model")
-    fun getAllFlow() : Flow<List<AiModelEntity>>
-
+    fun getAllFlow(): Flow<List<AiModelEntity>>
 
     @Query("SELECT * FROM table_ai_model")
-    fun getAllList() : List<AiModelEntity>
-
+    fun getAllList(): List<AiModelEntity>
 }
 
+class AiModelRepo(
+    private val context: Context,
+    private val db: AppDataBase,
+    private val aiModelDao: AiModelDao
+) : BaseRepo<List<AiModelEntity>, Nothing>(), KoinComponent {
 
-class AiModelRepo(private val context: Context, private val db: AppDataBase , private val aiModelDao: AiModelDao)
-    : BaseRepo<List<AiModelEntity>, Nothing>(), KoinComponent{
+    private val preSignRepo: PreSignRepo by inject()
 
-    private val preSignRepo : PreSignRepo by inject()
+    private val mutex = Mutex()
+
+    private val _ready = MutableStateFlow(false)
+    val ready: StateFlow<Boolean> = _ready.asStateFlow()
+
+    fun isReady(): Boolean = _ready.value
 
     init {
 
-        CoroutineExtension.launch {
-            downloadModelIfNeeded()
-        }
-
     }
-
 
     override fun stream(): Flow<List<AiModelEntity>> = aiModelDao.getAllFlow()
 
-//    suspend fun downloadModelIfNeeded(context: Context, updateStatus: ((String) -> Unit)? = null) {
-//
-//
-//        Log.d("AiModelRepo modelKeys $modelKeys")
-//
-//        updateStatus?.invoke("Downloading model for SoC: $hwType")
-//        withContext(Dispatchers.IO) {
-//            try {
-//                val fileUrls = modelKeys.associateWith { fetchPresignedUrl(it) }
-//                val total = fileUrls.size
-//                fileUrls.entries.withIndex().forEach { (index, entry) ->
-//                    val (fileKey, url) = entry
-//                    val destFile = File(context.filesDir, fileKey)
-//                    destFile.parentFile?.mkdirs()
-//                    if (!destFile.exists()) {
-//                        URL(url).openStream().use { input ->
-//                            FileOutputStream(destFile).use { output -> input.copyTo(output) }
-//                        }
-//                        updateStatus?.invoke("Downloading models files… (${index + 1} / $total)")
-//                    }
-//                }
-//            } catch (e: Exception) {
-//                updateStatus?.invoke("Error downloading model: ${e.message}")
-//                Log.e("ModelManager", "Error downloading model: ${e.message}")
-//            }
-//        }
-//    }
+    suspend fun preload(mdmEntity: MDMEntity) {
+        ensureNativeReady(
+            onStatus = { Log.d(it) },
+            onError = { Log.d("AiModelRepo preload error $it") },
+            mdmEntity = mdmEntity
+        )
+    }
 
+    suspend fun ensureNativeReady(
+        onStatus: ((String) -> Unit)? = null,
+        onError: ((Throwable) -> Unit)? = null,
+        mdmEntity: MDMEntity
+    ): Boolean = mutex.withLock {
 
+        if (_ready.value) return true
 
-    suspend fun downloadModelIfNeeded(
+        try {
+            onStatus?.invoke("AiModelRepo ensureNativeReady begin")
 
+//            val modelKeys = DeviceUtils.getRequiredModelKeys()
+//            syncDbModelList(modelKeys)
 
-    ) {
+            downloadModelIfNeeded()
+
+            val modelPath = DeviceUtils.getModelPath(context)
+            onStatus?.invoke("NativeLib.initialize path=$modelPath")
+
+            val ret = withContext(Dispatchers.Default) {
+                NativeLib.initialize(modelPath, mdmEntity.toVisionSdkSettings())
+            }
+
+            val ok = ret == 0
+            if (ok) {
+                NativeLib.processorStatus = NativeLib.ProcessorStatus.Initialized
+                _ready.value = true
+                onStatus?.invoke("NativeLib initialized")
+            } else {
+                _ready.value = false
+                onStatus?.invoke("NativeLib initialize failed ret=$ret")
+            }
+
+            ok
+        } catch (t: Throwable) {
+            _ready.value = false
+            onError?.invoke(t)
+            false
+        }
+    }
+
+    private suspend fun syncDbModelList(modelKeys: List<String>) {
+        val existing = aiModelDao.getAllList().map { it.binaryPath }.toSet()
+        val toInsert = modelKeys
+            .filterNot { existing.contains(it) }
+            .map { AiModelEntity(binaryPath = it, isSelected = false) }
+
+        if (toInsert.isEmpty()) return
+
+        db.withTransaction {
+            aiModelDao.upsertAll(toInsert)
+        }
+    }
+
+    suspend fun downloadModelIfNeeded() {
         val modelKeys = DeviceUtils.getRequiredModelKeys()
         val hwType = DeviceUtils.getHwType()
 
@@ -136,13 +166,12 @@ class AiModelRepo(private val context: Context, private val db: AppDataBase , pr
                 val ok = downloadOneFileWithRetry(
                     url = presign.presigned_url,
                     destFile = destFile,
-                    maxRetry = 3,
-
+                    maxRetry = 3
                 )
 
                 if (ok) {
                     successCount++
-                    Log.w("Downloading… (${index + 1}/$total)")
+                    Log.w("Downloaded… (${index + 1}/$total)")
                 } else {
                     failed.add(fileKey)
                 }
@@ -157,13 +186,10 @@ class AiModelRepo(private val context: Context, private val db: AppDataBase , pr
         }
     }
 
-
-
     private suspend fun downloadOneFileWithRetry(
         url: String,
         destFile: File,
-        maxRetry: Int = 3,
-
+        maxRetry: Int = 3
     ): Boolean {
         destFile.parentFile?.mkdirs()
         val tmp = File(destFile.parentFile, destFile.name + ".part")
@@ -188,7 +214,7 @@ class AiModelRepo(private val context: Context, private val db: AppDataBase , pr
                 }
 
                 conn.inputStream.use { input ->
-                   FileOutputStream(tmp).use { output ->
+                    FileOutputStream(tmp).use { output ->
                         input.copyTo(output)
                     }
                 }
@@ -209,7 +235,6 @@ class AiModelRepo(private val context: Context, private val db: AppDataBase , pr
             } catch (e: Throwable) {
                 Log.d("download failed file=${destFile.name} attempt=${attempt + 1} error=$e")
                 tmp.delete()
-
                 if (attempt < maxRetry - 1) {
                     kotlinx.coroutines.delay((attempt + 1) * 800L)
                 }
@@ -219,8 +244,4 @@ class AiModelRepo(private val context: Context, private val db: AppDataBase , pr
         Log.w("Failed ${destFile.name}")
         return false
     }
-
-
-
-
 }
